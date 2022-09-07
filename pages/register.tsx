@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { Typography, Box, TextField, Button } from "@mui/material";
+import {
+  emailAddressValidator,
+  usernameAndPasswordValidator,
+} from "../utils/formValidator";
 
 interface IRegistrationCreds {
   username: string;
@@ -8,14 +12,24 @@ interface IRegistrationCreds {
 }
 
 export default function Login() {
-  const [validInputFields, setValidInputFields] = useState<boolean>(false);
+  const [usernameError, setUsernameError] = useState<boolean>(false);
+  const [emailError, setEmailError] = useState<boolean>(false);
+  const [passwordError, setPasswordError] = useState<boolean>(false);
   const [registrationCreds, setRegistrationCreds] = useState<IRegistrationCreds>({
     username: "",
     email: "",
     password: "",
   });
 
+  const removeInputError = (registrationCreds: IRegistrationCreds) => {
+    const { username, password, email } = registrationCreds;
+    if (usernameError && username.length >= 8) setUsernameError(false);
+    if (passwordError && password.length >= 8) setPasswordError(false);
+    if (emailError && emailAddressValidator(email)) setEmailError(false);
+  };
+
   const handleFormInput = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    removeInputError(registrationCreds);
     const { name, value }: { name: string; value: string } = event.target;
     setRegistrationCreds(prev => {
       return {
@@ -27,6 +41,16 @@ export default function Login() {
 
   const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    const isValdidEmail = validateEmail(registrationCreds);
+    const isValidUsernameAndPassword =
+      validateUserNameAndPassword(registrationCreds);
+
+    if (!isValdidEmail || !isValidUsernameAndPassword) {
+      console.log("INVALID FORMAT");
+      return;
+    }
+
     const requestOptions = {
       method: "POST",
       headers: { "Content-Type": "application/json", Accept: "application/json" },
@@ -38,10 +62,21 @@ export default function Login() {
     //   setFormValues(formEmpty);
   };
 
-  /*
-  TO DO:
-  validate form inputs
-  */
+  const validateUserNameAndPassword = (registrationCreds: IRegistrationCreds) => {
+    const { username, password } = registrationCreds;
+    const validUsername = usernameAndPasswordValidator(username);
+    const validPassword = usernameAndPasswordValidator(password);
+    if (!validUsername) setUsernameError(true);
+    if (!validPassword) setPasswordError(true);
+    return validUsername && validPassword;
+  };
+
+  const validateEmail = (registrationCreds: IRegistrationCreds) => {
+    const { email } = registrationCreds;
+    const validEmail = emailAddressValidator(email);
+    if (!validEmail) setEmailError(true);
+    return validEmail;
+  };
 
   return (
     <Box
@@ -59,6 +94,8 @@ export default function Login() {
         id="outlined-basic"
         label="username"
         variant="filled"
+        error={usernameError}
+        helperText={usernameError ? "must be at least 8 characters" : ""}
         required
       />
       <TextField
@@ -68,9 +105,8 @@ export default function Login() {
         label="email"
         variant="filled"
         type="email"
-        // error={text === ""}
-        error={validInputFields}
-        helperText={validInputFields ? "invalid email" : ""}
+        error={emailError}
+        helperText={emailError ? "invalid email address" : ""}
         required
       />
       <TextField
@@ -80,6 +116,8 @@ export default function Login() {
         label="password"
         variant="filled"
         type="password"
+        error={passwordError}
+        helperText={passwordError ? "must be at least 8 characters" : ""}
         required
       />
       <Box m={3}>
