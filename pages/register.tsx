@@ -11,7 +11,7 @@ interface IRegistrationCreds {
   password: string;
 }
 
-export default function Login() {
+export default function Register() {
   const [usernameError, setUsernameError] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
@@ -59,11 +59,13 @@ export default function Login() {
     const res = await fetch("/api/register", requestOptions);
     const { message } = await res.json();
     console.log(message);
-    //   setFormValues(formEmpty);
+    // TODO - display message and redirect to dashboard
   };
 
-  const validateUserNameAndPassword = (registrationCreds: IRegistrationCreds) => {
-    const { username, password } = registrationCreds;
+  const validateUserNameAndPassword = ({
+    username,
+    password,
+  }: IRegistrationCreds) => {
     const validUsername = usernameAndPasswordValidator(username);
     const validPassword = usernameAndPasswordValidator(password);
     if (!validUsername) setUsernameError(true);
@@ -71,8 +73,7 @@ export default function Login() {
     return validUsername && validPassword;
   };
 
-  const validateEmail = (registrationCreds: IRegistrationCreds) => {
-    const { email } = registrationCreds;
+  const validateEmail = ({ email }: IRegistrationCreds) => {
     const validEmail = emailAddressValidator(email);
     if (!validEmail) setEmailError(true);
     return validEmail;
@@ -122,7 +123,7 @@ export default function Login() {
       />
       <Box m={3}>
         <Button type="submit" size="medium" variant="contained" color="primary">
-          Join The League
+          create golfer account
         </Button>
       </Box>
     </Box>
