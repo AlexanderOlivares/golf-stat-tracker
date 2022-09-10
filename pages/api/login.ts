@@ -3,7 +3,7 @@ import {
     usernameAndPasswordValidator,
     emailAddressValidator,
 } from "../../utils/formValidator";
-import jwtGenerator from "../../utils/jwtGenerator";
+import { jwtGenerator } from "../../utils/jwtGenerator";
 import pool from "../../db/dbConfig";
 import bcrypt from "bcrypt";
 import cookie from "cookie";
@@ -39,7 +39,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const userId: string = user.rows[0].user_id;
         const username: string = user.rows[0].user_name;
 
-        const token: string = jwtGenerator(userId, username, email);
+        const token: string = await jwtGenerator(userId, username, email);
+        console.log(`ayoo ${token}`);
 
 
         res.setHeader(
@@ -53,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             })
         )
 
-        return res.status(200).json({ message: `Welcome back ${username}!` });
+        return res.status(200).json({ message: `Welcome back ${username}!`, userId });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "error" });

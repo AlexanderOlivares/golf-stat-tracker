@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useRouter } from "next/router";
 import { Typography, Box, TextField, Button } from "@mui/material";
 import {
   emailAddressValidator,
@@ -12,6 +13,7 @@ interface IRegistrationCreds {
 }
 
 export default function Register() {
+  const router = useRouter();
   const [usernameError, setUsernameError] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
@@ -50,16 +52,24 @@ export default function Register() {
       console.log("INVALID FORMAT");
       return;
     }
+    try {
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(registrationCreds),
+      };
+      const res = await fetch("/api/register", requestOptions);
+      const { message, userId } = await res.json();
 
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(registrationCreds),
-    };
-    const res = await fetch("/api/register", requestOptions);
-    const { message } = await res.json();
-    console.log(message);
-    // TODO - display message and redirect to dashboard
+      if (res.status === 201) {
+        // add toast success with message here
+        console.log(message);
+        router.push(`/profile/:${userId}`);
+      }
+    } catch (error) {
+      console.log(error);
+      // add toast error here
+    }
   };
 
   const validateUserNameAndPassword = ({

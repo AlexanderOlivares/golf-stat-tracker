@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useRouter } from "next/router";
 import { Typography, Box, TextField, Button } from "@mui/material";
 import {
   emailAddressValidator,
@@ -11,6 +12,7 @@ interface ILoginCreds {
 }
 
 export default function Login() {
+  const router = useRouter();
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
   const [loginCreds, setLoginCreds] = useState<ILoginCreds>({
@@ -46,15 +48,24 @@ export default function Login() {
       return;
     }
 
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-      body: JSON.stringify(loginCreds),
-    };
-    const res = await fetch("/api/login", requestOptions);
-    const { message } = await res.json();
-    console.log(message);
-    // TODO - display message and redirect to dashboard
+    try {
+      const requestOptions = {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Accept: "application/json" },
+        body: JSON.stringify(loginCreds),
+      };
+      const res = await fetch("/api/login", requestOptions);
+      const { message, userId } = await res.json();
+
+      if (res.status === 200) {
+        // add toast success with message here
+        console.log(message);
+        router.push(`/profile/${userId}`);
+      }
+    } catch (error) {
+      console.log(error);
+      // add toast error here
+    }
   };
 
   const validateUserNameAndPassword = ({ password }: ILoginCreds) => {

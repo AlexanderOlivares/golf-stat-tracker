@@ -3,7 +3,7 @@ import {
     usernameAndPasswordValidator,
     emailAddressValidator,
 } from "../../utils/formValidator";
-import jwtGenerator from "../../utils/jwtGenerator";
+import { jwtGenerator } from "../../utils/jwtGenerator";
 import pool from "../../db/dbConfig";
 import bcrypt from "bcrypt";
 import cookie from "cookie";
@@ -43,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
         const userId = uuidv4();
 
-        const token = jwtGenerator(userId, username, email);
+        const token = await jwtGenerator(userId, username, email);
 
         const newUser = await pool.query(
             "INSERT INTO user_login (user_id, user_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
@@ -65,7 +65,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             })
         )
 
-        return res.status(201).json({ message: "account created" });
+        return res.status(201).json({ message: "account created", userId });
     } catch (error) {
         console.log(error);
         return res.status(500).json({ message: "error" });
