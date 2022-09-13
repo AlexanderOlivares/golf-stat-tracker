@@ -40,8 +40,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const username: string = user.rows[0].user_name;
 
         const token: string = await jwtGenerator(userId, username, email);
-        console.log(`ayoo ${token}`);
-
 
         res.setHeader(
             "Set-Cookie",
