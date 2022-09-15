@@ -1,7 +1,4 @@
-import "../styles/globals.css";
-import type { AppProps } from "next/app";
-import { ApolloProvider } from "@apollo/client";
-import appolloClient from "../apollo-client";
+import { ApolloClient, InMemoryCache } from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
@@ -14,12 +11,9 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError) console.log(`[Network error]: ${networkError}`);
 });
 
-function MyApp({ Component, pageProps }: AppProps) {
-  return (
-    <ApolloProvider client={appolloClient}>
-      <Component {...pageProps} />
-    </ApolloProvider>
-  );
-}
+const appolloClient = new ApolloClient({
+  uri: "http://localhost:3000/api/graphql",
+  cache: new InMemoryCache(),
+});
 
-export default MyApp;
+export default appolloClient;

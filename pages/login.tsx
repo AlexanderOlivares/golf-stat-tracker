@@ -5,13 +5,37 @@ import {
   emailAddressValidator,
   usernameAndPasswordValidator,
 } from "../utils/formValidator";
+import { useQuery } from "@apollo/client";
+import appolloClient from "../apollo-client";
+import { gql } from "apollo-server-micro";
+import { GetStaticPropsResult } from "next";
 
 interface ILoginCreds {
   email: string;
   password: string;
 }
 
+type User = {
+  userid: String;
+  username: String;
+  email: String;
+  password: String;
+};
+
+export const GET_USERS = gql`
+  query ExampleQuery {
+    users {
+      userid
+      username
+      email
+      password
+    }
+  }
+`;
+
 export default function Login() {
+  const { loading, error, data } = useQuery(GET_USERS);
+  console.log(data);
   const router = useRouter();
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
@@ -135,4 +159,14 @@ export default function Login() {
       </Box>
     </Box>
   );
+}
+
+export async function getServerSideProps() {
+  const { data }: { data: User[] } = await appolloClient.query({ query: GET_USERS });
+
+  return {
+    props: {
+      data,
+    },
+  };
 }

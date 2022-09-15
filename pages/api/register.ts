@@ -20,7 +20,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         }
 
         // update with graphql query
-        const usernameExists = await pool.query("SELECT user_name FROM user_login WHERE user_name = $1", [
+        const usernameExists = await pool.query("SELECT username FROM user_login WHERE username = $1", [
             username,
         ]);
 
@@ -46,7 +46,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const token = await jwtGenerator(userId, username, email);
 
         const newUser = await pool.query(
-            "INSERT INTO user_login (user_id, user_name, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
+            "INSERT INTO user_login (userid, username, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
             [userId, username, email, bcryptPassword]
         );
 
@@ -68,6 +68,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(201).json({ message: "account created", userId });
     } catch (error) {
         console.log(error);
-        return res.status(500).json({ message: "error" });
+        return res.status(500).send({ message: "Error creating user account. Please try again later." })
     }
 }
