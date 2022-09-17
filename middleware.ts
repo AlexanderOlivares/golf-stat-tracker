@@ -2,6 +2,7 @@ import { NextResponse, NextRequest } from 'next/server'
 import { verify } from "./utils/jwtGenerator"
 
 export async function middleware(request: NextRequest) {
+    // console.log('MIDDLEWARE RAN');
     const { url } = request;
     const token = request.cookies.get('token');
 

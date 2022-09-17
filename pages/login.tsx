@@ -34,8 +34,8 @@ export const GET_USERS = gql`
 `;
 
 export default function Login() {
-  const { loading, error, data } = useQuery(GET_USERS);
-  console.log(data);
+  //   const { loading, error, data } = useQuery(GET_USERS);
+  //   console.log(data);
   const router = useRouter();
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
@@ -161,12 +161,12 @@ export default function Login() {
   );
 }
 
-export async function getServerSideProps() {
-  const { data }: { data: User[] } = await appolloClient.query({ query: GET_USERS });
+// export async function getServerSideProps() {
+//   const { data }: { data: User[] } = await appolloClient.query({ query: GET_USERS });
 
-  return {
-    props: {
-      data,
-    },
-  };
-}
+//   return {
+//     props: {
+//       data,
+//     },
+//   };
+// }

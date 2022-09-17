@@ -5,14 +5,26 @@ import {
   emailAddressValidator,
   usernameAndPasswordValidator,
 } from "../utils/formValidator";
+import { gql, useMutation } from "@apollo/client";
 
-interface IRegistrationCreds {
+export interface IRegistrationCreds {
   username: string;
   email: string;
   password: string;
 }
 
+const registerMutation = gql`
+  mutation SignUpMutation($username: String!, $email: String!, $password: String!) {
+    register(input: { username: $username, email: $email, password: $password }) {
+      token
+      username
+      email
+    }
+  }
+`;
+
 export default function Register() {
+  const [register] = useMutation(registerMutation);
   const router = useRouter();
   const [usernameError, setUsernameError] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<boolean>(false);
@@ -53,19 +65,15 @@ export default function Register() {
       return;
     }
     try {
-      const requestOptions = {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(registrationCreds),
-      };
-      const res = await fetch("/api/register", requestOptions);
-      const { message, userId } = await res.json();
+      await register({
+        variables: {
+          username: registrationCreds.username,
+          email: registrationCreds.email,
+          password: registrationCreds.password,
+        },
+      });
 
-      if (res.status === 201) {
-        // add toast success with message here
-        console.log(message);
-        router.push(`/profile/:${userId}`);
-      }
+      router.push("/login");
     } catch (error) {
       console.log(error);
       // add toast error here
