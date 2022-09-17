@@ -8,7 +8,7 @@ export const typeDefs = gql`
     email: String
   }
 
-  type NewUser {
+  type LoggedInUser {
     userid: String
     username: String
     email: String
@@ -22,7 +22,6 @@ export const typeDefs = gql`
   }
 
   input LoginInput {
-    username: String
     email: String
     password: String
   }
@@ -33,8 +32,8 @@ export const typeDefs = gql`
   } 
 
   type Mutation {
-    register(input: RegistrationInput!): NewUser
-    login(input: LoginInput!): String!
-    # signOut: Boolean!
+    register(input: RegistrationInput!): LoggedInUser
+    login(input: LoginInput!): LoggedInUser
+    signOut: Boolean!
   }
 `;

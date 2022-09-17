@@ -1,6 +1,7 @@
 import pool from "../../../db/dbConfig";
 import registerUser from "../../../lib/user/register";
-import cookie from "cookie";
+import loginUser from "../../../lib/user/login";
+import { setAuthCookie, removeAuthCookie } from "../../../lib/auth-cookie";
 
 export const resolvers = {
   Query: {
@@ -27,18 +28,27 @@ export const resolvers = {
 
       if (!token) return new Error(user.message);
 
-      context.res.setHeader(
-        "Set-Cookie",
-        cookie.serialize("token", token, {
-          httpOnly: true,
-          secure: process.env.NODE_ENV !== "development",
-          maxAge: 60 * 60 * 24 * 7, // 1 week
-          sameSite: "strict",
-          path: "/",
-        })
-      );
+      setAuthCookie(context.res, token);
 
       return user;
     },
+    login: async (_parent: any, args: any, context: any, _info: any) => {
+      const { email, password } = args.input;
+
+      const user = await loginUser(email, password);
+      console.log(user);
+      const { token } = user;
+
+      if (!token) return new Error(user.message);
+
+      setAuthCookie(context.res, token);
+
+      return user;
+    },
+    async signOut(_parent:any, _args:any, context:any, _info:any) {
+        removeAuthCookie(context.res)
+        return true
+      },
+
   },
 };

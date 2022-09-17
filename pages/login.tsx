@@ -5,35 +5,28 @@ import {
   emailAddressValidator,
   usernameAndPasswordValidator,
 } from "../utils/formValidator";
-import { useQuery } from "@apollo/client";
+import { useQuery, gql, useMutation } from "@apollo/client";
 import appolloClient from "../apollo-client";
-import { gql } from "apollo-server-micro";
 import { GetStaticPropsResult } from "next";
+import SignOut from "../components/SignOut";
 
 interface ILoginCreds {
   email: string;
   password: string;
 }
 
-type User = {
-  userid: String;
-  username: String;
-  email: String;
-  password: String;
-};
-
-export const GET_USERS = gql`
-  query ExampleQuery {
-    users {
-      userid
+const loginMutation = gql`
+  mutation loginMutation($email: String!, $password: String!) {
+    login(input: { email: $email, password: $password }) {
+      token
       username
       email
-      password
     }
   }
 `;
 
 export default function Login() {
+  const [login] = useMutation(loginMutation);
   //   const { loading, error, data } = useQuery(GET_USERS);
   //   console.log(data);
   const router = useRouter();
@@ -73,19 +66,14 @@ export default function Login() {
     }
 
     try {
-      const requestOptions = {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Accept: "application/json" },
-        body: JSON.stringify(loginCreds),
-      };
-      const res = await fetch("/api/login", requestOptions);
-      const { message, userId } = await res.json();
+      await login({
+        variables: {
+          email: loginCreds.email,
+          password: loginCreds.password,
+        },
+      });
 
-      if (res.status === 200) {
-        // add toast success with message here
-        console.log(message);
-        router.push(`/profile/${userId}`);
-      }
+      // router.push(`/profile/${userId}`);
     } catch (error) {
       console.log(error);
       // add toast error here
@@ -153,9 +141,7 @@ export default function Login() {
         </Button>
       </Box>
       <Box m={3}>
-        <Button onClick={logout} size="medium" variant="contained" color="primary">
-          logout
-        </Button>
+        <SignOut />
       </Box>
     </Box>
   );
