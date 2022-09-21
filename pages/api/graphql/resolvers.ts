@@ -2,6 +2,7 @@ import pool from "../../../db/dbConfig";
 import registerUser from "../../../lib/user/register";
 import loginUser from "../../../lib/user/login";
 import { setAuthCookie, removeAuthCookie } from "../../../lib/auth-cookie";
+import cookie from "cookie";
 
 export const resolvers = {
   Query: {
@@ -9,12 +10,12 @@ export const resolvers = {
       const { rows } = await pool.query("SELECT * FROM user_login");
       return [...rows];
     },
-    user: async (userid: string) => {
+    user: async (_parent: any, args: any, context: any, _info: any) => {
+      const { userid } = args;
       const { rows } = await pool.query(
         "SELECT * FROM user_login WHERE userid = $1",
         [userid]
       );
-      console.log(rows);
       return { ...rows[0] };
     },
   },
@@ -34,6 +35,8 @@ export const resolvers = {
     },
     login: async (_parent: any, args: any, context: any, _info: any) => {
       const { email, password } = args.input;
+      console.log(context.req.headers.cookie);
+      //   console.log(context.req.getHeader("token"));
 
       const user = await loginUser(email, password);
       console.log(user);
@@ -45,10 +48,9 @@ export const resolvers = {
 
       return user;
     },
-    async signOut(_parent:any, _args:any, context:any, _info:any) {
-        removeAuthCookie(context.res)
-        return true
-      },
-
+    async signOut(_parent: any, _args: any, context: any, _info: any) {
+      removeAuthCookie(context.res);
+      return true;
+    },
   },
 };

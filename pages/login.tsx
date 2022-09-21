@@ -73,7 +73,7 @@ export default function Login() {
         },
       });
 
-      // router.push(`/profile/${userId}`);
+      //   router.push(`/profile/${userId}`);
     } catch (error) {
       console.log(error);
       // add toast error here
@@ -90,17 +90,6 @@ export default function Login() {
     const validEmail = emailAddressValidator(email);
     if (!validEmail) setEmailError(true);
     return validEmail;
-  };
-
-  const logout = async () => {
-    const requestOptions = {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Accept: "application/json" },
-    };
-    const res = await fetch("/api/logout", requestOptions);
-    const { message } = await res.json();
-    console.log(message);
-    // TODO - display message and redirect to login
   };
 
   return (
