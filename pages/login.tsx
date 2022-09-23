@@ -1,34 +1,18 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { Typography, Box, TextField, Button } from "@mui/material";
-import {
-  emailAddressValidator,
-  usernameAndPasswordValidator,
-} from "../utils/formValidator";
-import { useQuery, gql, useMutation } from "@apollo/client";
-import appolloClient from "../apollo-client";
-import { GetStaticPropsResult } from "next";
+import { emailAddressValidator, usernameAndPasswordValidator } from "../utils/formValidator";
+import { useMutation } from "@apollo/client";
 import SignOut from "../components/SignOut";
+import { loginMutation } from "./api/graphql/mutations/authMutations";
 
 interface ILoginCreds {
   email: string;
   password: string;
 }
 
-const loginMutation = gql`
-  mutation loginMutation($email: String!, $password: String!) {
-    login(input: { email: $email, password: $password }) {
-      token
-      username
-      email
-    }
-  }
-`;
-
 export default function Login() {
   const [login] = useMutation(loginMutation);
-  //   const { loading, error, data } = useQuery(GET_USERS);
-  //   console.log(data);
   const router = useRouter();
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
@@ -55,25 +39,27 @@ export default function Login() {
   };
 
   const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const isValdidEmail = validateEmail(loginCreds);
-    const isValidUsernameAndPassword = validateUserNameAndPassword(loginCreds);
-
-    if (!isValdidEmail || !isValidUsernameAndPassword) {
-      console.log("INVALID FORMAT");
-      return;
-    }
-
     try {
-      await login({
+      event.preventDefault();
+
+      const isValdidEmail = validateEmail(loginCreds);
+      const isValidUsernameAndPassword = validateUserNameAndPassword(loginCreds);
+
+      if (!isValdidEmail || !isValidUsernameAndPassword) {
+        console.log("INVALID FORMAT");
+        return;
+      }
+
+      const { data } = await login({
         variables: {
           email: loginCreds.email,
           password: loginCreds.password,
         },
       });
 
-      //   router.push(`/profile/${userId}`);
+      const { username } = data.login;
+
+      router.push(`/profile/${username}`);
     } catch (error) {
       console.log(error);
       // add toast error here
@@ -135,13 +121,3 @@ export default function Login() {
     </Box>
   );
 }
-
-// export async function getServerSideProps() {
-//   const { data }: { data: User[] } = await appolloClient.query({ query: GET_USERS });
-
-//   return {
-//     props: {
-//       data,
-//     },
-//   };
-// }

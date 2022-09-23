@@ -4,7 +4,7 @@ import {
 } from "../../utils/formValidator";
 import { jwtGenerator } from "../../utils/jwtGenerator";
 import pool from "../../db/dbConfig";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 
 export default async function loginUser(email: string, password: string) {
   try {
@@ -41,6 +41,7 @@ export default async function loginUser(email: string, password: string) {
       token,
     };
   } catch (error) {
+    console.log(error);
     return { message: "Error logging in. Please try again later." };
   }
 }

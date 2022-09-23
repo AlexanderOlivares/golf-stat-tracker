@@ -4,7 +4,7 @@ import {
 } from "../../utils/formValidator";
 import { jwtGenerator } from "../../utils/jwtGenerator";
 import pool from "../../db/dbConfig";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 
 export default async function registerUser(
@@ -25,22 +25,22 @@ export default async function registerUser(
       [username]
     );
 
+    if (usernameExists.rowCount) {
+      return { message: "Username already exists" };
+    }
+
     const emailExists = await pool.query(
       "SELECT email FROM user_login WHERE email = $1",
       [email]
     );
-
-    if (usernameExists.rowCount) {
-      return { message: "Username already exists" };
-    }
 
     if (emailExists.rowCount) {
       return { message: "Account with that email already exists" };
     }
 
     const SALT_ROUNDS = 10;
-    const salt: string = await bcrypt.genSalt(SALT_ROUNDS);
-    const bcryptPassword: string = await bcrypt.hash(password, salt);
+    const salt: string = bcrypt.genSaltSync(SALT_ROUNDS);
+    const bcryptPassword: string = bcrypt.hashSync(password, salt);
 
     const userid: string = uuidv4();
 

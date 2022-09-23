@@ -1,27 +1,15 @@
 import React, { useState } from "react";
 import { useRouter } from "next/router";
 import { Typography, Box, TextField, Button } from "@mui/material";
-import {
-  emailAddressValidator,
-  usernameAndPasswordValidator,
-} from "../utils/formValidator";
-import { gql, useMutation } from "@apollo/client";
+import { emailAddressValidator, usernameAndPasswordValidator } from "../utils/formValidator";
+import { registerMutation } from "./api/graphql/mutations/authMutations";
+import { useMutation } from "@apollo/client";
 
 export interface IRegistrationCreds {
   username: string;
   email: string;
   password: string;
 }
-
-const registerMutation = gql`
-  mutation SignUpMutation($username: String!, $email: String!, $password: String!) {
-    register(input: { username: $username, email: $email, password: $password }) {
-      token
-      username
-      email
-    }
-  }
-`;
 
 export default function Register() {
   const [register] = useMutation(registerMutation);
@@ -54,18 +42,18 @@ export default function Register() {
   };
 
   const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    const isValdidEmail = validateEmail(registrationCreds);
-    const isValidUsernameAndPassword =
-      validateUserNameAndPassword(registrationCreds);
-
-    if (!isValdidEmail || !isValidUsernameAndPassword) {
-      console.log("INVALID FORMAT");
-      return;
-    }
     try {
-      await register({
+      event.preventDefault();
+
+      const isValdidEmail = validateEmail(registrationCreds);
+      const isValidUsernameAndPassword = validateUserNameAndPassword(registrationCreds);
+
+      if (!isValdidEmail || !isValidUsernameAndPassword) {
+        console.log("INVALID FORMAT");
+        return;
+      }
+
+      const { data } = await register({
         variables: {
           username: registrationCreds.username,
           email: registrationCreds.email,
@@ -73,17 +61,16 @@ export default function Register() {
         },
       });
 
-      router.push("/login");
+      const { username } = data.register;
+
+      router.push(`/profile/${username}`);
     } catch (error) {
       console.log(error);
       // add toast error here
     }
   };
 
-  const validateUserNameAndPassword = ({
-    username,
-    password,
-  }: IRegistrationCreds) => {
+  const validateUserNameAndPassword = ({ username, password }: IRegistrationCreds) => {
     const validUsername = usernameAndPasswordValidator(username);
     const validPassword = usernameAndPasswordValidator(password);
     if (!validUsername) setUsernameError(true);

@@ -1,12 +1,7 @@
 import React from "react";
-import { gql, useMutation } from "@apollo/client";
+import { useMutation } from "@apollo/client";
 import { Button } from "@mui/material";
-
-const SignOutMutation = gql`
-  mutation SignOutMutation {
-    signOut
-  }
-`;
+import { SignOutMutation } from "../pages/api/graphql/mutations/authMutations";
 
 function SignOut() {
   const [signOut] = useMutation(SignOutMutation);
