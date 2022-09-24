@@ -16,7 +16,7 @@ const prodConfig = {
   },
 };
 
-const pool = new Pool(
+const pool: Pool = new Pool(
    process.env.NODE_ENV === "production" ? prodConfig : devConfig
 );
 
