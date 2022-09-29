@@ -59,7 +59,7 @@ export default function Login() {
 
       const { username } = data.login;
 
-      router.push(`/profile/${username}`);
+      router.push(`/${username}/profile`);
     } catch (error) {
       console.log(error);
       // add toast error here

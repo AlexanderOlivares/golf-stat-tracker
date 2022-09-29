@@ -22,4 +22,7 @@ export interface IContext {
   req: Request;
   res: Response;
   pool: Pool;
+//   username: String;
+//   userid: String;
+//   email: String;
 }

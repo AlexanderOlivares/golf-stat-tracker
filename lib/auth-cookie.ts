@@ -1,4 +1,5 @@
 import cookie, { parse } from "cookie";
+import { verify } from "./../utils/jwtGenerator";
 
 const TOKEN_NAME: string = process.env.TOKEN_NAME || "token";
 
@@ -28,17 +29,14 @@ export function removeAuthCookie(res: any) {
   );
 }
 
-export function validateAuthCookie(res: any) {
-  res.setHeader(
-    "Set-Cookie",
-    cookie.serialize(TOKEN_NAME, "", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV !== "development",
-      maxAge: -1,
-      sameSite: "strict",
-      path: "/",
-    })
-  );
+export async function validateAuthCookie(req: any) {
+    const errorMessage = "Please login"
+    const cookies  = parseCookies(req);
+    if (!cookies || !cookies[TOKEN_NAME])return { errorMessage }
+    const { token } = cookies;
+    const tokenPayload = await verify(token, process.env.JWT_SECRET!)
+    if (!tokenPayload) return { errorMessage}
+    return tokenPayload
 }
 
 export function parseCookies(req: any)  {
@@ -46,7 +44,7 @@ export function parseCookies(req: any)  {
   if (req.cookies) return req.cookies;
 
   // For pages we do need to parse the cookies.
-  const cookie = req.headers?.cookie;
+  const cookie = req.headers[TOKEN_NAME]
   return parse(cookie || "");
 }
 

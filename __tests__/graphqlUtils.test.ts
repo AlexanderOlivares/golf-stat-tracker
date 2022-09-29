@@ -12,9 +12,19 @@ test("If type IUser don't throw error", () => {
   expect(errorOccured(user)).toEqual(false);
 });
 
+test("If type other than IErrorMessage don't throw error", () => {
+  expect(errorOccured("hi")).toEqual(false);
+  expect(errorOccured(null)).toEqual(false);
+  expect(errorOccured(undefined)).toEqual(false);
+  expect(errorOccured(12)).toEqual(false);
+  expect(errorOccured(["arr"])).toEqual(false);
+  expect(errorOccured({message: "non-error message"})).toEqual(false);
+});
+
 
 test("If type IErrorMessage then throw error", () => {
-  const errorMessage: IErrorMessage = { errorMessage: "eroror occured"};
+  const errorMessage: IErrorMessage = { errorMessage: "error occured"};
   expect(errorOccured(errorMessage)).toEqual(true);
+  expect(errorOccured({ errorMessage: "object literal errorMessage"})).toEqual(true);
 });
 

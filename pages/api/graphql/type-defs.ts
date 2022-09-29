@@ -14,6 +14,13 @@ export const typeDefs = gql`
     email: String
     token: String
   }
+
+  type Token {
+    userid: String
+    username: String
+    email: String
+    exp: Int
+  }
    
   input RegistrationInput {
     username: String
@@ -29,6 +36,7 @@ export const typeDefs = gql`
   type Query {
     users: [User]!,
     user(username: String!): User
+    token: Token
   } 
 
   type Mutation {
