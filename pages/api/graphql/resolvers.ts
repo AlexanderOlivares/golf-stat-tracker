@@ -1,4 +1,4 @@
-import registerUser, { IErrorMessage, IUser } from "../../../lib/user/register";
+import registerUser from "../../../lib/user/register";
 import loginUser from "../../../lib/user/login";
 import { getUser, getUsers } from "../../../lib/user/getUsers";
 import { setAuthCookie, removeAuthCookie, validateAuthCookie } from "../../../lib/auth-cookie";
@@ -22,7 +22,6 @@ export const resolvers = {
     },
     token: async (_parent: undefined, args: IUserQueryArgs, context: IContext) => {
       const token = await validateAuthCookie(context.req);
-      console.log("in token resolver")
       if (errorOccured(token)) return new Error(token.errorMessage)
       return token;
     },

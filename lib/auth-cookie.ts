@@ -30,25 +30,25 @@ export function removeAuthCookie(res: any) {
 }
 
 export async function validateAuthCookie(req: any) {
-    const errorMessage = "Please login"
-    const cookies  = parseCookies(req);
-    if (!cookies || !cookies[TOKEN_NAME])return { errorMessage }
-    const { token } = cookies;
-    const tokenPayload = await verify(token, process.env.JWT_SECRET!)
-    if (!tokenPayload) return { errorMessage}
-    return tokenPayload
+  const errorMessage = "Please login";
+  const cookies = parseCookies(req);
+  if (!cookies || !cookies[TOKEN_NAME]) return { errorMessage };
+  const { token } = cookies;
+  const tokenPayload = await verify(token, process.env.JWT_SECRET!);
+  if (!tokenPayload) return { errorMessage };
+  return tokenPayload;
 }
 
-export function parseCookies(req: any)  {
+export function parseCookies(req: any) {
   // For API Routes we don't need to parse the cookies.
   if (req.cookies) return req.cookies;
 
   // For pages we do need to parse the cookies.
-  const cookie = req.headers[TOKEN_NAME]
+  const cookie = req.headers[TOKEN_NAME];
   return parse(cookie || "");
 }
 
-export function getAuthCookie(req: any) :string {
+export function getAuthCookie(req: any): string {
   const cookies = parseCookies(req);
   return cookies[TOKEN_NAME];
 }
