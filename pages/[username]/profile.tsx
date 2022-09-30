@@ -2,8 +2,7 @@ import React from "react";
 import { useQuery } from "@apollo/client";
 import { useRouter } from "next/router";
 import { getUserQuery } from "../api/graphql/queries/userQueries";
-import { Box } from "@mui/material";
-import NewRoundModal from "../../components/newRoundModal";
+import { Box, Button } from "@mui/material";
 
 export default function Profile() {
   const router = useRouter();
@@ -17,6 +16,8 @@ export default function Profile() {
   if (loading) return "Loading...";
   if (error) return `Error! ${error.message}`;
 
+  const startNewRound = () => router.push(`/${username}/round/new-round`);
+
   return (
     <>
       {loading ? (
@@ -27,7 +28,9 @@ export default function Profile() {
           <h3>uerId: {data.user.userid}</h3>
           <h3>uername: {data.user.username}</h3>
           <h3>email: {data.user.email}</h3>
-          <NewRoundModal />
+          <Button onClick={startNewRound} size="medium" variant="contained" color="primary">
+            new round
+          </Button>
         </Box>
       )}
     </>

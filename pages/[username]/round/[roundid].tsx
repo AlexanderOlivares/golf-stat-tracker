@@ -1,6 +1,7 @@
 import { useRouter } from "next/router";
 import { getAuthTokenQuery } from "../../api/graphql/queries/authQueries";
 import { useQuery } from "@apollo/client";
+import ScoreCard from "../../../components/ScoreCard";
 
 export default function Round() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function Round() {
   return (
     <>
       <h1>Round detail page</h1>
+      <ScoreCard />
     </>
   );
 }
