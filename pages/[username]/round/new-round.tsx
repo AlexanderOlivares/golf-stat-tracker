@@ -16,21 +16,53 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
+interface IUserAddedCourse {
+  userAddedCourseName: string;
+  city: string;
+  state: string;
+}
+
 export default function NewRoundModal() {
   const router = useRouter();
   const [verifyAuth, lazyResults] = useLazyQuery(getAuthTokenQuery);
-  const [holeCount, setHoleCount] = useState("18");
+  const [holeCount, setHoleCount] = useState(18);
   const [roundView, setRoundView] = useState("hole-by-hole");
   const [date, setDate] = useState<Dayjs | Date | null>(new Date());
-  // TODO add course name and date of round to sate and pass as query params
+  const [courseName, setCourseName] = useState<string>("");
+  const [isUserAddedCourse, setIsUserAddedCourse] = useState<boolean>(false);
+  const [userAddedCourseDetails, setuserAddedCourseDetails] = useState<IUserAddedCourse>({
+    userAddedCourseName: "",
+    city: "",
+    state: "",
+  });
 
-  const handleHoleCountChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    setHoleCount(event.target.value);
+  const handleHoleCountChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    setHoleCount(Number(event.target.value));
   };
 
-  const handleViewChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleViewChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setRoundView(event.target.value);
   };
+
+  const handleCourseInput = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    setCourseName(event.target.value);
+  };
+
+  const handleCheckboxes = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    setIsUserAddedCourse(event.target.checked);
+    setCourseName("");
+  };
+
+  const handleUserAddedCourseDetails = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    const { name, value }: { name: string; value: string } = event.target;
+    setuserAddedCourseDetails(prev => {
+      return {
+        ...prev,
+        [name]: value,
+      };
+    });
+  };
+  console.log(userAddedCourseDetails);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     try {
@@ -48,15 +80,24 @@ export default function NewRoundModal() {
       const { username } = data.token;
       const roundid = uuidv4();
       const roundDate = date?.toISOString();
+      const { userAddedCourseName, city, state } = userAddedCourseDetails;
 
-      router.push({
-        pathname: `/${username}/round/${roundid}`,
-        query: {
-          holeCount,
-          roundView,
-          roundDate,
+      router.push(
+        {
+          pathname: `/${username}/round/${roundid}`,
+          query: {
+            holeCount,
+            roundView,
+            roundDate,
+            courseName,
+            isUserAddedCourse,
+            userAddedCourseName,
+            city,
+            state,
+          },
         },
-      });
+        `/${username}/round/${roundid}`
+      );
     } catch (error) {
       // TODO add toast error or remove
       console.log(error);
@@ -83,24 +124,60 @@ export default function NewRoundModal() {
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                 Course
               </Typography>
-              <TextField id="outlined-basic" label="search courses" variant="outlined" />
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                or
-              </Typography>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                <Checkbox {...label} />
-                Add new course with round
-              </Typography>
-              <LocalizationProvider dateAdapter={AdapterDayjs}>
-                <DatePicker
-                  label="Date of round"
-                  value={date}
-                  onChange={newValue => {
-                    setDate(newValue);
-                  }}
-                  renderInput={params => <TextField {...params} />}
-                />
-              </LocalizationProvider>
+              <TextField
+                disabled={isUserAddedCourse}
+                onChange={handleCourseInput}
+                id="search-courses"
+                label="search courses"
+                name="search courses"
+                variant={isUserAddedCourse ? "filled" : "outlined"}
+              />
+              <Box>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                  or
+                </Typography>
+                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                  <Checkbox onChange={handleCheckboxes} value={isUserAddedCourse} {...label} />
+                  Add new course with round
+                </Typography>
+                {isUserAddedCourse && (
+                  <Box>
+                    <TextField
+                      onChange={handleUserAddedCourseDetails}
+                      id="user-added-course"
+                      label="course name"
+                      name="userAddedCourseName"
+                      variant="outlined"
+                    />
+                    <TextField
+                      onChange={handleUserAddedCourseDetails}
+                      id="user-added-course"
+                      label="city"
+                      name="city"
+                      variant="outlined"
+                    />
+                    <TextField
+                      onChange={handleUserAddedCourseDetails}
+                      id="user-added-course"
+                      label="state"
+                      name="state"
+                      variant="outlined"
+                    />
+                  </Box>
+                )}
+              </Box>
+              <Box mt={5}>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Date of round"
+                    value={date}
+                    onChange={newValue => {
+                      setDate(newValue);
+                    }}
+                    renderInput={params => <TextField {...params} />}
+                  />
+                </LocalizationProvider>
+              </Box>
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                 Holes
               </Typography>

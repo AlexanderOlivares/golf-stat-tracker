@@ -10,11 +10,29 @@ export default function Round() {
   if (loading) return "Loading...";
   // TODO add toast error
   if (error) router.push("/login");
+  const {
+    holeCount,
+    roundDate,
+    roundView,
+    roundid,
+    username,
+    courseName,
+    isUserAddedCourse,
+    userAddedCourseName,
+    city,
+    state,
+  } = router.query;
 
   return (
     <>
       <h1>Round detail page</h1>
-      <ScoreCard />
+      <h3>{roundDate}</h3>
+      <h3>{courseName ? courseName : userAddedCourseName}</h3>
+      <h3>
+        {city && city} {state && state}
+      </h3>
+      <h3></h3>
+      {roundView === "scorecard" && <ScoreCard />}
     </>
   );
 }
