@@ -7,12 +7,14 @@ import FormControl from "@mui/material/FormControl";
 import Radio from "@mui/material/Radio";
 import Checkbox from "@mui/material/Checkbox";
 import { getAuthTokenQuery } from "../../api/graphql/queries/authQueries";
-import { useLazyQuery } from "@apollo/client";
+import { getAllCourseNamesQuery } from "../../api/graphql/queries/courseQueries";
+import { useQuery, useLazyQuery } from "@apollo/client";
 import { v4 as uuidv4 } from "uuid";
 import { Dayjs } from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import Autocomplete from "@mui/material/Autocomplete";
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
@@ -22,8 +24,9 @@ interface IUserAddedCourse {
   state: string;
 }
 
-export default function NewRoundModal() {
+export default function NewRound() {
   const router = useRouter();
+  const { loading, error, data } = useQuery(getAllCourseNamesQuery);
   const [verifyAuth, lazyResults] = useLazyQuery(getAuthTokenQuery);
   const [holeCount, setHoleCount] = useState(18);
   const [roundView, setRoundView] = useState("hole-by-hole");
@@ -36,16 +39,15 @@ export default function NewRoundModal() {
     state: "",
   });
 
+  if (loading) return null;
+  if (error) return `Error! ${error}`;
+
   const handleHoleCountChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setHoleCount(Number(event.target.value));
   };
 
   const handleViewChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setRoundView(event.target.value);
-  };
-
-  const handleCourseInput = (event: React.ChangeEvent<HTMLInputElement>): void => {
-    setCourseName(event.target.value);
   };
 
   const handleCheckboxes = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -62,7 +64,6 @@ export default function NewRoundModal() {
       };
     });
   };
-  console.log(userAddedCourseDetails);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     try {
@@ -124,14 +125,28 @@ export default function NewRoundModal() {
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                 Course
               </Typography>
-              <TextField
-                disabled={isUserAddedCourse}
-                onChange={handleCourseInput}
-                id="search-courses"
-                label="search courses"
-                name="search courses"
-                variant={isUserAddedCourse ? "filled" : "outlined"}
-              />
+              {data && (
+                <Autocomplete
+                  freeSolo
+                  id="course-search-box"
+                  disableClearable
+                  value={courseName}
+                  onChange={(_: any, courseName: string) => {
+                    setCourseName(courseName);
+                  }}
+                  options={data.getAllCourses.map((row: any) => row.course_name)}
+                  renderInput={params => (
+                    <TextField
+                      {...params}
+                      label="Search Courses"
+                      InputProps={{
+                        ...params.InputProps,
+                        type: "search",
+                      }}
+                    />
+                  )}
+                />
+              )}
               <Box>
                 <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                   or

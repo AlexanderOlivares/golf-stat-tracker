@@ -3,6 +3,12 @@ import { Pool } from "pg";
 export interface IUserQueryArgs {
   username: string;
 }
+
+// not currently using but keeping for git
+export interface ICourseSearchQueryArgs {
+  courseName: string;
+}
+
 export interface IRegisterMutationArgs {
   input: {
     username: string;
@@ -22,7 +28,4 @@ export interface IContext {
   req: Request;
   res: Response;
   pool: Pool;
-//   username: String;
-//   userid: String;
-//   email: String;
 }

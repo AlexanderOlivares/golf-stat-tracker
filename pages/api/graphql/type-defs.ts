@@ -21,7 +21,18 @@ export const typeDefs = gql`
     email: String
     exp: Int
   }
-   
+  
+  type CourseName {
+    course_name: String
+  }
+
+  type CourseSearchResult {
+    courseName: String
+    country: String
+    state: String
+    city: String
+  }
+
   input RegistrationInput {
     username: String
     email: String
@@ -34,9 +45,11 @@ export const typeDefs = gql`
   }
 
   type Query {
-    users: [User]!,
+    users: [User]! # not currently used but keeping for git
     user(username: String!): User
     token: Token
+    getAllCourses: [CourseName]
+    courseSearchResults(courseName: String!): [CourseSearchResult]! # not currently used but keeping for git
   } 
 
   type Mutation {

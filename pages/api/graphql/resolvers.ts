@@ -2,14 +2,15 @@ import registerUser from "../../../lib/user/register";
 import loginUser from "../../../lib/user/login";
 import { getUser, getUsers } from "../../../lib/user/getUsers";
 import { setAuthCookie, removeAuthCookie, validateAuthCookie } from "../../../lib/auth-cookie";
+import { getAllCourses, searchCourses } from "../../../lib/course/searchCourses";
 import {
   IUserQueryArgs,
   IRegisterMutationArgs,
   ILoginMutationArgs,
   IContext,
+  ICourseSearchQueryArgs,
 } from "./resolverInterfaces";
 import { errorOccured } from "./graphqlUtils";
-
 
 export const resolvers = {
   Query: {
@@ -22,8 +23,19 @@ export const resolvers = {
     },
     token: async (_parent: undefined, args: IUserQueryArgs, context: IContext) => {
       const token = await validateAuthCookie(context.req);
-      if (errorOccured(token)) return new Error(token.errorMessage)
+      if (errorOccured(token)) return new Error(token.errorMessage);
       return token;
+    },
+    // not using but keeping for git
+    courseSearchResults: async (_parent: undefined, args: ICourseSearchQueryArgs, _context: IContext) => {
+      const { courseName } = args;
+      let res = await searchCourses(courseName);
+      return;
+    },
+    getAllCourses: async () => {
+      const courses = await getAllCourses();
+      if (errorOccured(courses)) return new Error(courses.errorMessage);
+      return courses;
     },
   },
   Mutation: {
