@@ -10,17 +10,15 @@ export async function searchCourses(courseName: string) {
     );
     return [...rows];
   } catch (error) {
-    return errorMessage("Error searching course names")
+    return errorMessage("Error searching course names");
   }
 }
 
-export async function getAllCourses() {
-    try {
-    const { rows } = await pool.query(
-        "SELECT course_name FROM courses",
-      );
-      return [...rows];
-    } catch (error) {
-      return errorMessage("Error fetching course names")
-    }
+export async function getCourseNamesAndIds() {
+  try {
+    const { rows } = await pool.query("SELECT course_name, course_id FROM courses");
+    return [...rows];
+  } catch (error) {
+    return errorMessage("Error fetching course names");
   }
+}

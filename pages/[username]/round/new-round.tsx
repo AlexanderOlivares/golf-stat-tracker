@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
 import { Typography, Box, Button, TextField } from "@mui/material";
 import RadioGroup from "@mui/material/RadioGroup";
@@ -7,7 +7,7 @@ import FormControl from "@mui/material/FormControl";
 import Radio from "@mui/material/Radio";
 import Checkbox from "@mui/material/Checkbox";
 import { getAuthTokenQuery } from "../../api/graphql/queries/authQueries";
-import { getAllCourseNamesQuery } from "../../api/graphql/queries/courseQueries";
+import { getCourses } from "../../api/graphql/queries/courseQueries";
 import { useQuery, useLazyQuery } from "@apollo/client";
 import { v4 as uuidv4 } from "uuid";
 import { Dayjs } from "dayjs";
@@ -15,32 +15,59 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import Autocomplete from "@mui/material/Autocomplete";
+import { isEmptyObject, userAddedCourseObjectValidator } from "../../../utils/formValidator";
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
 interface IUserAddedCourse {
   userAddedCourseName: string;
-  city: string;
-  state: string;
+  userAddedCity: string;
+  userAddedState: string;
+}
+
+interface ICourseData {
+  __typoename: string;
+  course_name: string;
+  course_id: string;
 }
 
 export default function NewRound() {
   const router = useRouter();
-  const { loading, error, data } = useQuery(getAllCourseNamesQuery);
+  const { loading, error, data } = useQuery(getCourses);
   const [verifyAuth, lazyResults] = useLazyQuery(getAuthTokenQuery);
   const [holeCount, setHoleCount] = useState(18);
   const [roundView, setRoundView] = useState("hole-by-hole");
   const [date, setDate] = useState<Dayjs | Date | null>(new Date());
   const [courseName, setCourseName] = useState<string>("");
+  const [courseId, setCourseId] = useState<string>("");
   const [isUserAddedCourse, setIsUserAddedCourse] = useState<boolean>(false);
   const [userAddedCourseDetails, setuserAddedCourseDetails] = useState<IUserAddedCourse>({
     userAddedCourseName: "",
-    city: "",
-    state: "",
+    userAddedCity: "",
+    userAddedState: "",
   });
+
+  useEffect(() => {
+    getCourseId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courseName]);
 
   if (loading) return null;
   if (error) return `Error! ${error}`;
+
+  function getCourseId() {
+    if (data) {
+      const { courses }: { courses: ICourseData[] } = data;
+      const foundMatchingCourse = courses.find(
+        (course: ICourseData) => course.course_name == courseName
+      );
+      if (foundMatchingCourse) {
+        setCourseId(foundMatchingCourse.course_id);
+        return;
+      }
+    }
+    setCourseId("");
+  }
 
   const handleHoleCountChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setHoleCount(Number(event.target.value));
@@ -80,21 +107,48 @@ export default function NewRound() {
 
       const { username } = data.token;
       const roundid = uuidv4();
-      const roundDate = date?.toISOString();
-      const { userAddedCourseName, city, state } = userAddedCourseDetails;
+      const roundDate = date?.toISOString(); // TODO TAKE THIS OFF UTC TIME
+
+      let baseQueryParams = {
+        holeCount,
+        roundView,
+        roundDate,
+        isUserAddedCourse,
+      };
+
+      const systemAddedParams = {
+        courseName,
+        courseId,
+      };
+
+      let userAddedParams = {};
+
+      if (isUserAddedCourse) {
+        const { userAddedCourseName, userAddedCity, userAddedState } = userAddedCourseDetails;
+        const unverifiedCourseId = uuidv4();
+
+        userAddedParams = {
+          userAddedCourseName,
+          userAddedCity,
+          userAddedState,
+          unverifiedCourseId,
+        };
+      }
+
+      if (!userAddedCourseObjectValidator(userAddedParams) && isUserAddedCourse) {
+        throw new Error("Please add course name, city and state to proceed");
+      }
+
+      if (!courseId && isEmptyObject(userAddedParams)) {
+        throw new Error("Please select or add a course to proceed");
+      }
 
       router.push(
         {
           pathname: `/${username}/round/${roundid}`,
           query: {
-            holeCount,
-            roundView,
-            roundDate,
-            courseName,
-            isUserAddedCourse,
-            userAddedCourseName,
-            city,
-            state,
+            ...baseQueryParams,
+            ...(isUserAddedCourse ? userAddedParams : systemAddedParams),
           },
         },
         `/${username}/round/${roundid}`
@@ -129,12 +183,13 @@ export default function NewRound() {
                 <Autocomplete
                   freeSolo
                   id="course-search-box"
+                  autoSelect
                   disableClearable
                   value={courseName}
                   onChange={(_: any, courseName: string) => {
                     setCourseName(courseName);
                   }}
-                  options={data.getAllCourses.map((row: any) => row.course_name)}
+                  options={data.courses.map((row: ICourseData) => row.course_name)}
                   renderInput={params => (
                     <TextField
                       {...params}
@@ -149,7 +204,7 @@ export default function NewRound() {
               )}
               <Box>
                 <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                  or
+                  Dont see your course?
                 </Typography>
                 <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                   <Checkbox onChange={handleCheckboxes} value={isUserAddedCourse} {...label} />
@@ -168,14 +223,14 @@ export default function NewRound() {
                       onChange={handleUserAddedCourseDetails}
                       id="user-added-course"
                       label="city"
-                      name="city"
+                      name="userAddedCity"
                       variant="outlined"
                     />
                     <TextField
                       onChange={handleUserAddedCourseDetails}
                       id="user-added-course"
                       label="state"
-                      name="state"
+                      name="userAddedState"
                       variant="outlined"
                     />
                   </Box>

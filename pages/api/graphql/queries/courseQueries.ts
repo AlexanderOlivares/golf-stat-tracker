@@ -12,10 +12,11 @@ export const searchCourseResultsQuery = gql`
   }
 `;
 
-export const getAllCourseNamesQuery = gql`
-  query getAllCourseNames {
-    getAllCourses {
+export const getCourses = gql`
+  query getCourseNamesAndIds {
+    courses {
       course_name
+      course_id
     }
   }
 `;

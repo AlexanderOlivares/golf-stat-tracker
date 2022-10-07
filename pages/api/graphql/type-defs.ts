@@ -22,8 +22,9 @@ export const typeDefs = gql`
     exp: Int
   }
   
-  type CourseName {
+  type CourseNamesAndIds {
     course_name: String
+    course_id: String
   }
 
   type CourseSearchResult {
@@ -48,7 +49,7 @@ export const typeDefs = gql`
     users: [User]! # not currently used but keeping for git
     user(username: String!): User
     token: Token
-    getAllCourses: [CourseName]
+    courses: [CourseNamesAndIds]
     courseSearchResults(courseName: String!): [CourseSearchResult]! # not currently used but keeping for git
   } 
 

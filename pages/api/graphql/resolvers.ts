@@ -2,7 +2,7 @@ import registerUser from "../../../lib/user/register";
 import loginUser from "../../../lib/user/login";
 import { getUser, getUsers } from "../../../lib/user/getUsers";
 import { setAuthCookie, removeAuthCookie, validateAuthCookie } from "../../../lib/auth-cookie";
-import { getAllCourses, searchCourses } from "../../../lib/course/searchCourses";
+import { getCourseNamesAndIds, searchCourses } from "../../../lib/course/searchCourses";
 import {
   IUserQueryArgs,
   IRegisterMutationArgs,
@@ -32,10 +32,10 @@ export const resolvers = {
       let res = await searchCourses(courseName);
       return;
     },
-    getAllCourses: async () => {
-      const courses = await getAllCourses();
-      if (errorOccured(courses)) return new Error(courses.errorMessage);
-      return courses;
+    courses: async () => {
+      const courseNamesAndIds = await getCourseNamesAndIds();
+      if (errorOccured(courseNamesAndIds)) return new Error(courseNamesAndIds.errorMessage);
+      return courseNamesAndIds;
     },
   },
   Mutation: {
