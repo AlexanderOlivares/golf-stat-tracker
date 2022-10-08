@@ -63,7 +63,7 @@ export default function Register() {
 
       const { username } = data.register;
 
-      router.push(`/profile/${username}`);
+      router.push(`/${username}/profile`);
     } catch (error) {
       console.log(error);
       // add toast error here

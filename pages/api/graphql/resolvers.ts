@@ -1,14 +1,13 @@
 import registerUser from "../../../lib/user/register";
 import loginUser from "../../../lib/user/login";
 import { getUser, getUsers } from "../../../lib/user/getUsers";
-import { setAuthCookie, removeAuthCookie, validateAuthCookie } from "../../../lib/auth-cookie";
-import { getCourseNamesAndIds, searchCourses } from "../../../lib/course/searchCourses";
+import { setAuthCookie, removeAuthCookie } from "../../../lib/auth-cookie";
+import { getCourseNamesAndIds } from "../../../lib/course/searchCourses";
 import {
   IUserQueryArgs,
   IRegisterMutationArgs,
   ILoginMutationArgs,
   IContext,
-  ICourseSearchQueryArgs,
 } from "./resolverInterfaces";
 import { errorOccured } from "./graphqlUtils";
 
@@ -20,17 +19,6 @@ export const resolvers = {
     user: async (_parent: undefined, args: IUserQueryArgs, _context: IContext) => {
       const { username } = args;
       return await getUser(username);
-    },
-    token: async (_parent: undefined, args: IUserQueryArgs, context: IContext) => {
-      const token = await validateAuthCookie(context.req);
-      if (errorOccured(token)) return new Error(token.errorMessage);
-      return token;
-    },
-    // not using but keeping for git
-    courseSearchResults: async (_parent: undefined, args: ICourseSearchQueryArgs, _context: IContext) => {
-      const { courseName } = args;
-      let res = await searchCourses(courseName);
-      return;
     },
     courses: async () => {
       const courseNamesAndIds = await getCourseNamesAndIds();

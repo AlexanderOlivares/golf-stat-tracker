@@ -15,13 +15,6 @@ export const typeDefs = gql`
     token: String
   }
 
-  type Token {
-    userid: String
-    username: String
-    email: String
-    exp: Int
-  }
-  
   type CourseNamesAndIds {
     course_name: String
     course_id: String
@@ -46,11 +39,8 @@ export const typeDefs = gql`
   }
 
   type Query {
-    users: [User]! # not currently used but keeping for git
     user(username: String!): User
-    token: Token
     courses: [CourseNamesAndIds]
-    courseSearchResults(courseName: String!): [CourseSearchResult]! # not currently used but keeping for git
   } 
 
   type Mutation {

@@ -6,9 +6,8 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
 import Radio from "@mui/material/Radio";
 import Checkbox from "@mui/material/Checkbox";
-import { getAuthTokenQuery } from "../../api/graphql/queries/authQueries";
 import { getCourses } from "../../api/graphql/queries/courseQueries";
-import { useQuery, useLazyQuery } from "@apollo/client";
+import { useQuery } from "@apollo/client";
 import { v4 as uuidv4 } from "uuid";
 import { Dayjs } from "dayjs";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
@@ -34,7 +33,6 @@ interface ICourseData {
 export default function NewRound() {
   const router = useRouter();
   const { loading, error, data } = useQuery(getCourses);
-  const [verifyAuth, lazyResults] = useLazyQuery(getAuthTokenQuery);
   const [holeCount, setHoleCount] = useState(18);
   const [roundView, setRoundView] = useState("scorecard");
   const [date, setDate] = useState<Dayjs | Date | null>(new Date());
@@ -101,16 +99,7 @@ export default function NewRound() {
     try {
       event.preventDefault();
 
-      const { data, error } = await verifyAuth();
-
-      // TODO add toast error
-      if (error) {
-        console.log(error.message);
-        router.push("/login");
-        return;
-      }
-
-      const { username } = data.token;
+      const { username } = router.query;
       const roundid = uuidv4();
 
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
