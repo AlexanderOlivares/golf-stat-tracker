@@ -36,10 +36,11 @@ export default function NewRound() {
   const { loading, error, data } = useQuery(getCourses);
   const [verifyAuth, lazyResults] = useLazyQuery(getAuthTokenQuery);
   const [holeCount, setHoleCount] = useState(18);
-  const [roundView, setRoundView] = useState("hole-by-hole");
+  const [roundView, setRoundView] = useState("scorecard");
   const [date, setDate] = useState<Dayjs | Date | null>(new Date());
   const [courseName, setCourseName] = useState<string>("");
   const [courseId, setCourseId] = useState<string>("");
+  const [teeColor, setTeeColor] = useState<string>("white");
   const [isUserAddedCourse, setIsUserAddedCourse] = useState<boolean>(false);
   const [userAddedCourseDetails, setuserAddedCourseDetails] = useState<IUserAddedCourse>({
     userAddedCourseName: "",
@@ -68,6 +69,10 @@ export default function NewRound() {
     }
     setCourseId("");
   }
+
+  const handleTeeColorChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    setTeeColor(event.target.value);
+  };
 
   const handleHoleCountChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setHoleCount(Number(event.target.value));
@@ -107,10 +112,15 @@ export default function NewRound() {
 
       const { username } = data.token;
       const roundid = uuidv4();
-      const roundDate = date?.toISOString(); // TODO TAKE THIS OFF UTC TIME
+
+      const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+      const roundDate = date?.toLocaleString("en-US", {
+        timeZone,
+      });
 
       let baseQueryParams = {
         holeCount,
+        teeColor,
         roundView,
         roundDate,
         isUserAddedCourse,
@@ -260,6 +270,21 @@ export default function NewRound() {
                 <span>
                   <FormControlLabel value="9" control={<Radio />} label="9" />
                   <FormControlLabel value="18" control={<Radio />} label="18" />
+                </span>
+              </RadioGroup>
+              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                Tee Color
+              </Typography>
+              <RadioGroup
+                aria-labelledby="demo-controlled-radio-buttons-group"
+                name="controlled-radio-buttons-group"
+                value={teeColor}
+                onChange={handleTeeColorChange}
+              >
+                <span>
+                  <FormControlLabel value="red" control={<Radio />} label="red" />
+                  <FormControlLabel value="white" control={<Radio />} label="white" />
+                  <FormControlLabel value="blue" control={<Radio />} label="blue" />
                 </span>
               </RadioGroup>
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
