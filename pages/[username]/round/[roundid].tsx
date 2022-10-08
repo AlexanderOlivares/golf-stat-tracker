@@ -1,16 +1,13 @@
 import { useRouter } from "next/router";
-import { getAuthTokenQuery } from "../../api/graphql/queries/authQueries";
 import { useQuery } from "@apollo/client";
 import ScoreCard from "../../../components/ScoreCard";
+import { getCourseForRound } from "../../api/graphql/queries/courseQueries";
 
 export default function Round() {
   const router = useRouter();
 
-  const { loading, error, data } = useQuery(getAuthTokenQuery);
-  if (loading) return "Loading...";
-  // TODO add toast error
-  if (error) router.push("/login");
   const {
+    courseid,
     holeCount,
     roundDate,
     roundView,
@@ -21,7 +18,26 @@ export default function Round() {
     userAddedCourseName,
     city,
     state,
+    teeColor,
+    courseId,
   } = router.query;
+  const props = router.query;
+
+  const { loading, error, data } = useQuery(getCourseForRound, {
+    variables: {
+      courseId,
+      teeColor,
+    },
+    skip: courseId ? false : true,
+  });
+
+  if (data) console.log(JSON.stringify(data, null, 2));
+  if (loading) return "Loading...";
+  if (error) {
+    // TODO add toast error
+    console.log(error);
+    router.push("/login");
+  }
 
   return (
     <>
@@ -32,7 +48,7 @@ export default function Round() {
         {city && city} {state && state}
       </h3>
       <h3></h3>
-      {roundView === "scorecard" && <ScoreCard />}
+      {roundView === "scorecard" && <ScoreCard {...props} />}
     </>
   );
 }

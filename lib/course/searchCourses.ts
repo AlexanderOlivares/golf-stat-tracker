@@ -22,3 +22,18 @@ export async function getCourseNamesAndIds() {
     return errorMessage("Error fetching course names");
   }
 }
+
+export async function getCourseForNewRound(courseId: string, teeColor: string) {
+  try {
+    const { rows } = await pool.query(
+      `SELECT *  
+            FROM courses 
+            WHERE course_id = $1`,
+      [courseId]
+    );
+
+    return [...rows];
+  } catch (error) {
+    return errorMessage("Error fetching course data");
+  }
+}

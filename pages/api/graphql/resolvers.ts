@@ -1,8 +1,8 @@
 import registerUser from "../../../lib/user/register";
 import loginUser from "../../../lib/user/login";
-import { getUser, getUsers } from "../../../lib/user/getUsers";
+import { getUser } from "../../../lib/user/getUsers";
 import { setAuthCookie, removeAuthCookie } from "../../../lib/auth-cookie";
-import { getCourseNamesAndIds } from "../../../lib/course/searchCourses";
+import { getCourseNamesAndIds, getCourseForNewRound } from "../../../lib/course/searchCourses";
 import {
   IUserQueryArgs,
   IRegisterMutationArgs,
@@ -13,9 +13,6 @@ import { errorOccured } from "./graphqlUtils";
 
 export const resolvers = {
   Query: {
-    users: async () => {
-      return await getUsers();
-    },
     user: async (_parent: undefined, args: IUserQueryArgs, _context: IContext) => {
       const { username } = args;
       return await getUser(username);
@@ -24,6 +21,13 @@ export const resolvers = {
       const courseNamesAndIds = await getCourseNamesAndIds();
       if (errorOccured(courseNamesAndIds)) return new Error(courseNamesAndIds.errorMessage);
       return courseNamesAndIds;
+    },
+    course: async (_parent: undefined, args: any, context: IContext) => {
+      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
+      const { courseId, teeColor } = args;
+      const course = await getCourseForNewRound(courseId, teeColor);
+      if (errorOccured(course)) return new Error(course.errorMessage);
+      return course;
     },
   },
   Mutation: {

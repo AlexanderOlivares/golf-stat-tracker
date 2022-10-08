@@ -110,7 +110,8 @@ const rows = [
   ]),
 ];
 
-export default function ScoreCard() {
+export default function ScoreCard(props: any) {
+  console.log(props);
   return (
     <TableContainer component={Paper}>
       <Table aria-label="collapsible table">
