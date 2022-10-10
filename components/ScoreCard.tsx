@@ -12,6 +12,8 @@ import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+import { ICourseTeeInfo } from "../pages/[username]/round/[roundid]";
+import { ParsedUrlQuery } from "querystring";
 
 function createData(
   hole: number,
@@ -110,7 +112,7 @@ const rows = [
   ]),
 ];
 
-export default function ScoreCard(props: any) {
+export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
   console.log(props);
   return (
     <TableContainer component={Paper}>

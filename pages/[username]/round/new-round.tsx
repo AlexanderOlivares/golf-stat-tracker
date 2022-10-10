@@ -25,7 +25,7 @@ interface IUserAddedCourse {
 }
 
 interface ICourseData {
-  __typoename: string;
+  __typename: string;
   course_name: string;
   course_id: string;
 }
