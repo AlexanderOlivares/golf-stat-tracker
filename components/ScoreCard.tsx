@@ -114,6 +114,89 @@ const rows = [
 
 export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
   console.log(props);
+  let lookup = new Map([
+    [9, "out"],
+    [19, "in"],
+    [20, "total"],
+    [21, "rating"],
+    [22, "slope"],
+    [23, "HCP"],
+    [24, "NET"],
+  ]);
+  let scoreCardRows: Array<Map<string | number | undefined, string | number>> = Array.from(
+    { length: Number(props.holeCount) + 7 },
+    (_, i) => {
+      let map: Map<string | number | undefined, string | number> = new Map();
+      if (i == 9 || i > 18) {
+        if (lookup.has(i)) {
+          return map.set(lookup.get(i), "");
+        }
+      }
+
+      let offset = 1;
+      if (i > 9) offset--;
+
+      return map.set("hole", i + offset);
+    }
+  );
+  console.log(scoreCardRows);
+  const { teeColor } = props;
+
+  for (let [key, val] of Object.entries(props)) {
+    if (!val) continue;
+    mapFrontNineValues(key, val, `${teeColor}_par_front`, "par");
+    mapFrontNineValues(key, val, `${teeColor}_hole_yardage_front`, "yardage");
+    mapFrontNineValues(key, val, `${teeColor}_handicap_front`, "handicap");
+
+    if (!props.is_nine_hole_course && props.holeCount == "18") {
+      mapBackNineValues(key, val, `${teeColor}_par_back`, "par");
+      mapBackNineValues(key, val, `${teeColor}_hole_yardage_back`, "yardage");
+      mapBackNineValues(key, val, `${teeColor}_handicap_back`, "handicap");
+    }
+
+    // duplicate the back 9 holes with info from front 9
+    if (props.is_nine_hole_course && props.holeCount == "18") {
+      mapBackNineValues(key, val, `${teeColor}_par_front`, "par");
+      mapBackNineValues(key, val, `${teeColor}_hole_yardage_front`, "yardage");
+      mapBackNineValues(key, val, `${teeColor}_handicap_front`, "handicap");
+    }
+
+    // it's an 18 hole course but user is only playing 9
+    // TODO need a way to specifiy if playing front or back
+    if (!props.is_nine_hole_course && props.holeCount == "9") {
+      mapBackNineValues(key, val, `${teeColor}_par_front`, "par");
+      mapBackNineValues(key, val, `${teeColor}_hole_yardage_front`, "yardage");
+      mapBackNineValues(key, val, `${teeColor}_handicap_front`, "handicap");
+    }
+  }
+
+  function mapBackNineValues(
+    key: string,
+    val: string,
+    keyNameToCheck: string,
+    mapPropertyName: string
+  ) {
+    if (key == keyNameToCheck) {
+      for (let i = 10; i < scoreCardRows.length; i++) {
+        scoreCardRows[i].set(mapPropertyName, val[i - 10]);
+      }
+    }
+  }
+
+  function mapFrontNineValues(
+    key: string,
+    val: string[],
+    keyNameToCheck: string,
+    mapPropertyName: string
+  ) {
+    if (key == keyNameToCheck) {
+      for (let i = 0; i < val.length; i++) {
+        scoreCardRows[i].set(mapPropertyName, val[i]);
+      }
+    }
+  }
+
+  console.log(scoreCardRows);
   return (
     <TableContainer component={Paper}>
       <Table aria-label="collapsible table">

@@ -117,7 +117,7 @@ export default function Round() {
       <h3>
         {city && city} {state && state}
       </h3>
-      <h3></h3>
+      <h3>{teeColor} tees</h3>
       {courseProps && roundView === "scorecard" && <ScoreCard {...courseProps} />}
     </>
   );
