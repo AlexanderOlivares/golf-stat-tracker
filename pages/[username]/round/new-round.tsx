@@ -34,6 +34,7 @@ export default function NewRound() {
   const router = useRouter();
   const { loading, error, data } = useQuery(getCourses);
   const [holeCount, setHoleCount] = useState(18);
+  const [frontOrBackNine, setFrontOrBackNine] = useState("front 9");
   const [roundView, setRoundView] = useState("scorecard");
   const [date, setDate] = useState<Dayjs | Date | null>(new Date());
   const [courseName, setCourseName] = useState<string>("");
@@ -76,6 +77,10 @@ export default function NewRound() {
     setHoleCount(Number(event.target.value));
   };
 
+  const handleFrontBackSelection = (event: React.ChangeEvent<HTMLInputElement>): void => {
+    setFrontOrBackNine(event.target.value);
+  };
+
   const handleViewChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setRoundView(event.target.value);
   };
@@ -112,6 +117,7 @@ export default function NewRound() {
         teeColor,
         roundView,
         roundDate,
+        frontOrBackNine,
         isUserAddedCourse,
       };
 
@@ -261,6 +267,19 @@ export default function NewRound() {
                   <FormControlLabel value="18" control={<Radio />} label="18" />
                 </span>
               </RadioGroup>
+              {holeCount == 9 && (
+                <RadioGroup
+                  aria-labelledby="demo-controlled-radio-buttons-group"
+                  name="controlled-radio-buttons-group"
+                  value={frontOrBackNine}
+                  onChange={handleFrontBackSelection}
+                >
+                  <span>
+                    <FormControlLabel value="front" control={<Radio />} label="front 9" />
+                    <FormControlLabel value="back" control={<Radio />} label="back 9" />
+                  </span>
+                </RadioGroup>
+              )}
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                 Tee Color
               </Typography>

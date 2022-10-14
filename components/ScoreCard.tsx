@@ -112,46 +112,66 @@ const rows = [
   ]),
 ];
 
+interface IHoleData {
+  hole?: string;
+  par?: string;
+  yardage?: string;
+  frontTotalYardage?: string;
+  backTotalYardage?: string;
+  totalYardage?: string;
+  handicap?: string;
+  score?: string;
+  out?: string;
+  in?: string;
+  total?: string;
+  rating?: string;
+  slope?: string;
+  HCP?: string;
+  NET?: string;
+}
+
+enum NON_HOLE_ROWS {
+  out = 9,
+  in = 19,
+  total = 20,
+  rating = 21,
+  slope = 22,
+  HCP = 23,
+  NET = 24,
+}
+
 export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
   console.log(props);
-  let lookup = new Map([
-    [9, "out"],
-    [19, "in"],
-    [20, "total"],
-    [21, "rating"],
-    [22, "slope"],
-    [23, "HCP"],
-    [24, "NET"],
-  ]);
-  let scoreCardRows: Array<Map<string | number | undefined, string | number>> = Array.from(
-    { length: Number(props.holeCount) + 7 },
-    (_, i) => {
-      let map: Map<string | number | undefined, string | number> = new Map();
-      if (i == 9 || i > 18) {
-        if (lookup.has(i)) {
-          return map.set(lookup.get(i), "");
-        }
-      }
-
-      let offset = 1;
-      if (i > 9) offset--;
-
-      return map.set("hole", i + offset);
-    }
-  );
-  console.log(scoreCardRows);
   const { teeColor } = props;
+
+  let scoreCardRows = Array.from({ length: Number(props.holeCount) + 7 }, (_, i) => {
+    let map: IHoleData = {};
+    if (i == 9 || i > 18) {
+      if (i in NON_HOLE_ROWS) {
+        map["hole"] = NON_HOLE_ROWS[i];
+        return map;
+      }
+    }
+
+    let offset = 1;
+    if (i > 9) offset--;
+
+    map["hole"] = (i + offset).toString();
+    return map;
+  });
 
   for (let [key, val] of Object.entries(props)) {
     if (!val) continue;
     mapFrontNineValues(key, val, `${teeColor}_par_front`, "par");
     mapFrontNineValues(key, val, `${teeColor}_hole_yardage_front`, "yardage");
     mapFrontNineValues(key, val, `${teeColor}_handicap_front`, "handicap");
+    mapTotalYardages(key, val, `${teeColor}_total_yardage_front`, "frontTotalYardage", false);
 
     if (!props.is_nine_hole_course && props.holeCount == "18") {
       mapBackNineValues(key, val, `${teeColor}_par_back`, "par");
       mapBackNineValues(key, val, `${teeColor}_hole_yardage_back`, "yardage");
       mapBackNineValues(key, val, `${teeColor}_handicap_back`, "handicap");
+      mapTotalYardages(key, val, `${teeColor}_total_yardage_back`, "backTotalYardage", false);
     }
 
     // duplicate the back 9 holes with info from front 9
@@ -159,6 +179,7 @@ export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
       mapBackNineValues(key, val, `${teeColor}_par_front`, "par");
       mapBackNineValues(key, val, `${teeColor}_hole_yardage_front`, "yardage");
       mapBackNineValues(key, val, `${teeColor}_handicap_front`, "handicap");
+      mapTotalYardages(key, val, `${teeColor}_total_yardage_back`, "frontTotalYardage", true);
     }
 
     // it's an 18 hole course but user is only playing 9
@@ -170,15 +191,46 @@ export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
     }
   }
 
+  function mapTotalYardages(
+    key: string,
+    val: string,
+    keyNameToCheck: string,
+    mapPropertyName: keyof IHoleData,
+    repeatSameNine: boolean
+  ) {
+    if (repeatSameNine) {
+      const teeColorRegex = new RegExp(`${teeColor}_total_yardage_front`);
+      if (teeColorRegex.test(key)) {
+        scoreCardRows[19][mapPropertyName] = val;
+        scoreCardRows[20]["totalYardage"] = String(Number(val) * 2);
+        return;
+      }
+    }
+    if (key == keyNameToCheck) {
+      if (/total_yardage_front$/.test(keyNameToCheck)) {
+        scoreCardRows[9][mapPropertyName] = val;
+      }
+      if (/total_yardage_back$/.test(keyNameToCheck)) {
+        scoreCardRows[19][mapPropertyName] = val;
+        scoreCardRows[20]["totalYardage"] = String(
+          Number(val) + Number(scoreCardRows[9].frontTotalYardage)
+        );
+      }
+    }
+  }
+
   function mapBackNineValues(
     key: string,
     val: string,
     keyNameToCheck: string,
-    mapPropertyName: string
+    mapPropertyName: keyof IHoleData
   ) {
     if (key == keyNameToCheck) {
-      for (let i = 10; i < scoreCardRows.length; i++) {
-        scoreCardRows[i].set(mapPropertyName, val[i - 10]);
+      for (let i = 10; i < scoreCardRows.length - 5; i++) {
+        const valToAssign: string = val[i - 10];
+        if (valToAssign) {
+          scoreCardRows[i][mapPropertyName] = valToAssign;
+        }
       }
     }
   }
@@ -187,11 +239,11 @@ export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
     key: string,
     val: string[],
     keyNameToCheck: string,
-    mapPropertyName: string
+    mapPropertyName: keyof IHoleData
   ) {
     if (key == keyNameToCheck) {
       for (let i = 0; i < val.length; i++) {
-        scoreCardRows[i].set(mapPropertyName, val[i]);
+        scoreCardRows[i][mapPropertyName] = val[i];
       }
     }
   }
