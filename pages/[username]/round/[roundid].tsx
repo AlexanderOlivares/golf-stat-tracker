@@ -13,6 +13,7 @@ export interface ICourseTeeInfo {
   roundView: string;
   roundid: string;
   username: string;
+  frontOrBackNine: string;
   courseName: string;
   isUserAddedCourse: string;
   userAddedCourseName: string;
