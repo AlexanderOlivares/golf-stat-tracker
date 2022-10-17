@@ -14,6 +14,7 @@ import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { ICourseTeeInfo } from "../pages/[username]/round/[roundid]";
 import { ParsedUrlQuery } from "querystring";
+import { formatScoreCard } from "../utils/scoreCardFormatter";
 
 function createData(
   hole: number,
@@ -143,139 +144,10 @@ enum NON_HOLE_ROWS {
 
 export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
   console.log(props);
-  const { teeColor } = props;
 
-  const SCORE_CARD_ROWS_LENGTH = 25;
-  let scoreCardRows = Array.from({ length: SCORE_CARD_ROWS_LENGTH }, (_, i) => {
-    let holeDetails: IHoleDetails = {};
-    if (i == 9 || i > 18) {
-      if (i in NON_HOLE_ROWS) {
-        holeDetails["hole"] = NON_HOLE_ROWS[i];
-        return holeDetails;
-      }
-    }
-
-    let offset = 1;
-    if (i > 9) offset--;
-
-    holeDetails["hole"] = (i + offset).toString();
-    return holeDetails;
-  });
-
-  let totalPar = 0;
-  for (let [key, val] of Object.entries(props)) {
-    if (!val) continue;
-    mapFrontNineValues(key, val, `${teeColor}_par_front`, "par");
-    mapFrontNineValues(key, val, `${teeColor}_hole_yardage_front`, "yardage");
-    mapFrontNineValues(key, val, `${teeColor}_handicap_front`, "handicap");
-    mapTotalYardages(key, val, `${teeColor}_total_yardage_front`, "frontTotalYardage", false);
-
-    mapOneOffProperties(key, val, `${teeColor}_rating`, "rating", 21);
-    mapOneOffProperties(key, val, `${teeColor}_slope`, "slope", 22);
-
-    mapTotalPar(key, val, `${teeColor}_par_front`, `${teeColor}_par_back`, "totalPar");
-
-    if (!props.is_nine_hole_course) {
-      mapBackNineValues(key, val, `${teeColor}_par_back`, "par");
-      mapBackNineValues(key, val, `${teeColor}_hole_yardage_back`, "yardage");
-      mapBackNineValues(key, val, `${teeColor}_handicap_back`, "handicap");
-      mapTotalYardages(key, val, `${teeColor}_total_yardage_back`, "backTotalYardage", false);
-    }
-
-    // duplicate the back 9 holes with info from front 9
-    if (props.is_nine_hole_course && props.holeCount == "18") {
-      mapBackNineValues(key, val, `${teeColor}_par_front`, "par");
-      mapBackNineValues(key, val, `${teeColor}_hole_yardage_front`, "yardage");
-      mapBackNineValues(key, val, `${teeColor}_handicap_front`, "handicap");
-      mapTotalYardages(key, val, `${teeColor}_total_yardage_back`, "frontTotalYardage", true);
-    }
-  }
-
-  function mapTotalYardages(
-    key: string,
-    val: string,
-    keyNameToCheck: string,
-    mapPropertyName: keyof IHoleDetails,
-    repeatSameNine: boolean
-  ) {
-    if (repeatSameNine) {
-      const teeColorRegex = new RegExp(`${teeColor}_total_yardage_front`);
-      if (teeColorRegex.test(key)) {
-        scoreCardRows[19][mapPropertyName] = val;
-        scoreCardRows[20]["totalYardage"] = String(Number(val) * 2);
-        return;
-      }
-    }
-    if (key == keyNameToCheck) {
-      if (/total_yardage_front$/.test(keyNameToCheck)) {
-        scoreCardRows[9][mapPropertyName] = val;
-      }
-      if (/total_yardage_back$/.test(keyNameToCheck)) {
-        scoreCardRows[19][mapPropertyName] = val;
-        scoreCardRows[20]["totalYardage"] = String(
-          Number(val) + Number(scoreCardRows[9].frontTotalYardage)
-        );
-      }
-    }
-  }
-
-  function mapTotalPar(
-    key: string,
-    val: string[],
-    keyNameToCheckFront: string,
-    keyNameToCheckBack: string,
-    mapPropertyName: keyof IHoleDetails
-  ) {
-    if (key == keyNameToCheckFront || key == keyNameToCheckBack) {
-      if (!val) return;
-      console.log(val);
-      totalPar += Number(val[val.length - 1]);
-      scoreCardRows[20][mapPropertyName] = String(totalPar);
-    }
-  }
-
-  function mapBackNineValues(
-    key: string,
-    val: string,
-    keyNameToCheck: string,
-    mapPropertyName: keyof IHoleDetails
-  ) {
-    if (key == keyNameToCheck) {
-      for (let i = 10; i < scoreCardRows.length - 5; i++) {
-        const valToAssign: string = val[i - 10];
-        if (valToAssign) {
-          scoreCardRows[i][mapPropertyName] = valToAssign;
-        }
-      }
-    }
-  }
-
-  function mapFrontNineValues(
-    key: string,
-    val: string[],
-    keyNameToCheck: string,
-    mapPropertyName: keyof IHoleDetails
-  ) {
-    if (key == keyNameToCheck) {
-      for (let i = 0; i < val.length; i++) {
-        scoreCardRows[i][mapPropertyName] = val[i];
-      }
-    }
-  }
-
-  function mapOneOffProperties(
-    key: string,
-    val: string,
-    keyNameToCheck: string,
-    mapPropertyName: keyof IHoleDetails,
-    scoreCardIndex: number
-  ) {
-    if (key == keyNameToCheck) {
-      scoreCardRows[scoreCardIndex][mapPropertyName] = val;
-    }
-  }
-
+  const scoreCardRows = formatScoreCard(props);
   console.log(scoreCardRows);
+
   return (
     <TableContainer component={Paper}>
       <Table aria-label="collapsible table">
