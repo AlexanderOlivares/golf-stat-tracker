@@ -1,3 +1,4 @@
+import { ICourseTeeInfo } from "../pages/[username]/round/[roundid]";
 import {
   buildScoreCardRowsArray,
   getFallbackTeeColor,
@@ -24,7 +25,7 @@ test("build score card rows array", () => {
 });
 
 test("fallback to white tees when coures only has white tee data", () => {
-  const props: any = {
+  const props: ICourseTeeInfo = {
     holeCount: "18",
     teeColor: "red",
     roundView: "scorecard",
@@ -79,7 +80,7 @@ test("fallback to white tees when coures only has white tee data", () => {
 });
 
 test("fallback to red tees when coures only has white tee data", () => {
-  const props: any = {
+  const props: ICourseTeeInfo = {
     holeCount: "18",
     teeColor: "red",
     roundView: "scorecard",
@@ -134,9 +135,9 @@ test("fallback to red tees when coures only has white tee data", () => {
 });
 
 test("throw error when no tee color is provided", () => {
-  const props: any = {
+  const props: ICourseTeeInfo = {
     holeCount: "18",
-    //   teeColor: "",
+    teeColor: "",
     roundView: "scorecard",
     roundDate: "10/17/2022, 9:03:12 PM",
     frontOrBackNine: "front 9",
@@ -187,7 +188,7 @@ test("throw error when no tee color is provided", () => {
 });
 
 test("show user selcted tees when course has data for that tee color", () => {
-  const props: any = {
+  const props: ICourseTeeInfo = {
     holeCount: "18",
     teeColor: "blue",
     roundView: "scorecard",
@@ -242,7 +243,7 @@ test("show user selcted tees when course has data for that tee color", () => {
 });
 
 test("find tee color match when course has user selected tees", () => {
-  const props: any = {
+  const props: ICourseTeeInfo = {
     holeCount: "18",
     teeColor: "blue",
     roundView: "scorecard",
@@ -303,7 +304,7 @@ test("find tee color match when course has user selected tees", () => {
 });
 
 test("return undefined when user selected tee color has no valid associated data", () => {
-  const props: any = {
+  const props: ICourseTeeInfo = {
     holeCount: "18",
     teeColor: "red",
     roundView: "scorecard",

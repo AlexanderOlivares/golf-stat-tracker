@@ -15,45 +15,46 @@ export interface ICourseTeeInfo {
   username: string;
   frontOrBackNine: string;
   courseName: string;
-  isUserAddedCourse: string;
-  userAddedCourseName: string;
-  city: string;
-  state: string;
   course_name: string;
   course_city: string;
   course_country: string;
   course_state: string;
   is_nine_hole_course: boolean;
-  blue_par_front: string[];
-  blue_par_back: string[];
-  blue_hole_yardage_front: string[];
-  blue_hole_yardage_back: string[];
-  blue_total_yardage_front: string;
-  blue_total_yardage_back: string;
-  blue_handicap_front: string[];
-  blue_handicap_back: string[];
-  blue_slope: string;
-  blue_rating: string;
-  white_par_front: string[];
-  white_par_back: string[];
-  white_hole_yardage_front: string[];
-  white_hole_yardage_back: string[];
-  white_total_yardage_front: string;
-  white_total_yardage_back: string;
-  white_handicap_front: string[];
-  white_handicap_back: string[];
-  white_slope: string;
-  white_rating: string;
-  red_par_front: string[];
-  red_par_back: string[];
-  red_hole_yardage_front: string[];
-  red_hole_yardage_back: string[];
-  red_total_yardage_front: string;
-  red_total_yardage_back: string;
-  red_handicap_front: string[];
-  red_handicap_back: string[];
-  red_slope: string;
-  red_rating: string;
+  __typename: string;
+  isUserAddedCourse: string;
+  userAddedCourseName?: string;
+  city?: string;
+  state?: string;
+  blue_par_front: string[] | null;
+  blue_par_back: string[] | null;
+  blue_hole_yardage_front: string[] | null;
+  blue_hole_yardage_back: string[] | null;
+  blue_total_yardage_front: string | null;
+  blue_total_yardage_back: string | null;
+  blue_handicap_front: string[] | null;
+  blue_handicap_back: string[] | null;
+  blue_slope: string | null;
+  blue_rating: string | null;
+  white_par_front: string[] | null;
+  white_par_back: string[] | null;
+  white_hole_yardage_front: string[] | null;
+  white_hole_yardage_back: string[] | null;
+  white_total_yardage_front: string | null;
+  white_total_yardage_back: string | null;
+  white_handicap_front: string[] | null;
+  white_handicap_back: string[] | null;
+  white_slope: string | null;
+  white_rating: string | null;
+  red_par_front: string[] | null;
+  red_par_back: string[] | null;
+  red_hole_yardage_front: string[] | null;
+  red_hole_yardage_back: string[] | null;
+  red_total_yardage_front: string | null;
+  red_total_yardage_back: string | null;
+  red_handicap_front: string[] | null;
+  red_handicap_back: string[] | null;
+  red_slope: string | null;
+  red_rating: string | null;
 }
 
 export default function Round() {
@@ -119,7 +120,7 @@ export default function Round() {
         {city && city} {state && state}
       </h3>
       <h3>{teeColor} tees</h3>
-      {courseProps && roundView === "scorecard" && <ScoreCard {...courseProps} />}
+      {data && courseProps && roundView === "scorecard" && <ScoreCard {...courseProps} />}
     </>
   );
 }

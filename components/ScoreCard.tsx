@@ -16,25 +16,7 @@ import { ICourseTeeInfo } from "../pages/[username]/round/[roundid]";
 import { ParsedUrlQuery } from "querystring";
 import { formatScoreCard } from "../utils/scoreCardFormatter";
 
-function createData(
-  hole: number,
-  par: number,
-  score: number,
-  distance: number,
-  handicap: number,
-  history: any[]
-) {
-  return {
-    hole,
-    par,
-    score,
-    distance,
-    handicap,
-    history,
-  };
-}
-
-function Row(props: { row: ReturnType<typeof createData> }) {
+function Row(props: { row: IHoleDetails }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
 
@@ -49,9 +31,9 @@ function Row(props: { row: ReturnType<typeof createData> }) {
         <TableCell component="th" scope="row">
           {row.hole}
         </TableCell>
-        <TableCell align="right">{row.par}</TableCell>
+        <TableCell align="right">{row.totalPar ? row.totalPar : row.par}</TableCell>
         <TableCell align="right">{row.score}</TableCell>
-        <TableCell align="right">{row.distance}</TableCell>
+        <TableCell align="right">{row.yardage}</TableCell>
         <TableCell align="right">{row.handicap}</TableCell>
       </TableRow>
       <TableRow>
@@ -69,7 +51,7 @@ function Row(props: { row: ReturnType<typeof createData> }) {
                     <TableCell>Result</TableCell>
                   </TableRow>
                 </TableHead>
-                <TableBody>
+                {/* <TableBody>
                   {row.history.map(historyRow => (
                     <TableRow key={historyRow.shot}>
                       <TableCell>{historyRow.shot}</TableCell>
@@ -79,7 +61,7 @@ function Row(props: { row: ReturnType<typeof createData> }) {
                       <TableCell>{historyRow.result}</TableCell>
                     </TableRow>
                   ))}
-                </TableBody>
+                </TableBody> */}
               </Table>
             </Box>
           </Collapse>
@@ -88,30 +70,6 @@ function Row(props: { row: ReturnType<typeof createData> }) {
     </React.Fragment>
   );
 }
-
-const rows = [
-  createData(1, 4, 5, 350, 1, [
-    {
-      shot: 1,
-      club: "Hybrid",
-      result: "bunker",
-    },
-  ]),
-  createData(2, 4, 5, 350, 1, [
-    {
-      shot: 1,
-      club: "7i",
-      result: "bunker",
-    },
-  ]),
-  createData(3, 4, 5, 350, 1, [
-    {
-      shot: 1,
-      club: "Driver",
-      result: "bunker",
-    },
-  ]),
-];
 
 interface IHoleDetails {
   hole?: string;
@@ -145,6 +103,8 @@ enum NON_HOLE_ROWS {
 export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
   console.log(props);
 
+  //   console.log(JSON.stringify(props, null, 2));
+
   const scoreCardRows = formatScoreCard(props);
   console.log(scoreCardRows);
 
@@ -162,7 +122,7 @@ export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map(row => (
+          {scoreCardRows.map(row => (
             <Row key={row.hole} row={row} />
           ))}
         </TableBody>
