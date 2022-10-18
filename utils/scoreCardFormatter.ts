@@ -30,7 +30,7 @@ enum NON_HOLE_ROWS {
   NET = 24,
 }
 
-function checkKeysForTeeColorMatch(props: ICourseTeeInfo | ParsedUrlQuery, matchTeeColor: string) {
+export function checkKeysForTeeColorMatch(props: ICourseTeeInfo | ParsedUrlQuery, matchTeeColor: string) {
   for (let [key, val] of Object.entries(props)) {
     if (key == `${matchTeeColor}_par_front` && val) {
       return matchTeeColor;
@@ -38,7 +38,7 @@ function checkKeysForTeeColorMatch(props: ICourseTeeInfo | ParsedUrlQuery, match
   }
 }
 
-function getFallbackTeeColor(props: ICourseTeeInfo | ParsedUrlQuery): string {
+export function getFallbackTeeColor(props: ICourseTeeInfo | ParsedUrlQuery): string {
   if (!props.teeColor) {
     throw Error("error reading tee color");
   }
@@ -56,10 +56,10 @@ function getFallbackTeeColor(props: ICourseTeeInfo | ParsedUrlQuery): string {
     if (fallBackTeeHasData) return fallBackTeeHasData;
   }
 
-  throw Error("Error populating course data");
+  return "white";
 }
 
-function buildScoreCardRowsArray() {
+export function buildScoreCardRowsArray() {
   const SCORE_CARD_ROWS_LENGTH = 25;
   return Array.from({ length: SCORE_CARD_ROWS_LENGTH }, (_, i) => {
     let holeDetails: IHoleDetails = {};
@@ -88,8 +88,8 @@ function hydrateScoreCardRows(
   let totalPar = 0;
 
   for (let [key, val] of Object.entries(props)) {
-    const isWrongTeeColor = verifyTeeColorPrefix(teeColor, key);
-    if (isWrongTeeColor || !val) continue;
+    const keyTeeColorPrefixMatches = teeColorPrefixMatch(teeColor, key);
+    if (!keyTeeColorPrefixMatches || !val) continue;
 
     mapFrontNineValues(scoreCardRows, key, val, `${teeColor}_par_front`, "par");
     mapFrontNineValues(scoreCardRows, key, val, `${teeColor}_hole_yardage_front`, "yardage");
@@ -160,9 +160,9 @@ function hydrateScoreCardRows(
   return scoreCardRows;
 }
 
-function verifyTeeColorPrefix(teeColor: string, propsKey: string) {
+export function teeColorPrefixMatch(teeColor: string, propsKey: string) {
   const teeColorPrefix = propsKey.split("_")[0];
-  return teeColor != teeColorPrefix;
+  return teeColor == teeColorPrefix;
 }
 
 function mapTotalYardages(
