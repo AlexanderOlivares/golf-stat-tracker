@@ -10,15 +10,30 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
+import Button from "@mui/material/Button";
 import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { ICourseTeeInfo } from "../pages/[username]/round/[roundid]";
 import { ParsedUrlQuery } from "querystring";
-import { formatScoreCard } from "../utils/scoreCardFormatter";
+import { formatScoreCard, IHoleDetails } from "../utils/scoreCardFormatter";
+import { userAddedRoundDetails, ISingleHoleDetail, IShotDetail } from "../utils/roundFormatter";
 
-function Row(props: { row: IHoleDetails }) {
+function Row(props: { row: ICompleteScorecared }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
+  const [shotDetailCount, setShotDetailCount] = React.useState(1);
+
+  function addNewShotDetail() {
+    const shotNumber = shotDetailCount + 1;
+    const newShotDetail: IShotDetail = {
+      shotNumber,
+      distanceToPin: null,
+      club: null,
+      result: null,
+    };
+    row.details.push(newShotDetail);
+    setShotDetailCount(shotNumber);
+  }
 
   return (
     <React.Fragment>
@@ -47,22 +62,37 @@ function Row(props: { row: IHoleDetails }) {
                 <TableHead>
                   <TableRow>
                     <TableCell>Shot #</TableCell>
+                    <TableCell>Distance to Pin</TableCell>
                     <TableCell>Club</TableCell>
                     <TableCell>Result</TableCell>
                   </TableRow>
                 </TableHead>
-                {/* <TableBody>
-                  {row.history.map(historyRow => (
-                    <TableRow key={historyRow.shot}>
-                      <TableCell>{historyRow.shot}</TableCell>
+                <TableBody>
+                  {row.details.map(detail => (
+                    <TableRow key={detail.shotNumber}>
+                      <TableCell>{detail.shotNumber}</TableCell>
+                      <TableCell>{detail.distanceToPin || "--"}</TableCell>
                       <TableCell component="th" scope="row">
-                        {historyRow.club}
+                        {detail.club || "--"}
                       </TableCell>
-                      <TableCell>{historyRow.result}</TableCell>
+                      <TableCell>{detail.result || "--"}</TableCell>
                     </TableRow>
                   ))}
-                </TableBody> */}
+                </TableBody>
               </Table>
+              {shotDetailCount < 10 ? (
+                <Box p={1}>
+                  <Button onClick={() => addNewShotDetail()} variant="contained">
+                    add shot
+                  </Button>
+                </Box>
+              ) : (
+                <Box p={1}>
+                  <Button disabled variant="contained">
+                    pick it up
+                  </Button>
+                </Box>
+              )}
             </Box>
           </Collapse>
         </TableCell>
@@ -71,42 +101,23 @@ function Row(props: { row: IHoleDetails }) {
   );
 }
 
-interface IHoleDetails {
-  hole?: string;
-  par?: string;
-  totalPar?: string;
-  yardage?: string;
-  frontTotalYardage?: string;
-  backTotalYardage?: string;
-  totalYardage?: string;
-  handicap?: string;
-  score?: string;
-  out?: string;
-  in?: string;
-  total?: string;
-  rating?: string;
-  slope?: string;
-  HCP?: string;
-  NET?: string;
-}
-
-enum NON_HOLE_ROWS {
-  out = 9,
-  in = 19,
-  total = 20,
-  rating = 21,
-  slope = 22,
-  HCP = 23,
-  NET = 24,
-}
+interface ICompleteScorecared extends ISingleHoleDetail, IHoleDetails {}
 
 export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
   console.log(props);
 
-  //   console.log(JSON.stringify(props, null, 2));
+  const scoreCardRows: IHoleDetails[] = formatScoreCard(props);
+  const userAddedRows: ISingleHoleDetail[] = userAddedRoundDetails;
 
-  const scoreCardRows = formatScoreCard(props);
-  console.log(scoreCardRows);
+  let roundRows: ICompleteScorecared[] = [];
+
+  for (let i = 0; i < scoreCardRows.length; i++) {
+    roundRows[i] = {
+      ...scoreCardRows[i],
+      ...userAddedRows[i],
+    };
+  }
+  console.log(roundRows);
 
   return (
     <TableContainer component={Paper}>
@@ -122,7 +133,7 @@ export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {scoreCardRows.map(row => (
+          {roundRows.map(row => (
             <Row key={row.hole} row={row} />
           ))}
         </TableBody>

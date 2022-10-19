@@ -1,7 +1,7 @@
 import { ICourseTeeInfo } from "../pages/[username]/round/[roundid]";
 import { ParsedUrlQuery } from "querystring";
 
-interface IHoleDetails {
+export interface IHoleDetails {
   hole?: string;
   par?: string;
   totalPar?: string;
@@ -10,7 +10,6 @@ interface IHoleDetails {
   backTotalYardage?: string;
   totalYardage?: string;
   handicap?: string;
-  score?: string;
   out?: string;
   in?: string;
   total?: string;
@@ -20,7 +19,7 @@ interface IHoleDetails {
   NET?: string;
 }
 
-enum NON_HOLE_ROWS {
+export enum NON_HOLE_ROWS {
   out = 9,
   in = 19,
   total = 20,
