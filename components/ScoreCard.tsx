@@ -1,48 +1,31 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
-import IconButton from "@mui/material/IconButton";
+// import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-import Typography from "@mui/material/Typography";
+// import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-import Button from "@mui/material/Button";
-import KeyboardArrowDownIcon from "@mui/icons-material/KeyboardArrowDown";
-import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
+// import Button from "@mui/material/Button";
+// import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 import { ICourseTeeInfo } from "../pages/[username]/round/[roundid]";
 import { ParsedUrlQuery } from "querystring";
 import { formatScoreCard, IHoleDetails } from "../utils/scoreCardFormatter";
-import { userAddedRoundDetails, ISingleHoleDetail, IShotDetail } from "../utils/roundFormatter";
+import { userAddedRoundDetails, ISingleHoleDetail } from "../utils/roundFormatter";
+import { HoleDetailModal } from "../components/HoleDetailModal";
 
 function Row(props: { row: ICompleteScorecared }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
-  const [shotDetailCount, setShotDetailCount] = React.useState(1);
-
-  function addNewShotDetail() {
-    const shotNumber = shotDetailCount + 1;
-    const newShotDetail: IShotDetail = {
-      shotNumber,
-      distanceToPin: null,
-      club: null,
-      result: null,
-    };
-    row.details.push(newShotDetail);
-    setShotDetailCount(shotNumber);
-  }
+  //   const [shotDetailCount, setShotDetailCount] = React.useState(1);
 
   return (
-    <React.Fragment>
-      <TableRow sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell>
-          <IconButton aria-label="expand row" size="small" onClick={() => setOpen(!open)}>
-            {open ? <KeyboardArrowUpIcon /> : <KeyboardArrowDownIcon />}
-          </IconButton>
-        </TableCell>
+    <>
+      <TableRow onClick={() => setOpen(!open)} sx={{ "& > *": { borderBottom: "unset" } }}>
         <TableCell component="th" scope="row">
           {row.hole}
         </TableCell>
@@ -55,9 +38,9 @@ function Row(props: { row: ICompleteScorecared }) {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-              <Typography variant="h6" gutterBottom component="div">
-                Detail
-              </Typography>
+              <Box textAlign="center" p={1}>
+                <HoleDetailModal />
+              </Box>
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
@@ -80,24 +63,11 @@ function Row(props: { row: ICompleteScorecared }) {
                   ))}
                 </TableBody>
               </Table>
-              {shotDetailCount < 10 ? (
-                <Box p={1}>
-                  <Button onClick={() => addNewShotDetail()} variant="contained">
-                    add shot
-                  </Button>
-                </Box>
-              ) : (
-                <Box p={1}>
-                  <Button disabled variant="contained">
-                    pick it up
-                  </Button>
-                </Box>
-              )}
             </Box>
           </Collapse>
         </TableCell>
       </TableRow>
-    </React.Fragment>
+    </>
   );
 }
 
@@ -124,7 +94,6 @@ export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
       <Table aria-label="collapsible table">
         <TableHead>
           <TableRow>
-            <TableCell />
             <TableCell>Hole</TableCell>
             <TableCell align="right">Par</TableCell>
             <TableCell align="right">Score</TableCell>
