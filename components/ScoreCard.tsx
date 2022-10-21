@@ -18,7 +18,7 @@ import { formatScoreCard, IHoleDetails } from "../utils/scoreCardFormatter";
 import { userAddedRoundDetails, ISingleHoleDetail } from "../utils/roundFormatter";
 import { HoleDetailModal } from "../components/HoleDetailModal";
 
-function Row(props: { row: ICompleteScorecared }) {
+function Row(props: { row: ICompleteScoreCard }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
   //   const [shotDetailCount, setShotDetailCount] = React.useState(1);
@@ -39,7 +39,7 @@ function Row(props: { row: ICompleteScorecared }) {
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
               <Box textAlign="center" p={1}>
-                <HoleDetailModal />
+                <HoleDetailModal row={row} />
               </Box>
               <Table size="small" aria-label="purchases">
                 <TableHead>
@@ -71,7 +71,7 @@ function Row(props: { row: ICompleteScorecared }) {
   );
 }
 
-interface ICompleteScorecared extends ISingleHoleDetail, IHoleDetails {}
+export interface ICompleteScoreCard extends ISingleHoleDetail, IHoleDetails {}
 
 export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
   console.log(props);
@@ -79,7 +79,7 @@ export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
   const scoreCardRows: IHoleDetails[] = formatScoreCard(props);
   const userAddedRows: ISingleHoleDetail[] = userAddedRoundDetails;
 
-  let roundRows: ICompleteScorecared[] = [];
+  let roundRows: ICompleteScoreCard[] = [];
 
   for (let i = 0; i < scoreCardRows.length; i++) {
     roundRows[i] = {

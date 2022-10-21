@@ -12,6 +12,8 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Box from "@mui/material/Box";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
+import { ISingleHoleDetail, IShotDetail } from "../utils/roundFormatter";
+import { ICompleteScoreCard } from "../components/ScoreCard";
 
 const marks = [
   {
@@ -36,8 +38,13 @@ function valuetext(value: number) {
   return `${value}`;
 }
 
-export function HoleDetailModal() {
+interface IHoleDetailModalProps {
+  row: ICompleteScoreCard;
+}
+
+export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const [open, setOpen] = React.useState(false);
+  const [holeNumber, setHoleNumber] = React.useState(1);
 
   const handleClickOpen = () => {
     setOpen(true);
@@ -46,6 +53,11 @@ export function HoleDetailModal() {
   const handleClose = () => {
     setOpen(false);
   };
+
+  const handleHoleChange = (event: Event, newValue: number | number[]) => {
+    setHoleNumber(newValue as number);
+  };
+  console.log(row);
 
   return (
     <div>
@@ -64,6 +76,8 @@ export function HoleDetailModal() {
             min={1}
             max={10}
             valueLabelDisplay="on"
+            value={holeNumber}
+            onChange={handleHoleChange}
           />
           <DialogContentText>Distance</DialogContentText>
           <Slider
@@ -75,36 +89,35 @@ export function HoleDetailModal() {
             max={350}
             valueLabelDisplay="on"
           />
+          <Box>
+            <InputLabel id="demo-simple-select-label">Club</InputLabel>
+            <Select
+              autoWidth
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={10}
+              label="Club"
+              onChange={() => "hi"}
+            >
+              <MenuItem value={10}>Ten</MenuItem>
+              <MenuItem value={20}>Twenty</MenuItem>
+              <MenuItem value={30}>Thirty</MenuItem>
+            </Select>
+            <InputLabel id="demo-simple-select-label">Result</InputLabel>
+            <Select
+              autoWidth
+              labelId="demo-simple-select-label"
+              id="demo-simple-select"
+              value={10}
+              label="Result"
+              onChange={() => "hi"}
+            >
+              <MenuItem value={10}>Ten</MenuItem>
+              <MenuItem value={20}>Twenty</MenuItem>
+              <MenuItem value={30}>Thirty</MenuItem>
+            </Select>
+          </Box>
         </DialogContent>
-        <Box>
-          <FormControl sx={{ m: 1, minWidth: 120 }}>
-            <InputLabel id="demo-simple-select-label">Age</InputLabel>
-            <Select
-              autoWidth
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={"hi"}
-              label="Age"
-              onChange={() => "hi"}
-            >
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-            <Select
-              autoWidth
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={"hi"}
-              label="Age"
-              onChange={() => "hi"}
-            >
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
-            </Select>
-          </FormControl>
-        </Box>
         <DialogActions>
           <Button onClick={handleClose}>Cancel</Button>
           <Button onClick={handleClose}>Save</Button>
