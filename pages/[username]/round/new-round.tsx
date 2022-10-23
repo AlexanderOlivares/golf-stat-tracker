@@ -14,11 +14,17 @@ import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import Autocomplete from "@mui/material/Autocomplete";
-import { isEmptyObject, userAddedCourseObjectValidator } from "../../../utils/formValidator";
+import MenuItem from "@mui/material/MenuItem";
+import Slider from "@mui/material/Slider";
+import Select, { SelectChangeEvent } from "@mui/material/Select";
+import { validUserAddedCourseFields } from "../../../utils/formValidator";
+import { queryParamToString } from "../../../utils/queryParamFormatter";
+import { useMutation } from "@apollo/client";
+import { createNewRound } from "../../api/graphql/mutations/roundMutations";
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
-interface IUserAddedCourse {
+export interface IUserAddedCourse {
   userAddedCourseName: string;
   userAddedCity: string;
   userAddedState: string;
@@ -30,17 +36,63 @@ interface ICourseData {
   course_id: string;
 }
 
+export interface INewRound {
+  roundid: string;
+  courseName: string | null;
+  courseId: string | null;
+  username: string;
+  holeCount: number;
+  teeColor: string;
+  //   roundView: string;
+  roundDate: string | null;
+  frontOrBackNine: string;
+  isUserAddedCourse: boolean;
+  weatherConditions: string;
+  temperature: number;
+  userAddedCourseName?: string;
+  userAddedCity?: string;
+  userAddedState?: string;
+  unverifiedCourseId?: string | null;
+}
+export function populateUserAddedCourseFields(
+  isUserAddedCourse: boolean,
+  userAddedCourseDetails: IUserAddedCourse
+) {
+  if (!isUserAddedCourse) {
+    return {
+      userAddedCourseName: "",
+      userAddedCity: "",
+      userAddedState: "",
+      unverifiedCourseId: null,
+    };
+  }
+
+  const { userAddedCourseName, userAddedCity, userAddedState } = userAddedCourseDetails;
+  const unverifiedCourseId = uuidv4();
+
+  return {
+    userAddedCourseName,
+    userAddedCity,
+    userAddedState,
+    unverifiedCourseId,
+  };
+}
+
 export default function NewRound() {
   const router = useRouter();
+  const [newRound] = useMutation(createNewRound);
   const { loading, error, data } = useQuery(getCourses);
   const [holeCount, setHoleCount] = useState(18);
   const [frontOrBackNine, setFrontOrBackNine] = useState("front 9");
   const [roundView, setRoundView] = useState("scorecard");
   const [date, setDate] = useState<Dayjs | Date | null>(new Date());
-  const [courseName, setCourseName] = useState<string>("");
-  const [courseId, setCourseId] = useState<string>("");
+  const [courseName, setCourseName] = useState<string | null>(null);
+  const [displayCourseName, setDisplayCourseName] = useState<string>("");
+  const [courseId, setCourseId] = useState<string | null>(null);
   const [teeColor, setTeeColor] = useState<string>("white");
   const [isUserAddedCourse, setIsUserAddedCourse] = useState<boolean>(false);
+  const [weatherConditions, setWeatherConditions] = useState<string>("");
+  const [temperature, setTemperature] = useState<number>(70);
   const [userAddedCourseDetails, setuserAddedCourseDetails] = useState<IUserAddedCourse>({
     userAddedCourseName: "",
     userAddedCity: "",
@@ -66,7 +118,7 @@ export default function NewRound() {
         return;
       }
     }
-    setCourseId("");
+    setCourseId(null);
   }
 
   const handleTeeColorChange = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -87,7 +139,17 @@ export default function NewRound() {
 
   const handleCheckboxes = (event: React.ChangeEvent<HTMLInputElement>): void => {
     setIsUserAddedCourse(event.target.checked);
-    setCourseName("");
+    setCourseName(null);
+    setDisplayCourseName("");
+    setCourseId(null);
+  };
+
+  const handleWeatherConditionsChange = (event: SelectChangeEvent): void => {
+    setWeatherConditions(event.target.value);
+  };
+
+  const handleTemperatureChange = (_: Event, newValue: number | number[]) => {
+    setTemperature(newValue as number);
   };
 
   const handleUserAddedCourseDetails = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -104,57 +166,54 @@ export default function NewRound() {
     try {
       event.preventDefault();
 
-      const { username } = router.query;
+      const username = queryParamToString(router.query.username);
+
       const roundid = uuidv4();
-
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-      const roundDate = date?.toLocaleString("en-US", {
-        timeZone,
-      });
+      const roundDate =
+        date?.toLocaleString("en-US", {
+          timeZone,
+        }) || null;
 
-      let baseQueryParams = {
+      const requestFieldList = {
+        roundid,
+        courseName,
+        courseId,
+        username,
         holeCount,
         teeColor,
-        roundView,
         roundDate,
         frontOrBackNine,
         isUserAddedCourse,
+        weatherConditions,
+        temperature,
       };
 
-      const systemAddedParams = {
-        courseName,
-        courseId,
-      };
+      const userAddedCourseFields = populateUserAddedCourseFields(
+        isUserAddedCourse,
+        userAddedCourseDetails
+      );
 
-      let userAddedParams = {};
-
-      if (isUserAddedCourse) {
-        const { userAddedCourseName, userAddedCity, userAddedState } = userAddedCourseDetails;
-        const unverifiedCourseId = uuidv4();
-
-        userAddedParams = {
-          userAddedCourseName,
-          userAddedCity,
-          userAddedState,
-          unverifiedCourseId,
-        };
-      }
-
-      if (!userAddedCourseObjectValidator(userAddedParams) && isUserAddedCourse) {
+      if (isUserAddedCourse && !validUserAddedCourseFields(userAddedCourseFields)) {
         throw new Error("Please add course name, city and state to proceed");
       }
 
-      if (!courseId && isEmptyObject(userAddedParams)) {
+      if (!courseName && !isUserAddedCourse) {
         throw new Error("Please select or add a course to proceed");
       }
+
+      const newRoundRequestBody: INewRound = {
+        ...requestFieldList,
+        ...userAddedCourseFields,
+      };
+
+      await newRound({
+        variables: newRoundRequestBody,
+      });
 
       router.push(
         {
           pathname: `/${username}/round/${roundid}`,
-          query: {
-            ...baseQueryParams,
-            ...(isUserAddedCourse ? userAddedParams : systemAddedParams),
-          },
         },
         `/${username}/round/${roundid}`
       );
@@ -182,7 +241,7 @@ export default function NewRound() {
           <Box>
             <FormControl>
               <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                Course
+                Course Name
               </Typography>
               {data && (
                 <Autocomplete
@@ -190,9 +249,11 @@ export default function NewRound() {
                   id="course-search-box"
                   autoSelect
                   disableClearable
-                  value={courseName}
+                  value={displayCourseName}
                   onChange={(_: any, courseName: string) => {
                     setCourseName(courseName);
+                    setDisplayCourseName(courseName);
+                    setIsUserAddedCourse(false);
                   }}
                   options={data.courses.map((row: ICourseData) => row.course_name)}
                   renderInput={params => (
@@ -212,7 +273,7 @@ export default function NewRound() {
                   Dont see your course?
                 </Typography>
                 <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                  <Checkbox onChange={handleCheckboxes} value={isUserAddedCourse} {...label} />
+                  <Checkbox onChange={handleCheckboxes} checked={isUserAddedCourse} {...label} />
                   Add new course with round
                 </Typography>
                 {isUserAddedCourse && (
@@ -311,6 +372,30 @@ export default function NewRound() {
                   label="hole-by-hole view"
                 />
               </RadioGroup>
+              <Typography>Conditions</Typography>
+              <Select
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={weatherConditions}
+                label="Weather"
+                onChange={handleWeatherConditionsChange}
+              >
+                <MenuItem value={"Clear"}>Clear</MenuItem>
+                <MenuItem value={"Windy"}>Windy</MenuItem>
+                <MenuItem value={"Rainy"}>Rainy</MenuItem>
+                <MenuItem value={"Wet"}>Wet</MenuItem>
+                <MenuItem value={"Foggy"}>Foggy</MenuItem>
+              </Select>
+              <Typography>Temperature</Typography>
+              <Slider
+                aria-label="Temperature"
+                defaultValue={70}
+                step={5}
+                min={20}
+                max={115}
+                valueLabelDisplay="on"
+                onChange={handleTemperatureChange}
+              />
             </FormControl>
           </Box>
           <Button type="submit" size="small" variant="contained" color="primary">

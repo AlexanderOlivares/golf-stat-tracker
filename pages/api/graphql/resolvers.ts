@@ -1,4 +1,4 @@
-import registerUser from "../../../lib/user/register";
+import registerUser, { IErrorMessage } from "../../../lib/user/register";
 import loginUser from "../../../lib/user/login";
 import { getUser } from "../../../lib/user/getUsers";
 import { setAuthCookie, removeAuthCookie } from "../../../lib/auth-cookie";
@@ -8,8 +8,11 @@ import {
   IRegisterMutationArgs,
   ILoginMutationArgs,
   IContext,
+  INewRoundMutationArgs,
 } from "./resolverInterfaces";
 import { errorOccured } from "./graphqlUtils";
+import { createNewRound } from "../../../lib/round/createNewRound";
+import { INewRound } from "../../[username]/round/new-round";
 
 export const resolvers = {
   Query: {
@@ -60,6 +63,12 @@ export const resolvers = {
     async signOut(_parent: undefined, _args: undefined, context: IContext) {
       removeAuthCookie(context.res);
       return true;
+    },
+    async newRound(_parent: undefined, args: INewRoundMutationArgs, _context: IContext) {
+        const { input } = args
+        const round = await createNewRound(input);
+        if (errorOccured(round)) return new Error(round.errorMessage)
+        return round;
     },
   },
 };

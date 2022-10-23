@@ -1,6 +1,5 @@
 import { gql } from "@apollo/client";
 
-
 export const typeDefs = gql`
   type User {
     userid: String
@@ -76,6 +75,42 @@ export const typeDefs = gql`
     red_slope: String
     red_rating: String
   }
+   
+   input NewRound {
+    roundid: String!
+    courseName: String
+    courseId: String
+    username: String!
+    holeCount: Int!
+    teeColor: String!
+    roundDate: String
+    frontOrBackNine: String!
+    isUserAddedCourse: Boolean!
+    weatherConditions: String!
+    temperature: Int!
+    userAddedCourseName: String
+    userAddedCity: String
+    userAddedState: String
+    unverifiedCourseId: String
+   }
+
+   type NewRoundResponse {
+    round_id: String!
+    course_name: String
+    course_id: String
+    username: String!
+    hole_count: Int!
+    tee_color: String!
+    round_date: String
+    front_or_back_nine: String!
+    is_user_added_course: Boolean!
+    weather_conditions: String!
+    temperature: Int!
+    user_added_course_name: String
+    user_added_city: String
+    user_added_state: String
+    unverified_course_id: String
+   }
 
   type Query {
     user(username: String!): User
@@ -87,5 +122,6 @@ export const typeDefs = gql`
     register(input: RegistrationInput!): LoggedInUser
     login(input: LoginInput!): LoggedInUser
     signOut: Boolean!
+    newRound(input: NewRound!): NewRoundResponse
   }
 `;

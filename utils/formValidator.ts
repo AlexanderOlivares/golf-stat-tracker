@@ -12,7 +12,7 @@ export const isEmptyObject = (obj: any)=> {
     return Object.keys(obj).length === 0;
 }
 
-export const userAddedCourseObjectValidator = (obj: any)=> {
+export const validUserAddedCourseFields = (obj: any)=> {
     let totalkeys = 0;
     let uuidSeen = false;
     for (let [key, val] of Object.entries(obj)){
