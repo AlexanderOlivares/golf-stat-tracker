@@ -1,6 +1,6 @@
 import { JWTPayload } from "jose";
 import { Pool } from "pg";
-import { IErrorMessage } from "../../../lib/user/register";
+import { IErrorMessage } from "../../../utils/errorMessage";
 import { IRoundRequestBody } from "../../[username]/round/new-round";
 
 export interface IUserQueryArgs {

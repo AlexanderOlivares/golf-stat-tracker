@@ -3,10 +3,9 @@ import { useQuery } from "@apollo/client";
 import ScoreCard from "../../../components/ScoreCard";
 import { getCourseForRound } from "../../api/graphql/queries/courseQueries";
 import { useEffect, useState } from "react";
-import { ParsedUrlQuery } from "querystring";
-import { buildScoreCardRowsArray, IHoleDetails } from "../../../utils/scoreCardFormatter";
 import { getRoundByIdQuery } from "../../api/graphql/queries/roundQueries";
 import { queryParamToString } from "../../../utils/queryParamFormatter";
+import { IShotDetail } from "../../../utils/roundFormatter";
 
 export interface IRoundDetails {
   teeColor: string;
@@ -33,27 +32,12 @@ export interface IRoundDetails {
 }
 
 export interface ICourseDetails {
-  //   teeColor: string;
-  //   courseId: string;
-  //   holeCount: string;
-  //   roundDate: string;
-  //   roundView: string;
-  //   roundid: string;
-  //   username: string;
-  //   frontOrBackNine: string;
-  //   courseName: string;
-  //   course_name: string;
-  //   course_city: string;
-  //   course_country: string;
-  //   course_state: string;
-  //   is_nine_hole_course: boolean;
-  //   __typename: string;
-  //   isUserAddedCourse: string;
-  //   userAddedCourseName?: string;
-  //   city?: string;
-  //   state?: string;
-  //   hole_scores: number[];
-  //   hole_shot_details: string[][];
+  course_id: string;
+  course_name: string;
+  course_country: string;
+  course_city: string;
+  course_state: string;
+  is_nine_hole_course: boolean;
   blue_par_front: string[] | null;
   blue_par_back: string[] | null;
   blue_hole_yardage_front: string[] | null;
@@ -86,8 +70,24 @@ export interface ICourseDetails {
   red_rating: string | null;
 }
 
-// this interface needs everything in snake_case from db
-export interface IScoreCardProps extends ICourseDetails, IRoundDetails {}
+export interface IScoreCardProps extends ICourseDetails {
+  tee_color: string;
+  hole_count: number;
+  round_date: string;
+  round_id: string;
+  username: string;
+  front_or_back_nine: string;
+  course_name: string;
+  is_user_added_course: boolean;
+  user_added_course_name: string;
+  user_added_city: string;
+  user_added_state: string;
+  unverified_course_id: string | null;
+  is_nine_hole_course: boolean;
+  weather_conditions: string;
+  hole_scores: number[];
+  hole_shot_details: IShotDetail[][];
+}
 
 export default function Round() {
   const router = useRouter();

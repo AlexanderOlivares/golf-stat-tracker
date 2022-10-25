@@ -1,8 +1,12 @@
 export interface IShotDetail {
-  shotNumber: number | null;
-  distanceToPin: number | null;
-  club: string | null;
-  result: string | null;
+  shotNumber?: number | null;
+  distanceToPin?: number | null;
+  club?: string | null;
+  result?: string | null;
+  fairwaysHit?: number | null,
+  greensInReg?: number | null,
+  threePutts?: number | null,
+  totalPutts?: number | null,
 }
 
 export interface ISingleHoleDetail {

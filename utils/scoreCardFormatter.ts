@@ -62,12 +62,12 @@ export function getFallbackTeeColor(props: IScoreCardProps): string {
     throw Error("error reading tee color");
   }
 
-  const userChosenTeeColor = props.teeColor.toString();
+  const userChosenTeeColor = props.tee_color.toString();
   const chosenTeesHaveData = checkKeysForTeeColorMatch(props, userChosenTeeColor);
   if (chosenTeesHaveData) return userChosenTeeColor;
 
   const fallBackTees: string[] = ["blue", "white", "red"].filter(
-    teeColor => teeColor != props.teeColor
+    teeColor => teeColor != props.tee_color
   );
 
   for (let fallBackTee of fallBackTees) {
@@ -151,7 +151,7 @@ function hydrateScoreCardRows(
     }
 
     // duplicate the back 9 holes with info from front 9
-    if (props.is_nine_hole_course && props.holeCount == "18") {
+    if (props.is_nine_hole_course && props.hole_count == 18) {
       mapBackNineValues(scoreCardRows, key, val, `${teeColor}_par_front`, "par");
       mapBackNineValues(scoreCardRows, key, val, `${teeColor}_hole_yardage_front`, "yardage");
       mapBackNineValues(scoreCardRows, key, val, `${teeColor}_handicap_front`, "handicap");

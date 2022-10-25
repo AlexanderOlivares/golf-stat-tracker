@@ -1,5 +1,5 @@
 import pool from "../../db/dbConfig";
-import { errorMessage } from "../user/register";
+import { errorMessage } from "../../utils/errorMessage";
 
 export async function getCourseNamesAndIds() {
   try {

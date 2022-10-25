@@ -1,6 +1,6 @@
 import pool from "../../db/dbConfig";
 import { IRoundRequestBody } from "../../pages/[username]/round/new-round";
-import { errorMessage, IErrorMessage } from "../user/register";
+import { errorMessage, IErrorMessage } from "../../utils/errorMessage";
 import { IShotDetail } from "../../utils/roundFormatter";
 import { NON_HOLE_ROWS } from "../../utils/scoreCardFormatter";
 
@@ -8,15 +8,6 @@ export function createHoleScoreArray() {
   return Array.from({ length: 25 }, () => null);
 }
 
-// export enum NON_HOLE_ROWS {
-//     out = 9,
-//     in = 19,
-//     total = 20,
-//     rating = 21,
-//     slope = 22,
-//     HCP = 23,
-//     NET = 24,
-//   }
 
 export function createHoleDetailsJson() {
   const defaultShotDetails: IShotDetail[] = [
@@ -30,7 +21,7 @@ export function createHoleDetailsJson() {
   const shotDetailsArray = Array.from({ length: 25 }, (_, i) => {
     if (i in NON_HOLE_ROWS) {
       if (i < 21) {
-        return [
+        const totalsShotDetail: IShotDetail[] = [
           {
             fairwaysHit: null,
             greensInReg: null,
@@ -38,7 +29,8 @@ export function createHoleDetailsJson() {
             totalPutts: null,
           },
         ];
-      } 
+        return totalsShotDetail;
+      }
     }
     return defaultShotDetails;
   });

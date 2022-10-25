@@ -3,6 +3,7 @@ import { jwtGenerator } from "../../utils/jwtGenerator";
 import pool from "../../db/dbConfig";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
+import { errorMessage } from "../../utils/errorMessage";
 
 export interface IUser {
   userid: string;
@@ -11,13 +12,7 @@ export interface IUser {
   token: string;
 }
 
-export interface IErrorMessage {
-  errorMessage: string;
-}
 
-export const errorMessage = (errorMessage: string): IErrorMessage => {
-  return { errorMessage };
-};
 
 export default async function registerUser(username: string, email: string, password: string) {
   try {
