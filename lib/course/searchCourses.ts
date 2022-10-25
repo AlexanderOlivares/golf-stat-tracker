@@ -1,19 +1,6 @@
 import pool from "../../db/dbConfig";
 import { errorMessage } from "../user/register";
 
-// not using but keeping for git
-export async function searchCourses(courseName: string) {
-  try {
-    const { rows } = await pool.query(
-      "SELECT course_name, course_country, course_state, course_city FROM courses WHERE course_name ILIKE $1 LIMIT 7",
-      [`${courseName}%`]
-    );
-    return [...rows];
-  } catch (error) {
-    return errorMessage("Error searching course names");
-  }
-}
-
 export async function getCourseNamesAndIds() {
   try {
     const { rows } = await pool.query("SELECT course_name, course_id FROM courses");
@@ -23,17 +10,22 @@ export async function getCourseNamesAndIds() {
   }
 }
 
-export async function getCourseForNewRound(courseId: string, teeColor: string) {
+export async function getCourseForNewRound(courseId: string) {
   try {
-    const { rows } = await pool.query(
+    const existingCourse = await pool.query(
       `SELECT *  
             FROM courses 
             WHERE course_id = $1`,
       [courseId]
     );
 
-    return [...rows];
+    if (!existingCourse.rowCount){
+        return errorMessage("Error fetching course data");
+    }
+
+    return [existingCourse.rows[0]];
   } catch (error) {
+    console.log(error);
     return errorMessage("Error fetching course data");
   }
 }

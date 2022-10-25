@@ -4,8 +4,11 @@ import ScoreCard from "../../../components/ScoreCard";
 import { getCourseForRound } from "../../api/graphql/queries/courseQueries";
 import { useEffect, useState } from "react";
 import { ParsedUrlQuery } from "querystring";
+import { buildScoreCardRowsArray, IHoleDetails } from "../../../utils/scoreCardFormatter";
+import { getRoundByIdQuery } from "../../api/graphql/queries/roundQueries";
+import { queryParamToString } from "../../../utils/queryParamFormatter";
 
-export interface ICourseTeeInfo {
+export interface IRoundDetails {
   teeColor: string;
   courseId: string;
   holeCount: string;
@@ -25,6 +28,32 @@ export interface ICourseTeeInfo {
   userAddedCourseName?: string;
   city?: string;
   state?: string;
+  hole_scores: number[];
+  hole_shot_details: string[];
+}
+
+export interface ICourseDetails {
+  //   teeColor: string;
+  //   courseId: string;
+  //   holeCount: string;
+  //   roundDate: string;
+  //   roundView: string;
+  //   roundid: string;
+  //   username: string;
+  //   frontOrBackNine: string;
+  //   courseName: string;
+  //   course_name: string;
+  //   course_city: string;
+  //   course_country: string;
+  //   course_state: string;
+  //   is_nine_hole_course: boolean;
+  //   __typename: string;
+  //   isUserAddedCourse: string;
+  //   userAddedCourseName?: string;
+  //   city?: string;
+  //   state?: string;
+  //   hole_scores: number[];
+  //   hole_shot_details: string[][];
   blue_par_front: string[] | null;
   blue_par_back: string[] | null;
   blue_hole_yardage_front: string[] | null;
@@ -57,70 +86,74 @@ export interface ICourseTeeInfo {
   red_rating: string | null;
 }
 
+// this interface needs everything in snake_case from db
+export interface IScoreCardProps extends ICourseDetails, IRoundDetails {}
+
 export default function Round() {
   const router = useRouter();
-  const {
-    holeCount,
-    roundDate,
-    roundView,
-    roundid,
-    username,
-    courseName,
-    isUserAddedCourse,
-    userAddedCourseName,
-    city,
-    state,
-    teeColor,
-    courseId,
-  } = router.query;
+  const { roundid, courseId, teeColor } = router.query;
+  console.log(`roundid: ${roundid}`);
+  console.log(`courseId: ${courseId}`);
+  console.log(`teeColor: ${teeColor}`);
 
-  const [courseProps, setCourseProps] = useState<ICourseTeeInfo | ParsedUrlQuery | null>(null);
+  const [scoreCardProps, setScoreCardProps] = useState<IScoreCardProps | null>(null);
+  const [courseDetails, setCourseDetails] = useState<ICourseDetails | null>(null);
+  const [roundDetails, setRoundDetails] = useState<IRoundDetails | null>(null);
 
-  const { loading, error, data } = useQuery(getCourseForRound, {
+  const courseForRound = useQuery(getCourseForRound, {
     variables: {
-      courseId,
-      teeColor,
+      courseId: queryParamToString(courseId),
+      teeColor: queryParamToString(teeColor),
     },
-    skip: courseId ? false : true,
+    // skip: !courseId,
+  });
+  const round = useQuery(getRoundByIdQuery, {
+    variables: {
+      roundid,
+    },
   });
 
   useEffect(() => {
-    if (router.isReady && !data?.course) {
-      setCourseProps(buildProps(router.query));
+    if (router.isReady && round.data) {
+      setRoundDetails(round.data.round);
     }
-    if (router.isReady && data?.course) {
-      const currentCourseInfo: ICourseTeeInfo = data.course[0];
-      setCourseProps(buildProps(router.query, currentCourseInfo));
+    if (router.isReady && courseForRound.data) {
+      setCourseDetails(courseForRound.data.course[0]);
     }
-  }, [data, router.isReady, router.query, teeColor]);
+    if (courseDetails && roundDetails) {
+      const builtProps = buildProps(roundDetails, courseDetails);
+      setScoreCardProps(builtProps);
+    }
+  }, [round, router.isReady, courseForRound, roundDetails, courseDetails]);
 
-  if (loading) return "Loading...";
-  if (error) {
+  if (round.loading || courseForRound.loading) return "Loading...";
+
+  if (round.error || courseForRound.error) {
     // TODO add toast error
-    console.log(error);
+    console.log(round.error || courseForRound.error);
     router.push("/login");
   }
 
-  function buildProps(queryParamProps: ParsedUrlQuery, courseProps?: ICourseTeeInfo) {
+  function buildProps(roundProps: any, courseProps?: any): IScoreCardProps {
     if (courseProps) {
       return {
-        ...queryParamProps,
+        ...roundProps,
         ...courseProps,
       };
     }
-    return queryParamProps;
+    return roundProps;
   }
 
   return (
     <>
       <h1>Round detail page</h1>
-      <h3>{roundDate}</h3>
+      {/* <h3>{roundDate}</h3>
       <h3>{courseName ? courseName : userAddedCourseName}</h3>
       <h3>
         {city && city} {state && state}
-      </h3>
+      </h3> */}
       <h3>{teeColor} tees</h3>
-      {data && courseProps && roundView === "scorecard" && <ScoreCard {...courseProps} />}
+      {round.data && scoreCardProps && <ScoreCard {...scoreCardProps} />}
     </>
   );
 }

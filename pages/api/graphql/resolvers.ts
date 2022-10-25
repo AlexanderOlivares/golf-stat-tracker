@@ -1,4 +1,4 @@
-import registerUser, { IErrorMessage } from "../../../lib/user/register";
+import registerUser from "../../../lib/user/register";
 import loginUser from "../../../lib/user/login";
 import { getUser } from "../../../lib/user/getUsers";
 import { setAuthCookie, removeAuthCookie } from "../../../lib/auth-cookie";
@@ -9,10 +9,11 @@ import {
   ILoginMutationArgs,
   IContext,
   INewRoundMutationArgs,
+  IRoundQueryArgs, 
+  ICourseQueryArgs
 } from "./resolverInterfaces";
 import { errorOccured } from "./graphqlUtils";
-import { createNewRound } from "../../../lib/round/createNewRound";
-import { INewRound } from "../../[username]/round/new-round";
+import { createNewRound, getRound } from "../../../lib/round/createNewRound";
 
 export const resolvers = {
   Query: {
@@ -25,13 +26,21 @@ export const resolvers = {
       if (errorOccured(courseNamesAndIds)) return new Error(courseNamesAndIds.errorMessage);
       return courseNamesAndIds;
     },
-    course: async (_parent: undefined, args: any, context: IContext) => {
+    course: async (_parent: undefined, args: ICourseQueryArgs, context: IContext) => {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
       const { courseId, teeColor } = args;
-      const course = await getCourseForNewRound(courseId, teeColor);
+      const course = await getCourseForNewRound(courseId);
       if (errorOccured(course)) return new Error(course.errorMessage);
       return course;
     },
+    round: async (_parent: undefined, args: IRoundQueryArgs, context: IContext) => {
+      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
+      const { roundid } = args;
+      const round = await getRound(roundid);
+      if (errorOccured(round)) return new Error(round.errorMessage);
+      return round;
+    },
+
   },
   Mutation: {
     register: async (_parent: undefined, args: IRegisterMutationArgs, context: IContext) => {

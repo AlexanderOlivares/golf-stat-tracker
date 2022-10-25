@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import { GraphQLJSONObject } from "graphql-type-json";
 
 export const typeDefs = gql`
   type User {
@@ -75,8 +76,8 @@ export const typeDefs = gql`
     red_slope: String
     red_rating: String
   }
-   
-   input NewRound {
+
+  input NewRound {
     roundid: String!
     courseName: String
     courseId: String
@@ -92,9 +93,11 @@ export const typeDefs = gql`
     userAddedCity: String
     userAddedState: String
     unverifiedCourseId: String
-   }
+  }
 
-   type NewRoundResponse {
+  scalar JSON
+
+  type NewRoundResponse {
     round_id: String!
     course_name: String
     course_id: String
@@ -110,13 +113,16 @@ export const typeDefs = gql`
     user_added_city: String
     user_added_state: String
     unverified_course_id: String
-   }
+    hole_scores: [Int]
+    hole_shot_details: JSON
+  }
 
   type Query {
     user(username: String!): User
     courses: [CourseNamesAndIds]
     course(courseId: String!, teeColor: String!): [Course]!
-  } 
+    round(roundid: String!): NewRoundResponse
+  }
 
   type Mutation {
     register(input: RegistrationInput!): LoggedInUser

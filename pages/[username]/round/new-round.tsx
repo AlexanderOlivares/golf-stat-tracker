@@ -36,7 +36,7 @@ interface ICourseData {
   course_id: string;
 }
 
-export interface INewRound {
+export interface IRoundRequestBody {
   roundid: string;
   courseName: string | null;
   courseId: string | null;
@@ -53,6 +53,8 @@ export interface INewRound {
   userAddedCity?: string;
   userAddedState?: string;
   unverifiedCourseId?: string | null;
+  hole_scores?: number[];
+  hole_shot_details?: string[];
 }
 export function populateUserAddedCourseFields(
   isUserAddedCourse: boolean,
@@ -202,10 +204,13 @@ export default function NewRound() {
         throw new Error("Please select or add a course to proceed");
       }
 
-      const newRoundRequestBody: INewRound = {
+      const newRoundRequestBody: IRoundRequestBody = {
         ...requestFieldList,
         ...userAddedCourseFields,
       };
+
+      //   console.log("new round request body:");
+      //   console.log(newRoundRequestBody);
 
       await newRound({
         variables: newRoundRequestBody,
@@ -214,6 +219,11 @@ export default function NewRound() {
       router.push(
         {
           pathname: `/${username}/round/${roundid}`,
+          query: {
+            roundid,
+            courseId,
+            teeColor,
+          },
         },
         `/${username}/round/${roundid}`
       );

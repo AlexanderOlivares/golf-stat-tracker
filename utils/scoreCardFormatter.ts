@@ -1,5 +1,4 @@
-import { ICourseTeeInfo } from "../pages/[username]/round/[roundid]";
-import { ParsedUrlQuery } from "querystring";
+import { IScoreCardProps } from "../pages/[username]/round/[roundid]";
 
 export interface IHoleDetails {
   hole?: string;
@@ -29,7 +28,28 @@ export enum NON_HOLE_ROWS {
   NET = 24,
 }
 
-export function checkKeysForTeeColorMatch(props: ICourseTeeInfo | ParsedUrlQuery, matchTeeColor: string) {
+// export function buildGenericScoreCardRowsArray() {
+//     const SCORE_CARD_ROWS_LENGTH = 25;
+//     return Array.from({ length: SCORE_CARD_ROWS_LENGTH }, (_, i) => {
+//       let holeDetails: IHoleDetails = {};
+//     //   holeDetails[""]
+  
+//       if (i == 9 || i > 18) {
+//         if (i in NON_HOLE_ROWS) {
+//           holeDetails["hole"] = NON_HOLE_ROWS[i];
+//           return holeDetails;
+//         }
+//       }
+  
+//       let offset = 1;
+//       if (i > 9) offset--;
+  
+//       holeDetails["hole"] = (i + offset).toString();
+//       return holeDetails;
+//     });
+//   }
+
+export function checkKeysForTeeColorMatch(props: IScoreCardProps, matchTeeColor: string) {
   for (let [key, val] of Object.entries(props)) {
     if (key == `${matchTeeColor}_par_front` && val) {
       return matchTeeColor;
@@ -37,8 +57,8 @@ export function checkKeysForTeeColorMatch(props: ICourseTeeInfo | ParsedUrlQuery
   }
 }
 
-export function getFallbackTeeColor(props: ICourseTeeInfo | ParsedUrlQuery): string {
-  if (!props.teeColor) {
+export function getFallbackTeeColor(props: IScoreCardProps): string {
+  if (!props.tee_color) {
     throw Error("error reading tee color");
   }
 
@@ -80,8 +100,7 @@ export function buildScoreCardRowsArray() {
 
 function hydrateScoreCardRows(
   scoreCardRows: IHoleDetails[],
-  props: ICourseTeeInfo | ParsedUrlQuery
-) {
+  props: IScoreCardProps) {
   const teeColor: string = getFallbackTeeColor(props);
 
   let totalPar = 0;
@@ -255,7 +274,7 @@ function mapOneOffProperties(
   }
 }
 
-export function formatScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
+export function formatScoreCard(props: IScoreCardProps){
   let scoreCardRows: IHoleDetails[] = buildScoreCardRowsArray();
   let hydratedScoreCardRows = hydrateScoreCardRows(scoreCardRows, props);
 
