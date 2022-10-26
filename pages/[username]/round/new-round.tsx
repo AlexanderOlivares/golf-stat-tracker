@@ -209,9 +209,6 @@ export default function NewRound() {
         ...userAddedCourseFields,
       };
 
-      //   console.log("new round request body:");
-      //   console.log(newRoundRequestBody);
-
       await newRound({
         variables: newRoundRequestBody,
       });
@@ -223,6 +220,7 @@ export default function NewRound() {
             roundid,
             courseId,
             teeColor,
+            isUserAddedCourse,
           },
         },
         `/${username}/round/${roundid}`

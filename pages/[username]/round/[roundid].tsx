@@ -4,31 +4,28 @@ import ScoreCard from "../../../components/ScoreCard";
 import { getCourseForRound } from "../../api/graphql/queries/courseQueries";
 import { useEffect, useState } from "react";
 import { getRoundByIdQuery } from "../../api/graphql/queries/roundQueries";
-import { queryParamToString } from "../../../utils/queryParamFormatter";
+import { queryParamToString, queryParamToBoolean } from "../../../utils/queryParamFormatter";
 import { IShotDetail } from "../../../utils/roundFormatter";
+import { buildGenericScoreCardRowsArray } from "../../../utils/scoreCardFormatter";
 
 export interface IRoundDetails {
-  teeColor: string;
-  courseId: string;
-  holeCount: string;
-  roundDate: string;
-  roundView: string;
-  roundid: string;
+  tee_color: string;
+  hole_count: number;
+  round_date: string;
+  round_id: string;
   username: string;
-  frontOrBackNine: string;
-  courseName: string;
+  front_or_back_nine: string;
   course_name: string;
-  course_city: string;
-  course_country: string;
-  course_state: string;
+  temperature: number;
+  is_user_added_course: boolean;
+  user_added_course_name: string;
+  user_added_city: string;
+  user_added_state: string;
+  unverified_course_id: string | null;
   is_nine_hole_course: boolean;
-  __typename: string;
-  isUserAddedCourse: string;
-  userAddedCourseName?: string;
-  city?: string;
-  state?: string;
+  weather_conditions: string;
   hole_scores: number[];
-  hole_shot_details: string[];
+  hole_shot_details: IShotDetail[][];
 }
 
 export interface ICourseDetails {
@@ -91,10 +88,7 @@ export interface IScoreCardProps extends ICourseDetails {
 
 export default function Round() {
   const router = useRouter();
-  const { roundid, courseId, teeColor } = router.query;
-  console.log(`roundid: ${roundid}`);
-  console.log(`courseId: ${courseId}`);
-  console.log(`teeColor: ${teeColor}`);
+  const { roundid, courseId, teeColor, isUserAddedCourse } = router.query;
 
   const [scoreCardProps, setScoreCardProps] = useState<IScoreCardProps | null>(null);
   const [courseDetails, setCourseDetails] = useState<ICourseDetails | null>(null);
@@ -105,8 +99,9 @@ export default function Round() {
       courseId: queryParamToString(courseId),
       teeColor: queryParamToString(teeColor),
     },
-    // skip: !courseId,
+    skip: queryParamToBoolean(isUserAddedCourse),
   });
+
   const round = useQuery(getRoundByIdQuery, {
     variables: {
       roundid,
@@ -122,6 +117,11 @@ export default function Round() {
     }
     if (courseDetails && roundDetails) {
       const builtProps = buildProps(roundDetails, courseDetails);
+      setScoreCardProps(builtProps);
+    }
+    if (!courseDetails && roundDetails) {
+      const gen = buildGenericScoreCardRowsArray();
+      const builtProps = buildProps(roundDetails, gen);
       setScoreCardProps(builtProps);
     }
   }, [round, router.isReady, courseForRound, roundDetails, courseDetails]);
@@ -147,13 +147,22 @@ export default function Round() {
   return (
     <>
       <h1>Round detail page</h1>
-      {/* <h3>{roundDate}</h3>
-      <h3>{courseName ? courseName : userAddedCourseName}</h3>
-      <h3>
-        {city && city} {state && state}
-      </h3> */}
-      <h3>{teeColor} tees</h3>
-      {round.data && scoreCardProps && <ScoreCard {...scoreCardProps} />}
+      {roundDetails && (
+        <>
+          <h3>{roundDetails.round_date}</h3>
+          <h3>
+            {roundDetails.course_name
+              ? roundDetails.course_name
+              : roundDetails.user_added_course_name}
+          </h3>
+          <h3>{courseDetails ? courseDetails.course_city : roundDetails.user_added_city}</h3>
+          <h3>{courseDetails ? courseDetails.course_state : roundDetails.user_added_state}</h3>
+          <h3>Conditions {roundDetails.weather_conditions}</h3>
+          <h3>Temperature {roundDetails.temperature}</h3>
+          <h3>{teeColor} tees</h3>
+          {scoreCardProps && <ScoreCard {...scoreCardProps} />}
+        </>
+      )}
     </>
   );
 }

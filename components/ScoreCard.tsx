@@ -1,27 +1,28 @@
 import * as React from "react";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
-// import IconButton from "@mui/material/IconButton";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
 import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
-// import Typography from "@mui/material/Typography";
 import Paper from "@mui/material/Paper";
-// import Button from "@mui/material/Button";
-// import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
-import { ICourseTeeInfo } from "../pages/[username]/round/[roundid]";
-import { ParsedUrlQuery } from "querystring";
+import { ICourseDetails, IScoreCardProps } from "../pages/[username]/round/[roundid]";
 import { formatScoreCard, IHoleDetails } from "../utils/scoreCardFormatter";
-import { userAddedRoundDetails, ISingleHoleDetail } from "../utils/roundFormatter";
+import { ISingleHoleDetail } from "../utils/roundFormatter";
 import { HoleDetailModal } from "../components/HoleDetailModal";
+import { IShotDetail } from "../utils/roundFormatter";
 
-function Row(props: { row: ICompleteScoreCard }) {
+// update with interface
+function Row(props: any) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
-  //   const [shotDetailCount, setShotDetailCount] = React.useState(1);
+
+  function showAltTableHeaders(holeNumber: string) {
+    const altHoleMatches = ["in", "out", "total", "rating", "slope", "HCP", "NET"];
+    return altHoleMatches.includes(holeNumber);
+  }
 
   return (
     <>
@@ -44,21 +45,28 @@ function Row(props: { row: ICompleteScoreCard }) {
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
-                    <TableCell>Shot #</TableCell>
-                    <TableCell>Distance to Pin</TableCell>
-                    <TableCell>Club</TableCell>
-                    <TableCell>Result</TableCell>
+                    <TableCell>
+                      {showAltTableHeaders(row.hole) ? "Fairways Hit" : "Shot #"}
+                    </TableCell>
+                    <TableCell>
+                      {showAltTableHeaders(row.hole) ? "GIR" : "Distance to Pin"}
+                    </TableCell>
+                    <TableCell>{showAltTableHeaders(row.hole) ? "3-Putts" : "Club"}</TableCell>
+                    <TableCell>
+                      {showAltTableHeaders(row.hole) ? "Total Putts" : "Result"}
+                    </TableCell>
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.details.map(detail => (
+                  {row.holeShotDetails.map((detail: IShotDetail) => (
+                    // make a better key here
                     <TableRow key={detail.shotNumber}>
-                      <TableCell>{detail.shotNumber}</TableCell>
-                      <TableCell>{detail.distanceToPin || "--"}</TableCell>
+                      <TableCell>{detail.shotNumber || detail.fairwaysHit}</TableCell>
+                      <TableCell>{detail.distanceToPin || detail.greensInReg}</TableCell>
                       <TableCell component="th" scope="row">
-                        {detail.club || "--"}
+                        {detail.club || detail.threePutts}
                       </TableCell>
-                      <TableCell>{detail.result || "--"}</TableCell>
+                      <TableCell>{detail.result || detail.totalPutts}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -73,21 +81,25 @@ function Row(props: { row: ICompleteScoreCard }) {
 
 export interface ICompleteScoreCard extends ISingleHoleDetail, IHoleDetails {}
 
-export default function ScoreCard(props: ICourseTeeInfo | ParsedUrlQuery) {
-  console.log(props);
+export default function ScoreCard(props: IScoreCardProps) {
+  //   console.log(props);
 
-  const scoreCardRows: IHoleDetails[] = formatScoreCard(props);
-  const userAddedRows: ISingleHoleDetail[] = userAddedRoundDetails;
+  const scoreCardRows: IHoleDetails[] = formatScoreCard(props); // cant call this if is user added course
+  const holeScores = props.hole_scores;
+  const holeShotDetails = props.hole_shot_details;
 
-  let roundRows: ICompleteScoreCard[] = [];
+  // update with interface
+  let roundRows: any[] = [];
 
   for (let i = 0; i < scoreCardRows.length; i++) {
     roundRows[i] = {
       ...scoreCardRows[i],
-      ...userAddedRows[i],
+      score: holeScores[i],
+      holeShotDetails: holeShotDetails[i],
     };
   }
-  console.log(roundRows);
+
+  //   console.log(roundRows);
 
   return (
     <TableContainer component={Paper}>
