@@ -4,6 +4,7 @@ import pool from "../../db/dbConfig";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { errorMessage } from "../../utils/errorMessage";
+import { clubs} from "../../components/ClubSelectChip";
 
 export interface IUser {
   userid: string;
@@ -50,7 +51,12 @@ export default async function registerUser(username: string, email: string, pass
       [userid, username, email, bcryptPassword]
     );
 
-    if (!newUser.rowCount) {
+    const defaultUserSettings = await pool.query(
+        "INSERT INTO user_settings (userid, username, email, using_default_clubs, clubs) VALUES ($1, $2, $3, $4, $5)",
+        [userid, username, email, true, clubs.slice(0, 14)]
+    );
+
+    if (!newUser.rowCount || !defaultUserSettings.rowCount) {
       return errorMessage("Error creating user account. Please try again later.");
     }
 

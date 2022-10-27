@@ -17,6 +17,7 @@ export default function Profile() {
   if (error) return `Error! ${error.message}`;
 
   const startNewRound = () => router.push(`/${username}/round/new-round`);
+  const editClubSelection = () => router.push(`/${username}/edit-profile`);
 
   return (
     <>
@@ -28,9 +29,14 @@ export default function Profile() {
           <h3>uerId: {data.user.userid}</h3>
           <h3>uername: {data.user.username}</h3>
           <h3>email: {data.user.email}</h3>
-          <Button onClick={startNewRound} size="medium" variant="contained" color="primary">
-            new round
+          <Button onClick={editClubSelection} size="medium" variant="contained" color="primary">
+            Edit my clubs
           </Button>
+          <Box m={2}>
+            <Button onClick={startNewRound} size="medium" variant="contained" color="primary">
+              new round
+            </Button>
+          </Box>
         </Box>
       )}
     </>

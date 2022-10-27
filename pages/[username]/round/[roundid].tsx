@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { getRoundByIdQuery } from "../../api/graphql/queries/roundQueries";
 import { queryParamToString, queryParamToBoolean } from "../../../utils/queryParamFormatter";
 import { IShotDetail } from "../../../utils/roundFormatter";
-import { buildGenericScoreCardRowsArray } from "../../../utils/scoreCardFormatter";
+import { buildScoreCardRowsArray } from "../../../utils/scoreCardFormatter";
 
 export interface IRoundDetails {
   tee_color: string;
@@ -120,8 +120,8 @@ export default function Round() {
       setScoreCardProps(builtProps);
     }
     if (!courseDetails && roundDetails) {
-      const gen = buildGenericScoreCardRowsArray();
-      const builtProps = buildProps(roundDetails, gen);
+      const genericScoreCard = buildScoreCardRowsArray();
+      const builtProps = buildProps(roundDetails, genericScoreCard);
       setScoreCardProps(builtProps);
     }
   }, [round, router.isReady, courseForRound, roundDetails, courseDetails]);

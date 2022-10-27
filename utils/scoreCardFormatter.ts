@@ -28,27 +28,6 @@ export enum NON_HOLE_ROWS {
   NET = 24,
 }
 
-// export function buildGenericScoreCardRowsArray() {
-//     const SCORE_CARD_ROWS_LENGTH = 25;
-//     return Array.from({ length: SCORE_CARD_ROWS_LENGTH }, (_, i) => {
-//       let holeDetails: IHoleDetails = {};
-//     //   holeDetails[""]
-  
-//       if (i == 9 || i > 18) {
-//         if (i in NON_HOLE_ROWS) {
-//           holeDetails["hole"] = NON_HOLE_ROWS[i];
-//           return holeDetails;
-//         }
-//       }
-  
-//       let offset = 1;
-//       if (i > 9) offset--;
-  
-//       holeDetails["hole"] = (i + offset).toString();
-//       return holeDetails;
-//     });
-//   }
-
 export function checkKeysForTeeColorMatch(props: IScoreCardProps, matchTeeColor: string) {
   for (let [key, val] of Object.entries(props)) {
     if (key == `${matchTeeColor}_par_front` && val) {

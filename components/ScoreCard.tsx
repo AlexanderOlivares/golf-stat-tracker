@@ -14,15 +14,15 @@ import { ISingleHoleDetail } from "../utils/roundFormatter";
 import { HoleDetailModal } from "../components/HoleDetailModal";
 import { IShotDetail } from "../utils/roundFormatter";
 
-// update with interface
-function Row(props: any) {
+function showAltTableHeaders(holeNumber: string | undefined): boolean {
+  if (!holeNumber) return false;
+  const altHoleMatches = ["in", "out", "total", "rating", "slope", "HCP", "NET"];
+  return altHoleMatches.includes(holeNumber);
+}
+
+function Row(props: { row: ICompleteScoreCard }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
-
-  function showAltTableHeaders(holeNumber: string) {
-    const altHoleMatches = ["in", "out", "total", "rating", "slope", "HCP", "NET"];
-    return altHoleMatches.includes(holeNumber);
-  }
 
   return (
     <>
@@ -58,9 +58,9 @@ function Row(props: any) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.holeShotDetails.map((detail: IShotDetail) => (
+                  {row.holeShotDetails.map((detail: IShotDetail, i: number) => (
                     // make a better key here
-                    <TableRow key={detail.shotNumber}>
+                    <TableRow key={i}>
                       <TableCell>{detail.shotNumber || detail.fairwaysHit}</TableCell>
                       <TableCell>{detail.distanceToPin || detail.greensInReg}</TableCell>
                       <TableCell component="th" scope="row">
@@ -79,17 +79,19 @@ function Row(props: any) {
   );
 }
 
-export interface ICompleteScoreCard extends ISingleHoleDetail, IHoleDetails {}
+export interface ICompleteScoreCard extends IHoleDetails {
+  score: number | null;
+  holeShotDetails: IShotDetail[];
+}
 
 export default function ScoreCard(props: IScoreCardProps) {
   //   console.log(props);
 
-  const scoreCardRows: IHoleDetails[] = formatScoreCard(props); // cant call this if is user added course
+  const scoreCardRows: IHoleDetails[] = formatScoreCard(props);
   const holeScores = props.hole_scores;
   const holeShotDetails = props.hole_shot_details;
 
-  // update with interface
-  let roundRows: any[] = [];
+  let roundRows: ICompleteScoreCard[] = [];
 
   for (let i = 0; i < scoreCardRows.length; i++) {
     roundRows[i] = {
@@ -99,7 +101,7 @@ export default function ScoreCard(props: IScoreCardProps) {
     };
   }
 
-  //   console.log(roundRows);
+  console.log(roundRows);
 
   return (
     <TableContainer component={Paper}>
