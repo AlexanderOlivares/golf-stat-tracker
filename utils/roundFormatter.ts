@@ -14,40 +14,21 @@ export interface ISingleHoleDetail {
   details: IShotDetail[];
 }
 
-export const userAddedRoundDetails = Array.from({ length: 25 }, () => {
-  const defaultShotDetails: IShotDetail[] = [
-    {
-      shotNumber: 1,
-      distanceToPin: null,
-      club: null,
-      result: null,
-    },
-  ];
 
-  const userAddedDetails: ISingleHoleDetail = {
-    score: null,
-    details: defaultShotDetails,
-  };
+// export const userAddedRoundDetails = Array.from({ length: 25 }, () => {
+//   const defaultShotDetails: IShotDetail[] = [
+//     {
+//       shotNumber: 1,
+//       distanceToPin: null,
+//       club: null,
+//       result: null,
+//     },
+//   ];
 
-  return userAddedDetails;
-});
+//   const userAddedDetails: ISingleHoleDetail = {
+//     score: null,
+//     details: defaultShotDetails,
+//   };
 
-// export function userAddedSavedRoundDetails(dataBaseData?: string) {
-//   return Array.from({ length: 25 }, () => {
-//     const defaultShotDetails: IShotDetail[] = [
-//       {
-//         shotNumber: 1,
-//         distanceToPin: null,
-//         club: null,
-//         result: null,
-//       },
-//     ];
-
-//     const userAddedDetails: ISingleHoleDetail = {
-//       score: null,
-//       details: defaultShotDetails,
-//     };
-
-//     return userAddedDetails;
-//   });
-// }
+//   return userAddedDetails;
+// });

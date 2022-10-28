@@ -14,6 +14,7 @@ import {
 } from "./resolverInterfaces";
 import { errorOccured } from "./graphqlUtils";
 import { createNewRound, getRound } from "../../../lib/round/createNewRound";
+import { getUserClubs } from "../../../lib/user/getUserClubs";
 
 export const resolvers = {
   Query: {
@@ -40,7 +41,14 @@ export const resolvers = {
       if (errorOccured(round)) return new Error(round.errorMessage);
       return round;
     },
-
+    // update the args type
+    clubs: async (_parent: undefined, args: any, context: IContext) => {
+      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
+        const { username } = args;
+        const clubs = await getUserClubs(username)
+        if (errorOccured(clubs)) return new Error(clubs.errorMessage);
+        return clubs
+      },
   },
   Mutation: {
     register: async (_parent: undefined, args: IRegisterMutationArgs, context: IContext) => {

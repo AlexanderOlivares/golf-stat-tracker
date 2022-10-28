@@ -4,7 +4,7 @@ import pool from "../../db/dbConfig";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { errorMessage } from "../../utils/errorMessage";
-import { clubs} from "../../components/ClubSelectChip";
+import { defaultClubs } from "../../pages/[username]/edit-profile";
 
 export interface IUser {
   userid: string;
@@ -53,7 +53,7 @@ export default async function registerUser(username: string, email: string, pass
 
     const defaultUserSettings = await pool.query(
         "INSERT INTO user_settings (userid, username, email, using_default_clubs, clubs) VALUES ($1, $2, $3, $4, $5)",
-        [userid, username, email, true, clubs.slice(0, 14)]
+        [userid, username, email, true, defaultClubs.slice(0, 14)]
     );
 
     if (!newUser.rowCount || !defaultUserSettings.rowCount) {

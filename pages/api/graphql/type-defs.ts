@@ -1,5 +1,4 @@
 import { gql } from "@apollo/client";
-import { GraphQLJSONObject } from "graphql-type-json";
 
 export const typeDefs = gql`
   type User {
@@ -117,11 +116,20 @@ export const typeDefs = gql`
     hole_shot_details: JSON
   }
 
+  type UserClubs {
+    userid: String!
+    username: String!
+    email: String!
+    using_default_clubs: Boolean!
+    clubs: [String]!
+  }
+
   type Query {
     user(username: String!): User
     courses: [CourseNamesAndIds]
     course(courseId: String!, teeColor: String!): [Course]!
     round(roundid: String!): NewRoundResponse
+    clubs(username: String!): UserClubs!
   }
 
   type Mutation {
@@ -129,5 +137,6 @@ export const typeDefs = gql`
     login(input: LoginInput!): LoggedInUser
     signOut: Boolean!
     newRound(input: NewRound!): NewRoundResponse
+    editClubs(input: String!): [String]
   }
 `;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Theme, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import OutlinedInput from "@mui/material/OutlinedInput";
@@ -7,6 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
+import { defaultClubs, UserProfileContext } from "../pages/[username]/edit-profile";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -19,34 +20,6 @@ const MenuProps = {
   },
 };
 
-export const clubs = [
-  "Driver",
-  "3 wood",
-  "4 hybrid",
-  "4 iron",
-  "5 iron",
-  "6 iron",
-  "7 iron",
-  "8 iron",
-  "9 iron",
-  "Pitching Wedge",
-  "52 degree",
-  "56 degree",
-  "58 degree",
-  "60 degree",
-  "putter",
-  "3 hybrid",
-  "7 wood",
-  "5 wood",
-  "1 iron",
-  "2 iron",
-  "3 iron",
-  "50 degree",
-  "54 degree",
-  "62 degree",
-  "64 degree",
-];
-
 function getStyles(name: string, clubName: readonly string[], theme: Theme) {
   return {
     fontWeight:
@@ -58,9 +31,11 @@ function getStyles(name: string, clubName: readonly string[], theme: Theme) {
 
 export default function MultipleSelectChip() {
   const theme = useTheme();
+  const { clubs } = useContext(UserProfileContext);
 
   // useQuery to pull saved bag from db
-  const [clubsInBag, setClubsInBag] = useState<string[]>(clubs.slice(0, 13));
+  //   const [clubsInBag, setClubsInBag] = useState<string[]>(defaultClubs.slice(0, 13));
+  const [clubsInBag, setClubsInBag] = useState<string[]>([""]);
 
   const handleChange = (event: SelectChangeEvent<typeof clubsInBag>) => {
     const {
@@ -72,7 +47,10 @@ export default function MultipleSelectChip() {
     );
   };
 
-  console.log(clubsInBag);
+  useEffect(() => {
+    setClubsInBag(clubs);
+  }, [clubs]);
+  //   console.log(clubsInBag);
 
   return (
     <div>
@@ -94,7 +72,7 @@ export default function MultipleSelectChip() {
           )}
           MenuProps={MenuProps}
         >
-          {clubs.map(name => (
+          {defaultClubs.map(name => (
             <MenuItem key={name} value={name} style={getStyles(name, clubsInBag, theme)}>
               {name}
             </MenuItem>
