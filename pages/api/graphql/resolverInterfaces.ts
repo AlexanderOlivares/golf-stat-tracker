@@ -26,6 +26,13 @@ export interface INewRoundMutationArgs {
   input: IRoundRequestBody
 }
 
+export interface IEditClubsMutationArgs {
+  input: {
+    clubs: string[];
+    username: string;
+  }
+}
+
 export interface IContext {
   req: Request;
   res: Response;

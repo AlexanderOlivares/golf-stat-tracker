@@ -1,4 +1,5 @@
   import pool from "../../db/dbConfig";
+  import { errorMessage, IErrorMessage } from "../../utils/errorMessage";
   
   export async function getUsers() {
     try {
@@ -6,7 +7,7 @@
       return [...rows]
     } catch (error) {
       console.log(error);
-      return { message: "Error fetching user data" };
+      return errorMessage("Error fetching user data");
     }
   }
 
@@ -19,6 +20,6 @@
       return { ...rows[0] };
     } catch (error) {
       console.log(error);
-      return { message: "Error fetching user data" };
+      return errorMessage("Error fetching user data");
     }
   }

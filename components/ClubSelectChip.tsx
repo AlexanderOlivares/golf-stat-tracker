@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import { Theme, useTheme } from "@mui/material/styles";
 import Box from "@mui/material/Box";
 import OutlinedInput from "@mui/material/OutlinedInput";
@@ -7,7 +7,16 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
-import { defaultClubs, UserProfileContext } from "../pages/[username]/edit-profile";
+import { defaultClubs } from "../pages/[username]/edit-profile";
+import { useQuery } from "@apollo/client";
+import { queryParamToString } from "../utils/queryParamFormatter";
+import { useRouter } from "next/router";
+import { getUserClubsQuery } from "../pages/api/graphql/queries/clubQueries";
+import { Button } from "@mui/material";
+import { useMutation } from "@apollo/client";
+import { clubEditMutation } from "../pages/api/graphql/mutations/clubMutations";
+
+getUserClubsQuery;
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -30,12 +39,12 @@ function getStyles(name: string, clubName: readonly string[], theme: Theme) {
 }
 
 export default function MultipleSelectChip() {
+  const [editClubs] = useMutation(clubEditMutation);
   const theme = useTheme();
-  const { clubs } = useContext(UserProfileContext);
+  const router = useRouter();
+  const { username } = router.query;
 
-  // useQuery to pull saved bag from db
-  //   const [clubsInBag, setClubsInBag] = useState<string[]>(defaultClubs.slice(0, 13));
-  const [clubsInBag, setClubsInBag] = useState<string[]>([""]);
+  const [clubsInBag, setClubsInBag] = useState<string[]>(defaultClubs);
 
   const handleChange = (event: SelectChangeEvent<typeof clubsInBag>) => {
     const {
@@ -47,38 +56,80 @@ export default function MultipleSelectChip() {
     );
   };
 
+  const { error, loading, data } = useQuery(getUserClubsQuery, {
+    variables: {
+      username: queryParamToString(username),
+    },
+  });
+
+  async function saveClubs() {
+    try {
+      if (!clubsInBag.length) {
+        // add toast error
+        console.log("You need at least 1 one club");
+        return;
+      }
+      const savedEditedClubs = await editClubs({
+        variables: {
+          clubs: clubsInBag,
+          username,
+        },
+      });
+      const { clubs } = savedEditedClubs.data.editClubs;
+      if (clubs) setClubsInBag(clubs);
+    } catch (error) {
+      // TDOD add toast error
+      console.log(error);
+    }
+  }
+
+  if (error) {
+    // TODO add toast error
+    router.push("/login");
+  }
+
   useEffect(() => {
-    setClubsInBag(clubs);
-  }, [clubs]);
-  //   console.log(clubsInBag);
+    if (data) {
+      setClubsInBag(data.clubs.clubs);
+    }
+  }, [data]);
 
   return (
-    <div>
-      <FormControl sx={{ m: 1, width: 300 }}>
-        <InputLabel id="club-selection">Clubs</InputLabel>
-        <Select
-          labelId="select-clubs"
-          id="club-selection-chip"
-          multiple
-          value={clubsInBag}
-          onChange={handleChange}
-          input={<OutlinedInput id="select-multiple-chip" label="Club" />}
-          renderValue={selected => (
-            <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-              {selected.map(value => (
-                <Chip key={value} label={value} />
+    <>
+      {loading ? (
+        <div>loading...</div>
+      ) : (
+        <div>
+          <FormControl sx={{ m: 1, width: 300 }}>
+            <InputLabel id="club-selection">Clubs</InputLabel>
+            <Select
+              labelId="select-clubs"
+              id="club-selection-chip"
+              multiple
+              value={clubsInBag}
+              onChange={handleChange}
+              input={<OutlinedInput id="select-multiple-chip" label="Club" />}
+              renderValue={selected => (
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                  {selected.map(value => (
+                    <Chip key={value} label={value} />
+                  ))}
+                </Box>
+              )}
+              MenuProps={MenuProps}
+            >
+              {defaultClubs.map(name => (
+                <MenuItem key={name} value={name} style={getStyles(name, clubsInBag, theme)}>
+                  {name}
+                </MenuItem>
               ))}
-            </Box>
-          )}
-          MenuProps={MenuProps}
-        >
-          {defaultClubs.map(name => (
-            <MenuItem key={name} value={name} style={getStyles(name, clubsInBag, theme)}>
-              {name}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-    </div>
+            </Select>
+            <Button variant="contained" onClick={saveClubs}>
+              Save
+            </Button>
+          </FormControl>
+        </div>
+      )}
+    </>
   );
 }

@@ -10,11 +10,12 @@ import {
   IContext,
   INewRoundMutationArgs,
   IRoundQueryArgs, 
-  ICourseQueryArgs
+  ICourseQueryArgs,
+  IEditClubsMutationArgs
 } from "./resolverInterfaces";
 import { errorOccured } from "./graphqlUtils";
 import { createNewRound, getRound } from "../../../lib/round/createNewRound";
-import { getUserClubs } from "../../../lib/user/getUserClubs";
+import { getUserClubs, updateUserClubs } from "../../../lib/user/getUserClubs";
 
 export const resolvers = {
   Query: {
@@ -41,8 +42,7 @@ export const resolvers = {
       if (errorOccured(round)) return new Error(round.errorMessage);
       return round;
     },
-    // update the args type
-    clubs: async (_parent: undefined, args: any, context: IContext) => {
+    clubs: async (_parent: undefined, args: { username: string }, context: IContext) => {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
         const { username } = args;
         const clubs = await getUserClubs(username)
@@ -86,6 +86,13 @@ export const resolvers = {
         const round = await createNewRound(input);
         if (errorOccured(round)) return new Error(round.errorMessage)
         return round;
+    },
+    async editClubs(_parent: undefined, args: IEditClubsMutationArgs, context: IContext) {
+      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
+        const { username, clubs } = args.input
+        const updatedClubs = await updateUserClubs(clubs, username);
+        if (errorOccured(updatedClubs)) return new Error(updatedClubs.errorMessage)
+        return updatedClubs;
     },
   },
 };

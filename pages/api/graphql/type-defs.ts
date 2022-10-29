@@ -124,6 +124,15 @@ export const typeDefs = gql`
     clubs: [String]!
   }
 
+  input UpdateClubsInput {
+    username: String!
+    clubs: [String]!
+  }
+
+  type ClubList {
+    clubs: [String]
+  }
+
   type Query {
     user(username: String!): User
     courses: [CourseNamesAndIds]
@@ -137,6 +146,6 @@ export const typeDefs = gql`
     login(input: LoginInput!): LoggedInUser
     signOut: Boolean!
     newRound(input: NewRound!): NewRoundResponse
-    editClubs(input: String!): [String]
+    editClubs(input: UpdateClubsInput!): ClubList
   }
 `;
