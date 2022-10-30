@@ -1,3 +1,4 @@
+import React from "react";
 import { useRouter } from "next/router";
 import { useQuery } from "@apollo/client";
 import ScoreCard from "../../../components/ScoreCard";
@@ -7,6 +8,7 @@ import { getRoundByIdQuery } from "../../api/graphql/queries/roundQueries";
 import { queryParamToString, queryParamToBoolean } from "../../../utils/queryParamFormatter";
 import { IShotDetail } from "../../../utils/roundFormatter";
 import { buildScoreCardRowsArray } from "../../../utils/scoreCardFormatter";
+import { RoundContextProvider } from "../../../context/RoundContext";
 
 export interface IRoundDetails {
   tee_color: string;
@@ -146,23 +148,25 @@ export default function Round() {
 
   return (
     <>
-      <h1>Round detail page</h1>
-      {roundDetails && (
-        <>
-          <h3>{roundDetails.round_date}</h3>
-          <h3>
-            {roundDetails.course_name
-              ? roundDetails.course_name
-              : roundDetails.user_added_course_name}
-          </h3>
-          <h3>{courseDetails ? courseDetails.course_city : roundDetails.user_added_city}</h3>
-          <h3>{courseDetails ? courseDetails.course_state : roundDetails.user_added_state}</h3>
-          <h3>Conditions {roundDetails.weather_conditions}</h3>
-          <h3>Temperature {roundDetails.temperature}</h3>
-          <h3>{teeColor} tees</h3>
-          {scoreCardProps && <ScoreCard {...scoreCardProps} />}
-        </>
-      )}
+      <RoundContextProvider>
+        <h1>Round detail page</h1>
+        {roundDetails && (
+          <>
+            <h3>{roundDetails.round_date}</h3>
+            <h3>
+              {roundDetails.course_name
+                ? roundDetails.course_name
+                : roundDetails.user_added_course_name}
+            </h3>
+            <h3>{courseDetails ? courseDetails.course_city : roundDetails.user_added_city}</h3>
+            <h3>{courseDetails ? courseDetails.course_state : roundDetails.user_added_state}</h3>
+            <h3>Conditions {roundDetails.weather_conditions}</h3>
+            <h3>Temperature {roundDetails.temperature}</h3>
+            <h3>{teeColor} tees</h3>
+            {scoreCardProps && <ScoreCard {...scoreCardProps} />}
+          </>
+        )}
+      </RoundContextProvider>
     </>
   );
 }

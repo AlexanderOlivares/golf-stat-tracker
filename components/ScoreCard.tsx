@@ -1,4 +1,4 @@
-import * as React from "react";
+import React, { useEffect } from "react";
 import Box from "@mui/material/Box";
 import Collapse from "@mui/material/Collapse";
 import Table from "@mui/material/Table";
@@ -8,11 +8,16 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { ICourseDetails, IScoreCardProps } from "../pages/[username]/round/[roundid]";
+import { IScoreCardProps } from "../pages/[username]/round/[roundid]";
 import { formatScoreCard, IHoleDetails } from "../utils/scoreCardFormatter";
-import { ISingleHoleDetail } from "../utils/roundFormatter";
+// import { ISingleHoleDtail } from "../utils/roundFormatter";
 import { HoleDetailModal } from "../components/HoleDetailModal";
 import { IShotDetail } from "../utils/roundFormatter";
+import { useRoundContext } from "../context/RoundContext";
+import { useRouter } from "next/router";
+import { useQuery } from "@apollo/client";
+import { queryParamToString } from "../utils/queryParamFormatter";
+import { getUserClubsQuery } from "../pages/api/graphql/queries/clubQueries";
 
 function showAltTableHeaders(holeNumber: string | undefined): boolean {
   if (!holeNumber) return false;
@@ -85,23 +90,56 @@ export interface ICompleteScoreCard extends IHoleDetails {
 }
 
 export default function ScoreCard(props: IScoreCardProps) {
-  //   console.log(props);
+  const roundContext = useRoundContext();
+  const router = useRouter();
+  const { username } = router.query;
+  console.log("in scorecard comp");
+  console.log(roundContext);
 
   const scoreCardRows: IHoleDetails[] = formatScoreCard(props);
   const holeScores = props.hole_scores;
   const holeShotDetails = props.hole_shot_details;
+  // fakescores to simulate displaying a completed round
+  const fakeScores = [3, 4, 4, 4, 5, 6, 4, 5, 4, 5, 6, 4, 5, 4, 5, 6, 4, 5, 4, 5, 4, 5, 6, 4, 5];
+
+  const { data, loading, error } = useQuery(getUserClubsQuery, {
+    variables: {
+      username: queryParamToString(username),
+    },
+  });
+
+  useEffect(() => {
+    if (data?.clubs.clubs) {
+      roundContext.dispatch({
+        type: "update clubs",
+        payload: {
+          ...roundContext.state,
+          clubs: data.clubs.clubs,
+        },
+      });
+    }
+    roundContext.dispatch({
+      type: "update scores and shot details",
+      payload: {
+        ...roundContext.state,
+        holeScores: fakeScores,
+        holeShotDetails,
+      },
+    });
+  }, [data, holeScores, holeShotDetails]);
 
   let roundRows: ICompleteScoreCard[] = [];
 
   for (let i = 0; i < scoreCardRows.length; i++) {
     roundRows[i] = {
       ...scoreCardRows[i],
-      score: holeScores[i],
+      //   score: holeScores[i],
+      score: fakeScores[i],
       holeShotDetails: holeShotDetails[i],
     };
   }
 
-  console.log(roundRows);
+  //   console.log(roundRows);
 
   return (
     <TableContainer component={Paper}>

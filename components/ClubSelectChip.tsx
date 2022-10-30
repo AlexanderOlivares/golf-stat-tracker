@@ -7,7 +7,7 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
-import { defaultClubs } from "../pages/[username]/edit-profile";
+// import { defaultClubs } from "../pages/[username]/edit-profile";
 import { useQuery } from "@apollo/client";
 import { queryParamToString } from "../utils/queryParamFormatter";
 import { useRouter } from "next/router";
@@ -15,6 +15,7 @@ import { getUserClubsQuery } from "../pages/api/graphql/queries/clubQueries";
 import { Button } from "@mui/material";
 import { useMutation } from "@apollo/client";
 import { clubEditMutation } from "../pages/api/graphql/mutations/clubMutations";
+import { defaultClubs } from "../lib/selectOptions";
 
 getUserClubsQuery;
 
