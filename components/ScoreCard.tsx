@@ -94,13 +94,11 @@ export default function ScoreCard(props: IScoreCardProps) {
   const router = useRouter();
   const { username } = router.query;
   console.log("in scorecard comp");
-  console.log(roundContext);
+  console.log(roundContext.state.holeScores);
 
   const scoreCardRows: IHoleDetails[] = formatScoreCard(props);
   const holeScores = props.hole_scores;
   const holeShotDetails = props.hole_shot_details;
-  // fakescores to simulate displaying a completed round
-  const fakeScores = [3, 4, 4, 4, 5, 6, 4, 5, 4, 5, 6, 4, 5, 4, 5, 6, 4, 5, 4, 5, 4, 5, 6, 4, 5];
 
   const { data, loading, error } = useQuery(getUserClubsQuery, {
     variables: {
@@ -122,7 +120,7 @@ export default function ScoreCard(props: IScoreCardProps) {
       type: "update scores and shot details",
       payload: {
         ...roundContext.state,
-        holeScores: fakeScores,
+        holeScores: holeScores,
         holeShotDetails,
       },
     });
@@ -133,8 +131,7 @@ export default function ScoreCard(props: IScoreCardProps) {
   for (let i = 0; i < scoreCardRows.length; i++) {
     roundRows[i] = {
       ...scoreCardRows[i],
-      //   score: holeScores[i],
-      score: fakeScores[i],
+      score: holeScores[i],
       holeShotDetails: holeShotDetails[i],
     };
   }

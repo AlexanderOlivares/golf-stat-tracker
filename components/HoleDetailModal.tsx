@@ -14,25 +14,9 @@ import Box from "@mui/material/Box";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { ISingleHoleDetail, IShotDetail } from "../utils/roundFormatter";
 import { ICompleteScoreCard } from "../components/ScoreCard";
-
-const marks = [
-  {
-    value: 1,
-    label: "1",
-  },
-  {
-    value: 2,
-    label: "2",
-  },
-  {
-    value: 3,
-    label: "3",
-  },
-  {
-    value: 4,
-    label: "4",
-  },
-];
+import { useRoundContext } from "../context/RoundContext";
+import { IRoundState } from "../context/RoundContext";
+import { NON_HOLE_ROWS } from "../utils/scoreCardFormatter";
 
 function valuetext(value: number) {
   return `${value}`;
@@ -42,20 +26,38 @@ interface IHoleDetailModalProps {
   row: ICompleteScoreCard;
 }
 
+async function convertToNumber() {
+  NON_HOLE_ROWS;
+}
+
 export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
+  const roundContext = useRoundContext();
+
   const [open, setOpen] = React.useState(false);
-  const [holeNumber, setHoleNumber] = React.useState(1);
+  const [shotNumber, setShotNumber] = React.useState(1);
 
-  const handleClickOpen = () => {
-    setOpen(true);
-  };
+  const handleClickOpen = () => setOpen(true);
+  const handleClose = () => setOpen(false);
 
-  const handleClose = () => {
-    setOpen(false);
-  };
-
-  const handleHoleChange = (event: Event, newValue: number | number[]) => {
-    setHoleNumber(newValue as number);
+  const handleShotNumberChange = (event: Event, newValue: number | number[]) => {
+    setShotNumber(newValue as number);
+    const updatedHoleScoresContext = (prevState: IRoundState) => {
+      return prevState.holeScores.map((existingScore: number, i: number) => {
+        if (i in NON_HOLE_ROWS) {
+          // return totals here
+          return 100;
+        }
+        if (i == Number(row.hole) - 1) return newValue as number;
+        return existingScore;
+      });
+    };
+    roundContext.dispatch({
+      type: "update hole score",
+      payload: {
+        ...roundContext.state,
+        holeScores: updatedHoleScoresContext(roundContext.state),
+      },
+    });
   };
   console.log(row);
 
@@ -76,8 +78,8 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
             min={1}
             max={10}
             valueLabelDisplay="on"
-            value={holeNumber}
-            onChange={handleHoleChange}
+            value={shotNumber}
+            onChange={handleShotNumberChange}
           />
           <DialogContentText>Distance</DialogContentText>
           <Slider

@@ -9,7 +9,7 @@ import { IShotDetail } from "../utils/roundFormatter";
 // -------------
 // add extra fields to hole details? - lie, wind direction, uphill/downhill
 
-interface IRoundState {
+export interface IRoundState {
   clubs: string[];
   holeScores: number[];
   holeShotDetails: IShotDetail[][];
@@ -45,8 +45,13 @@ function roundContextReducer(state: IRoundState, action: Action): any {
     case "update scores and shot details":
       return {
         ...state,
-        holeScore: payload.holeScores,
+        holeScores: payload.holeScores,
         holeShotDetails: payload.holeShotDetails,
+      };
+    case "update hole score":
+      return {
+        ...state,
+        holeScores: payload.holeScores,
       };
     default:
       return state;
