@@ -1,11 +1,11 @@
 import { IScoreCardProps } from "../pages/[username]/round/[roundid]";
+import { createHoleDetailsJson } from "../utils/roundFormatter";
 import {
   buildScoreCardRowsArray,
   getFallbackTeeColor,
   checkKeysForTeeColorMatch,
   teeColorPrefixMatch
 } from "../utils/scoreCardFormatter";
-import { createHoleDetailsJson } from "../lib/round/createNewRound";
 
 test("build score card rows array", () => {
   const testArray = buildScoreCardRowsArray();

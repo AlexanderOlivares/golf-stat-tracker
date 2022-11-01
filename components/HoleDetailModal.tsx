@@ -1,4 +1,4 @@
-import * as React from "react";
+import React from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
@@ -20,14 +20,6 @@ import { NON_HOLE_ROWS } from "../utils/scoreCardFormatter";
 
 function valuetext(value: number) {
   return `${value}`;
-}
-
-interface IHoleDetailModalProps {
-  row: ICompleteScoreCard;
-}
-
-async function convertToNumber() {
-  NON_HOLE_ROWS;
 }
 
 export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
@@ -59,6 +51,35 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       },
     });
   };
+
+  function handleDistanceToPin(event: Event, newValue: number | number[]) {
+    let holeShotDetailsCopy = roundContext.state.holeShotDetails;
+    const updateStateTest = (prevState: IShotDetail[][]) => {
+      return holeShotDetailsCopy.map((existingScore: IShotDetail[], i: number) => {
+        if (i == Number(row.hole)) {
+          // testing with hardcoded value
+          console.log(`operating on ${row.hole}`);
+          return [
+            {
+              shotNumber: 1,
+              distanceToPin: 150,
+              club: "8 iron",
+              result: "on green",
+            },
+          ];
+        }
+        return existingScore;
+      });
+    };
+    roundContext.dispatch({
+      type: "update hole shot details",
+      payload: {
+        ...roundContext.state,
+        holeShotDetails: updateStateTest(holeShotDetailsCopy),
+      },
+    });
+  }
+  console.log("row");
   console.log(row);
 
   return (
@@ -90,6 +111,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
             min={5}
             max={350}
             valueLabelDisplay="on"
+            onChange={handleDistanceToPin}
           />
           <Box>
             <InputLabel id="demo-simple-select-label">Club</InputLabel>

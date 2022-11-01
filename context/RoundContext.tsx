@@ -1,7 +1,7 @@
 import { createContext, useContext, useReducer } from "react";
 import type { ReactNode } from "react";
 import { defaultClubs } from "../lib/selectOptions";
-import { IShotDetail } from "../utils/roundFormatter";
+import { createHoleDetailsJson, IShotDetail } from "../utils/roundFormatter";
 
 // add clubs selection to context
 // FW hit, gir, putts - add these for stat calculations
@@ -18,7 +18,7 @@ export interface IRoundState {
 const defualtState: IRoundState = {
   clubs: defaultClubs.slice(0, 14),
   holeScores: [],
-  holeShotDetails: [],
+  holeShotDetails: createHoleDetailsJson(),
 };
 
 export type Action = {
@@ -52,6 +52,11 @@ function roundContextReducer(state: IRoundState, action: Action): any {
       return {
         ...state,
         holeScores: payload.holeScores,
+      };
+    case "update hole shot details":
+      return {
+        ...state,
+        holeShotDetails: payload.holeShotDetails,
       };
     default:
       return state;

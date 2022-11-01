@@ -1,41 +1,7 @@
 import pool from "../../db/dbConfig";
 import { IRoundRequestBody } from "../../pages/[username]/round/new-round";
 import { errorMessage, IErrorMessage } from "../../utils/errorMessage";
-import { IShotDetail } from "../../utils/roundFormatter";
-import { NON_HOLE_ROWS } from "../../utils/scoreCardFormatter";
-
-export function createHoleScoreArray() {
-  return Array.from({ length: 25 }, () => null);
-}
-
-
-export function createHoleDetailsJson() {
-  const defaultShotDetails: IShotDetail[] = [
-    {
-      shotNumber: 1,
-      distanceToPin: null,
-      club: null,
-      result: null,
-    },
-  ];
-  const shotDetailsArray = Array.from({ length: 25 }, (_, i) => {
-    if (i in NON_HOLE_ROWS) {
-      if (i < 21) {
-        const totalsShotDetail: IShotDetail[] = [
-          {
-            fairwaysHit: null,
-            greensInReg: null,
-            threePutts: null,
-            totalPutts: null,
-          },
-        ];
-        return totalsShotDetail;
-      }
-    }
-    return defaultShotDetails;
-  });
-  return shotDetailsArray;
-}
+import { createHoleDetailsJson, createHoleScoreArray  } from "../../utils/roundFormatter";
 
 export async function createNewRound(
   newRoundArgs: IRoundRequestBody
