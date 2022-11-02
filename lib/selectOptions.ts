@@ -29,8 +29,8 @@ export var defaultClubs = [
 
 
   export const shotResultOptions = [
-    "Hit Green",
     "Hit Fairway",
+    "Hit Green",
     "Miss Left",
     "Miss Right",
     "Miss Short",

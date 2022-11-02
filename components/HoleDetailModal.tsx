@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
@@ -16,6 +16,7 @@ import { ICompleteScoreCard } from "../components/ScoreCard";
 import { useRoundContext } from "../context/RoundContext";
 import { IRoundState } from "../context/RoundContext";
 import { NON_HOLE_ROWS } from "../utils/scoreCardFormatter";
+import { shotResultOptions } from "../lib/selectOptions";
 
 function valuetext(value: number) {
   return `${value}`;
@@ -25,26 +26,35 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const roundContext = useRoundContext();
 
   const [open, setOpen] = React.useState(false);
-  const [shotNumber, setShotNumber] = React.useState(1);
+  const [shotNumber, setShotNumber] = React.useState(1); // is this needed?
+  const [localHoleDetails, setLocalHoleDetails] = useState<IShotDetail>({
+    shotNumber: shotNumber,
+    distanceToPin: Number(row.yardage),
+    club: null,
+    result: null,
+  });
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
   const addNewHoleDetailsEntries = (prevState: IRoundState) => {
     const prevStateCopy = { ...prevState };
-    const newShot: IShotDetail = {
-      shotNumber: shotNumber,
-      distanceToPin: null,
-      club: null,
-      result: null,
-    };
+
     const holeIndexToUpdate = Number(row.hole) < 9 ? Number(row.hole) - 1 : Number(row.hole);
+
     const updatedHoleShotDetails = prevStateCopy.holeShotDetails.map(
       (holeDetail: IShotDetail[], index: number) => {
         if (index != holeIndexToUpdate) return holeDetail;
-        const entryForThisShotNumberExists = holeDetail.find(shot => shot.shotNumber == shotNumber);
-        if (!entryForThisShotNumberExists) return [...holeDetail, newShot];
-        return holeDetail;
+        const entryForThisShotNumberExists = holeDetail.find(
+          shot => shot.shotNumber == localHoleDetails.shotNumber
+        );
+        if (!entryForThisShotNumberExists) {
+          return [...holeDetail, localHoleDetails];
+        }
+        return holeDetail.map((shot: IShotDetail, i: number) => {
+          if (shot.shotNumber != localHoleDetails.shotNumber) return shot;
+          return localHoleDetails;
+        });
       }
     );
 
@@ -58,7 +68,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   };
 
   const updatedHoleScoresContext = (prevState: IRoundState) => {
-    return prevState.holeScores.map((existingScore: number, i: number) => {
+    const updatedScores = prevState.holeScores.map((existingScore: number, i: number) => {
       if (i in NON_HOLE_ROWS) {
         // TODO return totals here
         return 100;
@@ -66,27 +76,59 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       if (i == Number(row.hole) - 1) return shotNumber;
       return existingScore;
     });
-  };
-
-  const handleShotNumberChange = (_: Event, newValue: number | number[]) => {
-    setShotNumber(newValue as number);
-
     roundContext.dispatch({
       type: "update hole score",
       payload: {
         ...roundContext.state,
-        holeScores: updatedHoleScoresContext(roundContext.state),
+        holeScores: updatedScores,
       },
     });
   };
 
+  const handleShotNumberChange = (_: Event, newValue: number | number[]) => {
+    setShotNumber(newValue as number);
+    setLocalHoleDetails((prev: IShotDetail) => {
+      return {
+        ...prev,
+        shotNumber: newValue as number,
+      };
+    });
+  };
+
   function handleDistanceToPin(event: Event, newValue: number | number[]) {
-    return;
+    setLocalHoleDetails((prev: IShotDetail) => {
+      return {
+        ...prev,
+        distanceToPin: newValue as number,
+      };
+    });
   }
+
+  const handleClubChange = (event: SelectChangeEvent) => {
+    setLocalHoleDetails((prev: IShotDetail) => {
+      return {
+        ...prev,
+        club: event.target.value as string,
+      };
+    });
+  };
+
+  const handleShotResultChange = (event: SelectChangeEvent) => {
+    setLocalHoleDetails((prev: IShotDetail) => {
+      return {
+        ...prev,
+        result: event.target.value as string,
+      };
+    });
+  };
 
   useEffect(() => {
     addNewHoleDetailsEntries(roundContext.state);
-  }, [shotNumber]);
+    updatedHoleScoresContext(roundContext.state);
+  }, [shotNumber, localHoleDetails]);
+
+  console.log("------- local state ---------");
+  console.log(localHoleDetails);
 
   return (
     <div>
@@ -126,26 +168,34 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
               autoWidth
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={10}
+              value={localHoleDetails.club || roundContext.state.clubs[0]}
               label="Club"
-              onChange={() => "hi"}
+              onChange={handleClubChange}
             >
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
+              {roundContext.state.clubs.map((club: string) => {
+                return (
+                  <MenuItem key={club} value={club}>
+                    {club}
+                  </MenuItem>
+                );
+              })}
             </Select>
             <InputLabel id="demo-simple-select-label">Result</InputLabel>
             <Select
               autoWidth
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={10}
+              value={localHoleDetails.result || shotResultOptions[0]}
               label="Result"
-              onChange={() => "hi"}
+              onChange={handleShotResultChange}
             >
-              <MenuItem value={10}>Ten</MenuItem>
-              <MenuItem value={20}>Twenty</MenuItem>
-              <MenuItem value={30}>Thirty</MenuItem>
+              {shotResultOptions.map((option: string) => {
+                return (
+                  <MenuItem key={option} value={option}>
+                    {option}
+                  </MenuItem>
+                );
+              })}
             </Select>
           </Box>
         </DialogContent>
