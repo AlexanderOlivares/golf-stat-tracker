@@ -39,6 +39,7 @@ export var defaultClubs = [
     "Greenside Bunker",
     "In Hole",
     "OB",
+    "Mishit", 
     "Penalty Stroke", 
   ];
 

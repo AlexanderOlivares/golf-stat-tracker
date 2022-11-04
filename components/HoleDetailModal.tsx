@@ -27,6 +27,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
 
   const [open, setOpen] = React.useState(false);
   const [shotNumber, setShotNumber] = React.useState(1); // is this needed?
+  const [dtp, setDtp] = React.useState(Number(row.yardage) || 35); // is this needed?
   const [localHoleDetails, setLocalHoleDetails] = useState<IShotDetail>({
     shotNumber: shotNumber,
     distanceToPin: Number(row.yardage),
@@ -125,7 +126,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   useEffect(() => {
     addNewHoleDetailsEntries(roundContext.state);
     updatedHoleScoresContext(roundContext.state);
-  }, [shotNumber, localHoleDetails]);
+  }, [localHoleDetails]);
 
   console.log("------- local state ---------");
   console.log(localHoleDetails);
@@ -154,7 +155,9 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
           <DialogContentText>Distance To Pin</DialogContentText>
           <Slider
             aria-label="Yards to pin"
-            defaultValue={1}
+            key={row.score}
+            defaultValue={localHoleDetails.distanceToPin || dtp}
+            value={localHoleDetails.distanceToPin || dtp}
             getAriaValueText={valuetext}
             step={5}
             min={5}
