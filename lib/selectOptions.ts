@@ -1,5 +1,6 @@
 
 export var defaultClubs = [
+    "--",
     "Driver",
     "3 wood",
     "4 hybrid",
@@ -29,6 +30,7 @@ export var defaultClubs = [
 
 
   export const shotResultOptions = [
+    "--",
     "Hit Fairway",
     "Hit Green",
     "Miss Left",

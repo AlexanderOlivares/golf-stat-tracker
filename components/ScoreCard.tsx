@@ -112,7 +112,7 @@ export default function ScoreCard(props: IScoreCardProps) {
         type: "update clubs",
         payload: {
           ...roundContext.state,
-          clubs: data.clubs.clubs,
+          clubs: [...data.clubs.clubs, "--"],
         },
       });
     }

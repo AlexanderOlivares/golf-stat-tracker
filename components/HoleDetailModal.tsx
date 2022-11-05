@@ -24,21 +24,21 @@ function valuetext(value: number) {
 
 export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const roundContext = useRoundContext();
+  const holeIndex = Number(row.hole) < 9 ? Number(row.hole) - 1 : Number(row.hole);
 
-  const [open, setOpen] = React.useState(false);
-  const [shotNumber, setShotNumber] = React.useState(1); // is this needed?
-  const [dtp, setDtp] = React.useState(Number(row.yardage) || 35); // is this needed?
-  const [localHoleDetails, setLocalHoleDetails] = useState<IShotDetail>({
-    shotNumber: shotNumber,
-    distanceToPin: Number(row.yardage),
-    club: null,
-    result: null,
-  });
+  const [open, setOpen] = useState(false);
+  const [shotNumber, setShotNumber] = useState(1);
+  const holeTotalYardage = Number(row.yardage);
+  const [dtp, setDtp] = useState(holeTotalYardage || 35);
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  const addNewHoleDetailsEntries = (prevState: IRoundState) => {
+  const addNewHoleDetailsEntries = (
+    prevState: IRoundState,
+    keyToUpdate: keyof IShotDetail,
+    valueToUpdate: string | number
+  ) => {
     const prevStateCopy = { ...prevState };
 
     const holeIndexToUpdate = Number(row.hole) < 9 ? Number(row.hole) - 1 : Number(row.hole);
@@ -46,15 +46,23 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     const updatedHoleShotDetails = prevStateCopy.holeShotDetails.map(
       (holeDetail: IShotDetail[], index: number) => {
         if (index != holeIndexToUpdate) return holeDetail;
-        const entryForThisShotNumberExists = holeDetail.find(
-          shot => shot.shotNumber == localHoleDetails.shotNumber
-        );
-        if (!entryForThisShotNumberExists) {
-          return [...holeDetail, localHoleDetails];
+        const entryForShotNumberExists = holeDetail.find(shot => shot.shotNumber == shotNumber);
+        const newEntry: IShotDetail = {
+          shotNumber,
+          distanceToPin: dtp,
+          club: null,
+          result: null,
+        };
+        if (!entryForShotNumberExists) {
+          return [...holeDetail, newEntry];
         }
-        return holeDetail.map((shot: IShotDetail, i: number) => {
-          if (shot.shotNumber != localHoleDetails.shotNumber) return shot;
-          return localHoleDetails;
+        return holeDetail.map((shot: IShotDetail) => {
+          if (shot.shotNumber != shotNumber) return shot;
+          return {
+            ...shot,
+            shotNumber,
+            [keyToUpdate]: valueToUpdate != "--" ? valueToUpdate : null,
+          };
         });
       }
     );
@@ -88,48 +96,29 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
 
   const handleShotNumberChange = (_: Event, newValue: number | number[]) => {
     setShotNumber(newValue as number);
-    setLocalHoleDetails((prev: IShotDetail) => {
-      return {
-        ...prev,
-        shotNumber: newValue as number,
-      };
-    });
+    updatedHoleScoresContext(roundContext.state);
   };
 
   function handleDistanceToPin(event: Event, newValue: number | number[]) {
-    setLocalHoleDetails((prev: IShotDetail) => {
-      return {
-        ...prev,
-        distanceToPin: newValue as number,
-      };
-    });
+    setDtp(newValue as number);
+    addNewHoleDetailsEntries(roundContext.state, "distanceToPin", newValue as number);
   }
 
   const handleClubChange = (event: SelectChangeEvent) => {
-    setLocalHoleDetails((prev: IShotDetail) => {
-      return {
-        ...prev,
-        club: event.target.value as string,
-      };
-    });
+    addNewHoleDetailsEntries(roundContext.state, "club", event.target.value);
   };
 
   const handleShotResultChange = (event: SelectChangeEvent) => {
-    setLocalHoleDetails((prev: IShotDetail) => {
-      return {
-        ...prev,
-        result: event.target.value as string,
-      };
-    });
+    addNewHoleDetailsEntries(roundContext.state, "result", event.target.value);
   };
 
   useEffect(() => {
-    addNewHoleDetailsEntries(roundContext.state);
     updatedHoleScoresContext(roundContext.state);
-  }, [localHoleDetails]);
+  }, [shotNumber]);
 
-  console.log("------- local state ---------");
-  console.log(localHoleDetails);
+  useEffect(() => {
+    addNewHoleDetailsEntries(roundContext.state, "distanceToPin", dtp);
+  }, []);
 
   return (
     <div>
@@ -156,12 +145,13 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
           <Slider
             aria-label="Yards to pin"
             key={row.score}
-            defaultValue={localHoleDetails.distanceToPin || dtp}
-            value={localHoleDetails.distanceToPin || dtp}
+            value={
+              roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.distanceToPin || dtp
+            }
             getAriaValueText={valuetext}
             step={5}
             min={5}
-            max={350}
+            max={holeTotalYardage || dtp} // dtp as fallback could be problematic
             valueLabelDisplay="on"
             onChange={handleDistanceToPin}
           />
@@ -171,7 +161,8 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
               autoWidth
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={localHoleDetails.club || roundContext.state.clubs[0]}
+              defaultValue="--"
+              value={roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.club || "--"}
               label="Club"
               onChange={handleClubChange}
             >
@@ -188,7 +179,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
               autoWidth
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={localHoleDetails.result || shotResultOptions[0]}
+              value={roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.result || "--"}
               label="Result"
               onChange={handleShotResultChange}
             >
