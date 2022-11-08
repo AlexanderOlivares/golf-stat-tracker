@@ -10,7 +10,6 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { IScoreCardProps } from "../pages/[username]/round/[roundid]";
 import { formatScoreCard, IHoleDetails } from "../utils/scoreCardFormatter";
-// import { ISingleHoleDtail } from "../utils/roundFormatter";
 import { HoleDetailModal } from "../components/HoleDetailModal";
 import { IShotDetail } from "../utils/roundFormatter";
 import { useRoundContext } from "../context/RoundContext";
@@ -28,6 +27,11 @@ function showAltTableHeaders(holeNumber: string | undefined): boolean {
 function Row(props: { row: ICompleteScoreCard }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
+  const roundContext = useRoundContext();
+  const altHoleMatches = ["in", "out", "total", "rating", "slope", "HCP", "NET"];
+  const holeIndex = Number(row.hole) <= 9 ? Number(row.hole) - 1 : Number(row.hole);
+
+  const { state } = roundContext;
 
   return (
     <>
@@ -36,7 +40,8 @@ function Row(props: { row: ICompleteScoreCard }) {
           {row.hole}
         </TableCell>
         <TableCell align="right">{row.totalPar ? row.totalPar : row.par}</TableCell>
-        <TableCell align="right">{row.score}</TableCell>
+        {/* <TableCell align="right">{row.score}</TableCell> */}
+        <TableCell align="right">{state.holeScores[holeIndex]}</TableCell>
         <TableCell align="right">{row.yardage}</TableCell>
         <TableCell align="right">{row.handicap}</TableCell>
       </TableRow>
@@ -44,9 +49,11 @@ function Row(props: { row: ICompleteScoreCard }) {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-              <Box textAlign="center" p={1}>
-                <HoleDetailModal row={row} />
-              </Box>
+              {!altHoleMatches.includes(String(row.hole)) && (
+                <Box textAlign="center" p={1}>
+                  <HoleDetailModal row={row} />
+                </Box>
+              )}
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
@@ -93,8 +100,6 @@ export default function ScoreCard(props: IScoreCardProps) {
   const roundContext = useRoundContext();
   const router = useRouter();
   const { username } = router.query;
-  console.log("in scorecard comp");
-  console.log(roundContext.state.holeScores);
 
   const scoreCardRows: IHoleDetails[] = formatScoreCard(props);
   const holeScores = props.hole_scores;
@@ -135,8 +140,6 @@ export default function ScoreCard(props: IScoreCardProps) {
       holeShotDetails: holeShotDetails[i],
     };
   }
-
-  //   console.log(roundRows);
 
   return (
     <TableContainer component={Paper}>

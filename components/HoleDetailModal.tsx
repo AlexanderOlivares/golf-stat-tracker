@@ -24,7 +24,7 @@ function valuetext(value: number) {
 
 export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const roundContext = useRoundContext();
-  const holeIndex = Number(row.hole) < 9 ? Number(row.hole) - 1 : Number(row.hole);
+  const holeIndex = Number(row.hole) <= 9 ? Number(row.hole) - 1 : Number(row.hole);
 
   const [open, setOpen] = useState(false);
   const [shotNumber, setShotNumber] = useState(1);
@@ -76,13 +76,26 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     });
   };
 
+  function sliceSum(arr: number[], start: number, end: number) {
+    return arr.slice(start, end).reduce((a, c) => a + c, 0);
+  }
+
   const updatedHoleScoresContext = (prevState: IRoundState) => {
     const updatedScores = prevState.holeScores.map((existingScore: number, i: number) => {
-      if (i in NON_HOLE_ROWS) {
-        // TODO return totals here
-        return 100;
+      if (NON_HOLE_ROWS[i] == "out") {
+        return sliceSum(prevState.holeScores, 0, 9);
       }
-      if (i == Number(row.hole) - 1) return shotNumber;
+      if (NON_HOLE_ROWS[i] == "in") {
+        return sliceSum(prevState.holeScores, 10, 19);
+      }
+      if (i in NON_HOLE_ROWS) {
+        if (NON_HOLE_ROWS[i] == "total") {
+          const frontNine = sliceSum(prevState.holeScores, 0, 9);
+          const backNine = sliceSum(prevState.holeScores, 10, 19);
+          return frontNine + backNine;
+        }
+      }
+      if (i == holeIndex) return shotNumber;
       return existingScore;
     });
     roundContext.dispatch({
@@ -114,7 +127,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
 
   useEffect(() => {
     updatedHoleScoresContext(roundContext.state);
-  }, [shotNumber]);
+  }, [shotNumber, open]);
 
   useEffect(() => {
     addNewHoleDetailsEntries(roundContext.state, "distanceToPin", dtp);
