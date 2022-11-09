@@ -27,9 +27,12 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const holeIndex = Number(row.hole) <= 9 ? Number(row.hole) - 1 : Number(row.hole);
 
   const [open, setOpen] = useState(false);
-  const [shotNumber, setShotNumber] = useState(1);
+  const [shotNumber, setShotNumber] = useState(roundContext.state.holeScores[holeIndex] || 1);
   const holeTotalYardage = Number(row.yardage);
-  const [dtp, setDtp] = useState(holeTotalYardage || 35);
+  const lastDTPIndex = roundContext.state.holeShotDetails[holeIndex].length - 1;
+  const [dtp, setDtp] = useState(
+    roundContext.state.holeShotDetails[holeIndex][lastDTPIndex]["distanceToPin"] || holeTotalYardage
+  );
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);

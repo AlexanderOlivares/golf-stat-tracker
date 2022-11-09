@@ -9,7 +9,7 @@ import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import { IScoreCardProps } from "../pages/[username]/round/[roundid]";
-import { formatScoreCard, IHoleDetails } from "../utils/scoreCardFormatter";
+import { formatScoreCard, IHoleDetails, NON_HOLE_ROWS } from "../utils/scoreCardFormatter";
 import { HoleDetailModal } from "../components/HoleDetailModal";
 import { IShotDetail } from "../utils/roundFormatter";
 import { useRoundContext } from "../context/RoundContext";
@@ -17,6 +17,7 @@ import { useRouter } from "next/router";
 import { useQuery } from "@apollo/client";
 import { queryParamToString } from "../utils/queryParamFormatter";
 import { getUserClubsQuery } from "../pages/api/graphql/queries/clubQueries";
+const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
 function showAltTableHeaders(holeNumber: string | undefined): boolean {
   if (!holeNumber) return false;
@@ -24,14 +25,28 @@ function showAltTableHeaders(holeNumber: string | undefined): boolean {
   return altHoleMatches.includes(holeNumber);
 }
 
+function getHoleIndexToUpdate(hole: string): number {
+  if (statsOnlyHoles.includes(hole)) {
+    const holeIndexLookup = {
+      out: 9,
+      in: 19,
+      total: 20,
+      rating: 21,
+      slope: 22,
+      HCP: 23,
+      NET: 24,
+    };
+    return holeIndexLookup[hole as keyof typeof holeIndexLookup];
+  }
+  return Number(hole) <= 9 ? Number(hole) - 1 : Number(hole);
+}
+
 function Row(props: { row: ICompleteScoreCard }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
   const roundContext = useRoundContext();
-  const altHoleMatches = ["in", "out", "total", "rating", "slope", "HCP", "NET"];
-  const holeIndex = Number(row.hole) <= 9 ? Number(row.hole) - 1 : Number(row.hole);
-
   const { state } = roundContext;
+  const holeIndex = getHoleIndexToUpdate(row.hole);
 
   return (
     <>
@@ -49,7 +64,7 @@ function Row(props: { row: ICompleteScoreCard }) {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-              {!altHoleMatches.includes(String(row.hole)) && (
+              {!statsOnlyHoles.includes(String(row.hole)) && (
                 <Box textAlign="center" p={1}>
                   <HoleDetailModal row={row} />
                 </Box>
@@ -70,7 +85,7 @@ function Row(props: { row: ICompleteScoreCard }) {
                   </TableRow>
                 </TableHead>
                 <TableBody>
-                  {row.holeShotDetails.map((detail: IShotDetail, i: number) => (
+                  {state.holeShotDetails[holeIndex].map((detail: IShotDetail, i: number) => (
                     // make a better key here
                     <TableRow key={i}>
                       <TableCell>{detail.shotNumber || detail.fairwaysHit}</TableCell>
@@ -136,8 +151,8 @@ export default function ScoreCard(props: IScoreCardProps) {
   for (let i = 0; i < scoreCardRows.length; i++) {
     roundRows[i] = {
       ...scoreCardRows[i],
-      score: holeScores[i],
-      holeShotDetails: holeShotDetails[i],
+      score: roundContext.state.holeScores[i],
+      holeShotDetails: roundContext.state.holeShotDetails[i],
     };
   }
 

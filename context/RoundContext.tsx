@@ -2,12 +2,7 @@ import { createContext, useContext, useReducer } from "react";
 import type { ReactNode } from "react";
 import { defaultClubs } from "../lib/selectOptions";
 import { createHoleDetailsJson, IShotDetail } from "../utils/roundFormatter";
-
-// add clubs selection to context
-// FW hit, gir, putts - add these for stat calculations
-// change distance to feet when putter is selected (Make sure change is recognizable)
-// -------------
-// add extra fields to hole details? - lie, wind direction, uphill/downhill
+import { createHoleScoreArray } from "../utils/roundFormatter";
 
 export interface IRoundState {
   clubs: string[];
