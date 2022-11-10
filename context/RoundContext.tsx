@@ -8,12 +8,14 @@ export interface IRoundState {
   clubs: string[];
   holeScores: number[];
   holeShotDetails: IShotDetail[][];
+  par: string[];
 }
 
 const defualtState: IRoundState = {
   clubs: defaultClubs.slice(0, 14),
   holeScores: [],
   holeShotDetails: createHoleDetailsJson(),
+  par: [],
 };
 
 export type Action = {
@@ -42,6 +44,7 @@ function roundContextReducer(state: IRoundState, action: Action): any {
         ...state,
         holeScores: payload.holeScores,
         holeShotDetails: payload.holeShotDetails,
+        par: payload.par,
       };
     case "update hole score":
       return {

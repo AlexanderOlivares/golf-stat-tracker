@@ -6,7 +6,7 @@ export interface IShotDetail {
   distanceToPin?: number | null;
   club?: string | null;
   result?: string | null;
-  fairwaysHit?: number | null,
+  fairwaysHit?: string | null,
   greensInReg?: number | null,
   threePutts?: number | null,
   totalPutts?: number | null,

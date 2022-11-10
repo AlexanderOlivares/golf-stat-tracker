@@ -12,11 +12,12 @@ import MenuItem from "@mui/material/MenuItem";
 import Box from "@mui/material/Box";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { IShotDetail } from "../utils/roundFormatter";
-import { ICompleteScoreCard } from "../components/ScoreCard";
+import { getHoleIndexToUpdate, ICompleteScoreCard } from "../components/ScoreCard";
 import { useRoundContext } from "../context/RoundContext";
 import { IRoundState } from "../context/RoundContext";
 import { NON_HOLE_ROWS } from "../utils/scoreCardFormatter";
 import { shotResultOptions } from "../lib/selectOptions";
+import { getFrontFairwaysHit, getNonParThreeIndices } from "../utils/holeDetailsFormatter";
 
 function valuetext(value: number) {
   return `${value}`;
@@ -24,7 +25,7 @@ function valuetext(value: number) {
 
 export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const roundContext = useRoundContext();
-  const holeIndex = Number(row.hole) <= 9 ? Number(row.hole) - 1 : Number(row.hole);
+  const holeIndex = getHoleIndexToUpdate(row.hole);
 
   const [open, setOpen] = useState(false);
   const [shotNumber, setShotNumber] = useState(roundContext.state.holeScores[holeIndex] || 1);
@@ -37,6 +38,25 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
+  function calculateFairwaysHit(frontOrBackNine?: string) {
+    const frontNineFairwayIndices = getNonParThreeIndices(roundContext.state.par, 0, 9);
+    const backNineFairwayIndices = getNonParThreeIndices(roundContext.state.par, 10, 19);
+    const totalFairways = roundContext.state.par.filter(par => Number(par) > 3).length - 2; // minus in/out total par
+    const frontFairwaysHit = getFrontFairwaysHit(
+      roundContext.state.holeShotDetails,
+      frontNineFairwayIndices
+    );
+    const backFairwaysHit = getFrontFairwaysHit(
+      roundContext.state.holeShotDetails,
+      backNineFairwayIndices
+    );
+    if (frontOrBackNine == "front") return `${frontFairwaysHit}/${frontNineFairwayIndices.length}`;
+    if (frontOrBackNine == "back") return `${backFairwaysHit}/${backNineFairwayIndices.length}`;
+    return `${frontFairwaysHit + backFairwaysHit}/${totalFairways}`;
+  }
+
+  //   function calculateGIR() {}
+
   const addNewHoleDetailsEntries = (
     prevState: IRoundState,
     keyToUpdate: keyof IShotDetail,
@@ -44,10 +64,40 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   ) => {
     const prevStateCopy = { ...prevState };
 
-    const holeIndexToUpdate = Number(row.hole) < 9 ? Number(row.hole) - 1 : Number(row.hole);
+    const holeIndexToUpdate = Number(row.hole) <= 9 ? Number(row.hole) - 1 : Number(row.hole);
 
     const updatedHoleShotDetails = prevStateCopy.holeShotDetails.map(
       (holeDetail: IShotDetail[], index: number) => {
+        if (index === 9) {
+          return [
+            {
+              fairwaysHit: calculateFairwaysHit("front"),
+              greensInReg: 4,
+              threePutts: 2,
+              totalPutts: 14,
+            },
+          ];
+        }
+        if (index === 19) {
+          return [
+            {
+              fairwaysHit: calculateFairwaysHit("back"),
+              greensInReg: 4,
+              threePutts: 2,
+              totalPutts: 14,
+            },
+          ];
+        }
+        if (index === 20) {
+          return [
+            {
+              fairwaysHit: calculateFairwaysHit(),
+              greensInReg: 4,
+              threePutts: 2,
+              totalPutts: 14,
+            },
+          ];
+        }
         if (index != holeIndexToUpdate) return holeDetail;
         const entryForShotNumberExists = holeDetail.find(shot => shot.shotNumber == shotNumber);
         const newEntry: IShotDetail = {

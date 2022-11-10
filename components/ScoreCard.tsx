@@ -25,7 +25,7 @@ function showAltTableHeaders(holeNumber: string | undefined): boolean {
   return altHoleMatches.includes(holeNumber);
 }
 
-function getHoleIndexToUpdate(hole: string): number {
+export function getHoleIndexToUpdate(hole: string): number {
   if (statsOnlyHoles.includes(hole)) {
     const holeIndexLookup = {
       out: 9,
@@ -111,6 +111,10 @@ export interface ICompleteScoreCard extends IHoleDetails {
   holeShotDetails: IShotDetail[];
 }
 
+function formatParArray(holes: IHoleDetails[]) {
+  return holes.map(hole => hole.par).slice(0, 20);
+}
+
 export default function ScoreCard(props: IScoreCardProps) {
   const roundContext = useRoundContext();
   const router = useRouter();
@@ -142,6 +146,7 @@ export default function ScoreCard(props: IScoreCardProps) {
         ...roundContext.state,
         holeScores: holeScores,
         holeShotDetails,
+        par: formatParArray(scoreCardRows),
       },
     });
   }, [data, holeScores, holeShotDetails]);
