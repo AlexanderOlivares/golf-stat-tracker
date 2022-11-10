@@ -17,7 +17,11 @@ import { useRoundContext } from "../context/RoundContext";
 import { IRoundState } from "../context/RoundContext";
 import { NON_HOLE_ROWS } from "../utils/scoreCardFormatter";
 import { shotResultOptions } from "../lib/selectOptions";
-import { getFrontFairwaysHit, getNonParThreeIndices } from "../utils/holeDetailsFormatter";
+import {
+  getFairwaysHit,
+  getGreensInReg,
+  getNonParThreeIndices,
+} from "../utils/holeDetailsFormatter";
 
 function valuetext(value: number) {
   return `${value}`;
@@ -42,11 +46,11 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     const frontNineFairwayIndices = getNonParThreeIndices(roundContext.state.par, 0, 9);
     const backNineFairwayIndices = getNonParThreeIndices(roundContext.state.par, 10, 19);
     const totalFairways = roundContext.state.par.filter(par => Number(par) > 3).length - 2; // minus in/out total par
-    const frontFairwaysHit = getFrontFairwaysHit(
+    const frontFairwaysHit = getFairwaysHit(
       roundContext.state.holeShotDetails,
       frontNineFairwayIndices
     );
-    const backFairwaysHit = getFrontFairwaysHit(
+    const backFairwaysHit = getFairwaysHit(
       roundContext.state.holeShotDetails,
       backNineFairwayIndices
     );
@@ -55,7 +59,12 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     return `${frontFairwaysHit + backFairwaysHit}/${totalFairways}`;
   }
 
-  //   function calculateGIR() {}
+  function calculateGIR(frontOrBack?: string) {
+    const { holeShotDetails, par } = roundContext.state;
+    if (frontOrBack == "front") return getGreensInReg(holeShotDetails, par, 0, 9);
+    if (frontOrBack == "back") return getGreensInReg(holeShotDetails, par, 10, 19);
+    return getGreensInReg(holeShotDetails, par);
+  }
 
   const addNewHoleDetailsEntries = (
     prevState: IRoundState,
@@ -72,7 +81,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
           return [
             {
               fairwaysHit: calculateFairwaysHit("front"),
-              greensInReg: 4,
+              greensInReg: calculateGIR("front"),
               threePutts: 2,
               totalPutts: 14,
             },
@@ -82,7 +91,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
           return [
             {
               fairwaysHit: calculateFairwaysHit("back"),
-              greensInReg: 4,
+              greensInReg: calculateGIR("back"),
               threePutts: 2,
               totalPutts: 14,
             },
@@ -92,7 +101,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
           return [
             {
               fairwaysHit: calculateFairwaysHit(),
-              greensInReg: 4,
+              greensInReg: calculateGIR(),
               threePutts: 2,
               totalPutts: 14,
             },

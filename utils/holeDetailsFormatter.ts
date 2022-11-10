@@ -7,7 +7,7 @@ export function getNonParThreeIndices(parArray: string[], sliceStart: number, sl
     .filter(index => index != null);
 }
 
-export function getFrontFairwaysHit(shotDetails: IShotDetail[][], frontNineFairwayIndices: (number|null)[]){
+export function getFairwaysHit(shotDetails: IShotDetail[][], frontNineFairwayIndices: (number|null)[]){
     return shotDetails.filter((shotDetail: IShotDetail[], i) => {
         return (
           shotDetail[0].result == "Hit Fairway" &&
@@ -15,3 +15,14 @@ export function getFrontFairwaysHit(shotDetails: IShotDetail[][], frontNineFairw
         );
       }).length; 
 }
+
+export function getGreensInReg(shotDetails: IShotDetail[][], parArray: string[], sliceStart?: number, sliceEnd?: number) {
+    return shotDetails
+      .slice(sliceStart, sliceEnd)
+      .filter((shotDetail: IShotDetail[], i) => {
+        const greenInRegShotNumber = Number(parArray[i]) - 2;
+        return shotDetail.filter((shot: IShotDetail, i) => {
+          return shot.shotNumber == greenInRegShotNumber && shot.result == "Hit Green";
+        }).length;
+      }).length;
+  }
