@@ -18,8 +18,9 @@ import { IRoundState } from "../context/RoundContext";
 import { NON_HOLE_ROWS } from "../utils/scoreCardFormatter";
 import { shotResultOptions } from "../lib/selectOptions";
 import {
-  getFairwaysHit,
-  getGreensInReg,
+  calculateFairwaysHit,
+  calculateGreensInReg,
+  calculateTotalPutts,
   getNonParThreeIndices,
 } from "../utils/holeDetailsFormatter";
 
@@ -42,15 +43,15 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  function calculateFairwaysHit(frontOrBackNine?: string) {
+  function getFairwaysHit(frontOrBackNine?: string) {
     const frontNineFairwayIndices = getNonParThreeIndices(roundContext.state.par, 0, 9);
     const backNineFairwayIndices = getNonParThreeIndices(roundContext.state.par, 10, 19);
     const totalFairways = roundContext.state.par.filter(par => Number(par) > 3).length - 2; // minus in/out total par
-    const frontFairwaysHit = getFairwaysHit(
+    const frontFairwaysHit = calculateFairwaysHit(
       roundContext.state.holeShotDetails,
       frontNineFairwayIndices
     );
-    const backFairwaysHit = getFairwaysHit(
+    const backFairwaysHit = calculateFairwaysHit(
       roundContext.state.holeShotDetails,
       backNineFairwayIndices
     );
@@ -59,11 +60,41 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     return `${frontFairwaysHit + backFairwaysHit}/${totalFairways}`;
   }
 
-  function calculateGIR(frontOrBack?: string) {
+  function getGreensInReg(frontOrBack?: string) {
     const { holeShotDetails, par } = roundContext.state;
-    if (frontOrBack == "front") return getGreensInReg(holeShotDetails, par, 0, 9);
-    if (frontOrBack == "back") return getGreensInReg(holeShotDetails, par, 10, 19);
-    return getGreensInReg(holeShotDetails, par);
+    if (frontOrBack == "front") return calculateGreensInReg(holeShotDetails, par, 0, 9);
+    if (frontOrBack == "back") return calculateGreensInReg(holeShotDetails, par, 10, 19);
+    return calculateGreensInReg(holeShotDetails, par);
+  }
+
+  function getTotalPutts(frontBackOrTotal?: string) {
+    const { holeShotDetails } = roundContext.state;
+    const sum = (arr: number[]) => arr.reduce((a, c) => a + c, 0);
+    if (frontBackOrTotal == "front") {
+      const frontNinePutts = calculateTotalPutts(holeShotDetails, 0, 9);
+      return sum(frontNinePutts);
+    }
+    if (frontBackOrTotal == "back") {
+      const backNinePutts = calculateTotalPutts(holeShotDetails, 10, 19);
+      return sum(backNinePutts);
+    }
+    const totalPutts = calculateTotalPutts(holeShotDetails);
+    return sum(totalPutts);
+  }
+
+  function getThreePutts(frontBackOrTotal?: string) {
+    const { holeShotDetails } = roundContext.state;
+    const getThreePutts = (arr: number[]) => arr.filter(putts => putts > 2).length;
+    if (frontBackOrTotal == "front") {
+      const frontNinePutts = calculateTotalPutts(holeShotDetails, 0, 9);
+      return getThreePutts(frontNinePutts);
+    }
+    if (frontBackOrTotal == "back") {
+      const backNinePutts = calculateTotalPutts(holeShotDetails, 10, 19);
+      return getThreePutts(backNinePutts);
+    }
+    const totalPutts = calculateTotalPutts(holeShotDetails);
+    return getThreePutts(totalPutts);
   }
 
   const addNewHoleDetailsEntries = (
@@ -80,30 +111,30 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
         if (index === 9) {
           return [
             {
-              fairwaysHit: calculateFairwaysHit("front"),
-              greensInReg: calculateGIR("front"),
-              threePutts: 2,
-              totalPutts: 14,
+              fairwaysHit: getFairwaysHit("front"),
+              greensInReg: getGreensInReg("front"),
+              threePutts: getThreePutts("front"),
+              totalPutts: getTotalPutts("front"),
             },
           ];
         }
         if (index === 19) {
           return [
             {
-              fairwaysHit: calculateFairwaysHit("back"),
-              greensInReg: calculateGIR("back"),
-              threePutts: 2,
-              totalPutts: 14,
+              fairwaysHit: getFairwaysHit("back"),
+              greensInReg: getGreensInReg("back"),
+              threePutts: getThreePutts("back"),
+              totalPutts: getTotalPutts("back"),
             },
           ];
         }
         if (index === 20) {
           return [
             {
-              fairwaysHit: calculateFairwaysHit(),
-              greensInReg: calculateGIR(),
-              threePutts: 2,
-              totalPutts: 14,
+              fairwaysHit: getFairwaysHit(),
+              greensInReg: getGreensInReg(),
+              threePutts: getThreePutts(),
+              totalPutts: getTotalPutts(),
             },
           ];
         }

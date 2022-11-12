@@ -7,7 +7,7 @@ export function getNonParThreeIndices(parArray: string[], sliceStart: number, sl
     .filter(index => index != null);
 }
 
-export function getFairwaysHit(shotDetails: IShotDetail[][], frontNineFairwayIndices: (number|null)[]){
+export function calculateFairwaysHit(shotDetails: IShotDetail[][], frontNineFairwayIndices: (number|null)[]){
     return shotDetails.filter((shotDetail: IShotDetail[], i) => {
         return (
           shotDetail[0].result == "Hit Fairway" &&
@@ -16,13 +16,24 @@ export function getFairwaysHit(shotDetails: IShotDetail[][], frontNineFairwayInd
       }).length; 
 }
 
-export function getGreensInReg(shotDetails: IShotDetail[][], parArray: string[], sliceStart?: number, sliceEnd?: number) {
+export function calculateGreensInReg(shotDetails: IShotDetail[][], parArray: string[], sliceStart?: number, sliceEnd?: number) {
     return shotDetails
       .slice(sliceStart, sliceEnd)
       .filter((shotDetail: IShotDetail[], i) => {
-        const greenInRegShotNumber = Number(parArray[i]) - 2;
+        const greenInRegShotNumber: number = Number(parArray[i]) - 2;
         return shotDetail.filter((shot: IShotDetail, i) => {
           return shot.shotNumber == greenInRegShotNumber && shot.result == "Hit Green";
         }).length;
       }).length;
+  }
+
+
+  export function calculateTotalPutts(shotDetails: IShotDetail[][], sliceStart?: number, sliceEnd?: number) {
+    return shotDetails
+      .slice(sliceStart, sliceEnd)
+      .map((shotDetail: IShotDetail[], i) => {
+        return shotDetail.filter((shot: IShotDetail, i) => {
+          return shot.club === "Putter"
+        }).length
+      })
   }

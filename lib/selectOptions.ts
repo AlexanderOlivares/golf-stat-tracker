@@ -15,7 +15,7 @@ export var defaultClubs = [
     "56 degree",
     "58 degree",
     "60 degree",
-    "putter",
+    "Putter",
     "3 hybrid",
     "7 wood",
     "5 wood",
