@@ -39,6 +39,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const [dtp, setDtp] = useState(
     roundContext.state.holeShotDetails[holeIndex][lastDTPIndex]["distanceToPin"] || holeTotalYardage
   );
+  const [yardsOrFeet, setYardsOrFeet] = useState<string>("Yards");
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -211,6 +212,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   }
 
   const handleClubChange = (event: SelectChangeEvent) => {
+    if (event.target.value == "Putter") setYardsOrFeet("Feet");
     addNewHoleDetailsEntries(roundContext.state, "club", event.target.value);
   };
 
@@ -220,6 +222,11 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
 
   useEffect(() => {
     updatedHoleScoresContext(roundContext.state);
+    if (roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.club != "Putter") {
+      setYardsOrFeet("Yards");
+    } else {
+      setYardsOrFeet("Feet");
+    }
   }, [shotNumber, open]);
 
   useEffect(() => {
@@ -247,17 +254,17 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
             onChange={handleShotNumberChange}
           />
           <DialogTitle textAlign="center">Hole Details</DialogTitle>
-          <DialogContentText>Distance To Pin</DialogContentText>
+          <DialogContentText>{`Distance To Pin ${yardsOrFeet}`}</DialogContentText>
           <Slider
-            aria-label="Yards to pin"
+            aria-label="Distance to pin"
             key={row.score}
             value={
               roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.distanceToPin || dtp
             }
             getAriaValueText={valuetext}
-            step={5}
-            min={5}
-            max={holeTotalYardage || dtp} // dtp as fallback could be problematic
+            step={yardsOrFeet === "Yards" ? 5 : 1}
+            min={yardsOrFeet === "Yards" ? 5 : 1}
+            max={yardsOrFeet === "Yards" ? holeTotalYardage || dtp : 100} // dtp as fallback could be problematic
             valueLabelDisplay="on"
             onChange={handleDistanceToPin}
           />

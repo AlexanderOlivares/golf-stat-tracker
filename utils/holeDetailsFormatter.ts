@@ -20,8 +20,9 @@ export function calculateGreensInReg(shotDetails: IShotDetail[][], parArray: str
     return shotDetails
       .slice(sliceStart, sliceEnd)
       .filter((shotDetail: IShotDetail[], i) => {
-        const greenInRegShotNumber: number = Number(parArray[i]) - 2;
-        return shotDetail.filter((shot: IShotDetail, i) => {
+        const frontOrBackParArray = parArray.slice(sliceStart, sliceEnd);
+        const greenInRegShotNumber: number = Number(frontOrBackParArray[i]) - 2;
+        return shotDetail.filter((shot: IShotDetail) => {
           return shot.shotNumber == greenInRegShotNumber && shot.result == "Hit Green";
         }).length;
       }).length;
@@ -32,7 +33,7 @@ export function calculateGreensInReg(shotDetails: IShotDetail[][], parArray: str
     return shotDetails
       .slice(sliceStart, sliceEnd)
       .map((shotDetail: IShotDetail[], i) => {
-        return shotDetail.filter((shot: IShotDetail, i) => {
+        return shotDetail.filter((shot: IShotDetail) => {
           return shot.club === "Putter"
         }).length
       })
