@@ -103,49 +103,16 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     keyToUpdate: keyof IShotDetail,
     valueToUpdate: string | number
   ) => {
-    const prevStateCopy = { ...prevState };
-
-    const holeIndexToUpdate = Number(row.hole) <= 9 ? Number(row.hole) - 1 : Number(row.hole);
-
-    const updatedHoleShotDetails = prevStateCopy.holeShotDetails.map(
+    const updatedHoleShotDetails = prevState.holeShotDetails.map(
       (holeDetail: IShotDetail[], index: number) => {
-        if (index === 9) {
-          return [
-            {
-              fairwaysHit: getFairwaysHit("front"),
-              greensInReg: getGreensInReg("front"),
-              threePutts: getThreePutts("front"),
-              totalPutts: getTotalPutts("front"),
-            },
-          ];
-        }
-        if (index === 19) {
-          return [
-            {
-              fairwaysHit: getFairwaysHit("back"),
-              greensInReg: getGreensInReg("back"),
-              threePutts: getThreePutts("back"),
-              totalPutts: getTotalPutts("back"),
-            },
-          ];
-        }
-        if (index === 20) {
-          return [
-            {
-              fairwaysHit: getFairwaysHit(),
-              greensInReg: getGreensInReg(),
-              threePutts: getThreePutts(),
-              totalPutts: getTotalPutts(),
-            },
-          ];
-        }
-        if (index != holeIndexToUpdate) return holeDetail;
+        if (index != holeIndex) return holeDetail;
         const entryForShotNumberExists = holeDetail.find(shot => shot.shotNumber == shotNumber);
         const newEntry: IShotDetail = {
           shotNumber,
           distanceToPin: dtp,
           club: null,
           result: null,
+          [keyToUpdate]: valueToUpdate != "--" ? valueToUpdate : null,
         };
         if (!entryForShotNumberExists) {
           return [...holeDetail, newEntry];
@@ -220,13 +187,61 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     addNewHoleDetailsEntries(roundContext.state, "result", event.target.value);
   };
 
-  useEffect(() => {
+  function saveScorecard() {
     updatedHoleScoresContext(roundContext.state);
     if (roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.club != "Putter") {
       setYardsOrFeet("Yards");
     } else {
       setYardsOrFeet("Feet");
     }
+
+    const updatedHoleShotDetails = roundContext.state.holeShotDetails.map(
+      (holeDetail: IShotDetail[], index: number) => {
+        if (index === 9) {
+          return [
+            {
+              fairwaysHit: getFairwaysHit("front"),
+              greensInReg: getGreensInReg("front"),
+              threePutts: getThreePutts("front"),
+              totalPutts: getTotalPutts("front"),
+            },
+          ];
+        }
+        if (index === 19) {
+          return [
+            {
+              fairwaysHit: getFairwaysHit("back"),
+              greensInReg: getGreensInReg("back"),
+              threePutts: getThreePutts("back"),
+              totalPutts: getTotalPutts("back"),
+            },
+          ];
+        }
+        if (index === 20) {
+          return [
+            {
+              fairwaysHit: getFairwaysHit(),
+              greensInReg: getGreensInReg(),
+              threePutts: getThreePutts(),
+              totalPutts: getTotalPutts(),
+            },
+          ];
+        }
+        return holeDetail;
+      }
+    );
+
+    roundContext.dispatch({
+      type: "update hole shot details",
+      payload: {
+        ...roundContext.state,
+        holeShotDetails: updatedHoleShotDetails,
+      },
+    });
+  }
+
+  useEffect(() => {
+    saveScorecard();
   }, [shotNumber, open]);
 
   useEffect(() => {
