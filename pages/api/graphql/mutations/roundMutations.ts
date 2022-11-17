@@ -48,10 +48,19 @@ export const createNewRound = gql`
       is_user_added_course
       weather_conditions
       temperature
-      user_added_course_name,
-      user_added_city,
-      user_added_state,
-      unverified_course_id,
+      user_added_course_name
+      user_added_city
+      user_added_state
+      unverified_course_id
+    }
+  }
+`;
+
+export const saveRound = gql`
+  mutation SaveRound($holeScores: [Int], $holeShotDetails: JSON, $roundid: String) {
+    saveRound(input: { holeScores: $holeScores, holeShotDetails: $holeShotDetails, roundid: $roundid }) {
+      hole_scores
+      hole_shot_details
     }
   }
 `;

@@ -114,6 +114,7 @@ export const typeDefs = gql`
     unverified_course_id: String
     hole_scores: [Int]
     hole_shot_details: JSON
+    # hole_shot_details: String
   }
 
   type UserClubs {
@@ -133,6 +134,17 @@ export const typeDefs = gql`
     clubs: [String]
   }
 
+  input RoundStats {
+    holeScores: [Int]
+    holeShotDetails: JSON
+    roundid: String
+  }
+
+  type RoundStatsResponse {
+    hole_scores: [Int]
+    hole_shot_details: JSON
+  }
+
   type Query {
     user(username: String!): User
     courses: [CourseNamesAndIds]
@@ -147,5 +159,6 @@ export const typeDefs = gql`
     signOut: Boolean!
     newRound(input: NewRound!): NewRoundResponse
     editClubs(input: UpdateClubsInput!): ClubList
+    saveRound(input: RoundStats!): RoundStatsResponse
   }
 `;

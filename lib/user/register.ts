@@ -4,7 +4,7 @@ import pool from "../../db/dbConfig";
 import bcrypt from "bcryptjs";
 import { v4 as uuidv4 } from "uuid";
 import { errorMessage } from "../../utils/errorMessage";
-import { defaultClubs } from "../../pages/[username]/edit-profile";
+import { defaultClubs } from "../selectOptions";
 
 export interface IUser {
   userid: string;

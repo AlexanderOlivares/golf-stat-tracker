@@ -43,7 +43,6 @@ export interface IRoundRequestBody {
   username: string;
   holeCount: number;
   teeColor: string;
-  //   roundView: string;
   roundDate: string | null;
   frontOrBackNine: string;
   isUserAddedCourse: boolean;
@@ -54,7 +53,7 @@ export interface IRoundRequestBody {
   userAddedState?: string;
   unverifiedCourseId?: string | null;
   hole_scores?: number[];
-  hole_shot_details?: string[];
+  hole_shot_details?: string;
 }
 export function populateUserAddedCourseFields(
   isUserAddedCourse: boolean,

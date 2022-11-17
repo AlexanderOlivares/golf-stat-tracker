@@ -16,6 +16,7 @@ import {
 import { errorOccured } from "./graphqlUtils";
 import { createNewRound, getRound } from "../../../lib/round/createNewRound";
 import { getUserClubs, updateUserClubs } from "../../../lib/user/getUserClubs";
+import { saveRoundDetails } from "../../../lib/round/updateRound";
 
 export const resolvers = {
   Query: {
@@ -93,6 +94,14 @@ export const resolvers = {
         const updatedClubs = await updateUserClubs(clubs, username);
         if (errorOccured(updatedClubs)) return new Error(updatedClubs.errorMessage)
         return updatedClubs;
+    },
+    // update args 
+    async saveRound(_parent: undefined, args: any, context: IContext) {
+      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
+        const { holeScores, holeShotDetails, roundid } = args.input
+        const savedRoundStats = await saveRoundDetails(holeScores, holeShotDetails, roundid);
+        if (errorOccured(savedRoundStats)) return new Error(savedRoundStats.errorMessage)
+        return savedRoundStats;
     },
   },
 };

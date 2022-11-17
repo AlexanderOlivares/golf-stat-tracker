@@ -23,12 +23,19 @@ import {
   calculateTotalPutts,
   getNonParThreeIndices,
 } from "../utils/holeDetailsFormatter";
+import { useMutation } from "@apollo/client";
+import { saveRound as saveRoundMutation } from "../pages/api/graphql/mutations/roundMutations";
+import { useRouter } from "next/router";
+import { queryParamToString } from "../utils/queryParamFormatter";
 
 function valuetext(value: number) {
   return `${value}`;
 }
 
 export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
+  const router = useRouter();
+  const { roundid } = router.query;
+  const [saveRound] = useMutation(saveRoundMutation);
   const roundContext = useRoundContext();
   const holeIndex = getHoleIndexToUpdate(row.hole);
 
@@ -166,6 +173,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
         holeScores: updatedScores,
       },
     });
+    return updatedScores;
   };
 
   const handleShotNumberChange = (_: Event, newValue: number | number[]) => {
@@ -187,8 +195,8 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     addNewHoleDetailsEntries(roundContext.state, "result", event.target.value);
   };
 
-  function saveScorecard() {
-    updatedHoleScoresContext(roundContext.state);
+  async function saveScorecard() {
+    const updatedHoleScores = updatedHoleScoresContext(roundContext.state);
     if (roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.club != "Putter") {
       setYardsOrFeet("Yards");
     } else {
@@ -238,6 +246,15 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
         holeShotDetails: updatedHoleShotDetails,
       },
     });
+
+    const { data } = await saveRound({
+      variables: {
+        holeScores: updatedHoleScores,
+        holeShotDetails: updatedHoleShotDetails,
+        roundid: queryParamToString(roundid),
+      },
+    });
+    console.log("SAVED!!!!!!!!!!!!!!!!!");
   }
 
   useEffect(() => {
