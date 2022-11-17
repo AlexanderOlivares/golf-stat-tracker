@@ -53,7 +53,7 @@ export default async function registerUser(username: string, email: string, pass
 
     const defaultUserSettings = await pool.query(
         "INSERT INTO user_settings (userid, username, email, using_default_clubs, clubs) VALUES ($1, $2, $3, $4, $5)",
-        [userid, username, email, true, defaultClubs.slice(0, 14)]
+        [userid, username, email, true, defaultClubs.slice(1, 15)]
     );
 
     if (!newUser.rowCount || !defaultUserSettings.rowCount) {

@@ -61,13 +61,15 @@ export default function MultipleSelectChip() {
     variables: {
       username: queryParamToString(username),
     },
+    fetchPolicy: "network-only",
   });
 
   async function saveClubs() {
     try {
-      if (!clubsInBag.length) {
+      if (!clubsInBag.length || !clubsInBag.includes("Putter")) {
         // add toast error
-        console.log("You need at least 1 one club");
+        console.log("You must have a putter");
+        setClubsInBag([...clubsInBag, "Putter"]);
         return;
       }
       const savedEditedClubs = await editClubs({
