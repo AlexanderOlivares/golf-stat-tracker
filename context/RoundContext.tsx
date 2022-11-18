@@ -2,7 +2,6 @@ import { createContext, useContext, useReducer } from "react";
 import type { ReactNode } from "react";
 import { defaultClubs } from "../lib/selectOptions";
 import { createHoleDetailsJson, IShotDetail } from "../utils/roundFormatter";
-import { createHoleScoreArray } from "../utils/roundFormatter";
 
 export interface IRoundState {
   clubs: string[];

@@ -1,5 +1,6 @@
 import React, { useEffect } from "react";
 import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
 import Collapse from "@mui/material/Collapse";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
@@ -123,6 +124,8 @@ export default function ScoreCard(props: IScoreCardProps) {
   const scoreCardRows: IHoleDetails[] = formatScoreCard(props);
   const holeScores = props.hole_scores;
   const holeShotDetails = props.hole_shot_details;
+  const { rating } = scoreCardRows[21];
+  const { slope } = scoreCardRows[22];
 
   const { data, loading, error } = useQuery(getUserClubsQuery, {
     variables: {
@@ -153,7 +156,8 @@ export default function ScoreCard(props: IScoreCardProps) {
 
   let roundRows: ICompleteScoreCard[] = [];
 
-  for (let i = 0; i < scoreCardRows.length; i++) {
+  // hiding rating, slope, index and handicap for now. should be i < scoreCardRows.length
+  for (let i = 0; i < 21; i++) {
     roundRows[i] = {
       ...scoreCardRows[i],
       score: roundContext.state.holeScores[i],
@@ -162,23 +166,33 @@ export default function ScoreCard(props: IScoreCardProps) {
   }
 
   return (
-    <TableContainer component={Paper}>
-      <Table aria-label="collapsible table">
-        <TableHead>
-          <TableRow>
-            <TableCell>Hole</TableCell>
-            <TableCell align="right">Par</TableCell>
-            <TableCell align="right">Score</TableCell>
-            <TableCell align="right">Distance</TableCell>
-            <TableCell align="right">Handicap</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {roundRows.map(row => (
-            <Row key={row.hole} row={row} />
-          ))}
-        </TableBody>
-      </Table>
-    </TableContainer>
+    <>
+      <Box>
+        <Typography variant="h6" component="h2">
+          Slope {slope}
+        </Typography>
+        <Typography variant="h6" component="h2">
+          Rating {rating}
+        </Typography>
+      </Box>
+      <TableContainer component={Paper}>
+        <Table aria-label="collapsible table">
+          <TableHead>
+            <TableRow>
+              <TableCell>Hole</TableCell>
+              <TableCell align="right">Par</TableCell>
+              <TableCell align="right">Score</TableCell>
+              <TableCell align="right">Distance</TableCell>
+              <TableCell align="right">Handicap</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {roundRows.map(row => (
+              <Row key={row.hole} row={row} />
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </>
   );
 }
