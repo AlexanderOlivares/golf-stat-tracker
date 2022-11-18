@@ -195,6 +195,35 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     addNewHoleDetailsEntries(roundContext.state, "result", event.target.value);
   };
 
+  function handleHoleReset() {
+    const shotDetailsWithResetHole = roundContext.state.holeShotDetails.map(
+      (hole: IShotDetail[], index: number) => {
+        if (index != holeIndex) return hole;
+        return [
+          {
+            shotNumber: 1,
+            distanceToPin: null,
+            club: null,
+            result: null,
+          },
+        ];
+      }
+    );
+
+    roundContext.state.holeScores[holeIndex] = 1;
+    setShotNumber(1);
+    addNewHoleDetailsEntries(roundContext.state, "distanceToPin", holeTotalYardage);
+
+    roundContext.dispatch({
+      type: "update scores and shot details",
+      payload: {
+        ...roundContext.state,
+        holeScores: roundContext.state.holeScores,
+        holeShotDetails: shotDetailsWithResetHole,
+      },
+    });
+  }
+
   async function saveScorecard() {
     const updatedHoleScores = updatedHoleScoresContext(roundContext.state);
     if (roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.club != "Putter") {
@@ -339,7 +368,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose}>Cancel</Button>
+          <Button onClick={handleHoleReset}>Reset</Button>
           <Button onClick={handleClose}>Save</Button>
         </DialogActions>
       </Dialog>
