@@ -11,12 +11,13 @@ import {
   INewRoundMutationArgs,
   IRoundQueryArgs, 
   ICourseQueryArgs,
-  IEditClubsMutationArgs
+  IEditClubsMutationArgs,
 } from "./resolverInterfaces";
 import { errorOccured } from "./graphqlUtils";
 import { createNewRound, getRound } from "../../../lib/round/createNewRound";
 import { getUserClubs, updateUserClubs } from "../../../lib/user/getUserClubs";
 import { saveRoundDetails } from "../../../lib/round/updateRound";
+import { getRoundPreview } from "../../../lib/round/roundPreview";
 
 export const resolvers = {
   Query: {
@@ -43,6 +44,13 @@ export const resolvers = {
       if (errorOccured(round)) return new Error(round.errorMessage);
       return round;
     },
+    roundPreview: async (_parent: undefined, args: { username: string }, context: IContext) => {
+      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
+      const { username } = args;
+      const round = await getRoundPreview(username);
+      if (errorOccured(round)) return new Error(round.errorMessage);
+      return round;
+    },
     clubs: async (_parent: undefined, args: { username: string }, context: IContext) => {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
         const { username } = args;
@@ -54,28 +62,18 @@ export const resolvers = {
   Mutation: {
     register: async (_parent: undefined, args: IRegisterMutationArgs, context: IContext) => {
       const { username, email, password } = args.input;
-
       const registeredUser = await registerUser(username, email, password);
-
       if (errorOccured(registeredUser)) return new Error(registeredUser.errorMessage);
-
       const { token } = registeredUser;
-
       setAuthCookie(context.res, token);
-
       return registeredUser;
     },
     login: async (_parent: undefined, args: ILoginMutationArgs, context: IContext) => {
       const { email, password } = args.input;
-
       const loggedInUser = await loginUser(email, password);
-
       if (errorOccured(loggedInUser)) return new Error(loggedInUser.errorMessage);
-
       const { token } = loggedInUser;
-
       setAuthCookie(context.res, token);
-
       return loggedInUser;
     },
     async signOut(_parent: undefined, _args: undefined, context: IContext) {
@@ -95,7 +93,7 @@ export const resolvers = {
         if (errorOccured(updatedClubs)) return new Error(updatedClubs.errorMessage)
         return updatedClubs;
     },
-    // update args 
+    // TODO update args 
     async saveRound(_parent: undefined, args: any, context: IContext) {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
         const { holeScores, holeShotDetails, roundid } = args.input

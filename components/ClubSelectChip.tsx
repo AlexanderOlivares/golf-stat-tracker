@@ -17,8 +17,6 @@ import { useMutation } from "@apollo/client";
 import { clubEditMutation } from "../pages/api/graphql/mutations/clubMutations";
 import { defaultClubs } from "../lib/selectOptions";
 
-getUserClubsQuery;
-
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
 const MenuProps = {

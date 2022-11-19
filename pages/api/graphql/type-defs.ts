@@ -145,11 +145,28 @@ export const typeDefs = gql`
     hole_shot_details: JSON
   }
 
+  type RoundPreviewResponse {
+    round_id: String!
+    course_id: String
+    course_name: String
+    tee_color: String!
+    round_date: String
+    is_user_added_course: Boolean!
+    #   user_added_course_name
+    #   unverified_course_id
+    score: Int
+    fairwaysHit: String
+    greensInReg: Int
+    threePutts: Int
+    totalPutts: Int
+  }
+
   type Query {
     user(username: String!): User
     courses: [CourseNamesAndIds]
     course(courseId: String!, teeColor: String!): [Course]!
     round(roundid: String!): NewRoundResponse
+    roundPreview(username: String!): [RoundPreviewResponse]
     clubs(username: String!): UserClubs!
   }
 

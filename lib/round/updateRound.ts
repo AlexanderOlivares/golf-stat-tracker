@@ -1,5 +1,4 @@
 import pool from "../../db/dbConfig";
-import { IRoundRequestBody } from "../../pages/[username]/round/new-round";
 import { errorMessage, IErrorMessage } from "../../utils/errorMessage";
 import { IShotDetail } from "../../utils/roundFormatter";
 

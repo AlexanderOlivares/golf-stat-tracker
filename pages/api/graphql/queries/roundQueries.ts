@@ -23,3 +23,23 @@ export const getRoundByIdQuery = gql`
     }
   }
 `;
+
+export const getRoundPreviewByUsernameQuery = gql`
+  query getRoundPreviewByUsernameQuery($username: String!) {
+    roundPreview(username: $username) {
+      round_id
+      course_id
+      course_name
+      tee_color
+      round_date
+      is_user_added_course
+      #   user_added_course_name
+      #   unverified_course_id
+      score
+      fairwaysHit
+      greensInReg
+      threePutts
+      totalPutts
+    }
+  }
+`;
