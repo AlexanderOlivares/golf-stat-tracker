@@ -42,12 +42,12 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const [open, setOpen] = useState(false);
   const [shotNumber, setShotNumber] = useState(roundContext.state.holeScores[holeIndex] || 1);
   const holeTotalYardage = Number(row.yardage);
-  const lastDTPIndex = roundContext.state.holeShotDetails[holeIndex].length - 1; // this isn't chronological
+  const [shotDetailIndexToUpdate, setShotDetailIndexToUpdate] = useState(shotNumber - 1);
   const [dtp, setDtp] = useState(
-    roundContext.state.holeShotDetails[holeIndex][lastDTPIndex]["distanceToPin"] || holeTotalYardage
+    roundContext.state.holeShotDetails[holeIndex][shotDetailIndexToUpdate]?.distanceToPin ||
+      holeTotalYardage
   );
   const [yardsOrFeet, setYardsOrFeet] = useState<string>("Yards");
-  const [shotDetailIndexToUpdate, setShotDetailIndexToUpdate] = useState(shotNumber - 1);
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -323,7 +323,6 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
             aria-label="Distance to pin"
             key={row.score}
             value={
-              //   roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.distanceToPin || dtp
               roundContext.state.holeShotDetails[holeIndex][shotDetailIndexToUpdate]
                 ?.distanceToPin || dtp
             }
