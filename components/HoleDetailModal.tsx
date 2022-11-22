@@ -230,12 +230,6 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     });
   }
 
-  function handleYardsOrFeet(currentShot: IShotDetail, club: string) {
-    console.log(currentShot);
-    if (club == "Putter") return setYardsOrFeet("Feet");
-    return setYardsOrFeet("Yards");
-  }
-
   async function saveScorecard() {
     const updatedHoleScores = updatedHoleScoresContext(roundContext.state);
 
