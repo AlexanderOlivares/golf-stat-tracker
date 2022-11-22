@@ -42,11 +42,12 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const [open, setOpen] = useState(false);
   const [shotNumber, setShotNumber] = useState(roundContext.state.holeScores[holeIndex] || 1);
   const holeTotalYardage = Number(row.yardage);
-  const lastDTPIndex = roundContext.state.holeShotDetails[holeIndex].length - 1;
+  const lastDTPIndex = roundContext.state.holeShotDetails[holeIndex].length - 1; // this isn't chronological
   const [dtp, setDtp] = useState(
     roundContext.state.holeShotDetails[holeIndex][lastDTPIndex]["distanceToPin"] || holeTotalYardage
   );
   const [yardsOrFeet, setYardsOrFeet] = useState<string>("Yards");
+  const [shotDetailIndexToUpdate, setShotDetailIndexToUpdate] = useState(shotNumber - 1);
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -166,13 +167,6 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       if (i == holeIndex) return shotNumber;
       return existingScore;
     });
-    roundContext.dispatch({
-      type: "update hole score",
-      payload: {
-        ...roundContext.state,
-        holeScores: updatedScores,
-      },
-    });
     return updatedScores;
   };
 
@@ -187,13 +181,25 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   }
 
   const handleClubChange = (event: SelectChangeEvent) => {
-    if (event.target.value == "Putter") setYardsOrFeet("Feet");
-    addNewHoleDetailsEntries(roundContext.state, "club", event.target.value);
+    const club = event.target.value;
+    club == "Putter" ? setYardsOrFeet("Feet") : setYardsOrFeet("Yards");
+    addNewHoleDetailsEntries(roundContext.state, "club", club);
   };
 
   const handleShotResultChange = (event: SelectChangeEvent) => {
     addNewHoleDetailsEntries(roundContext.state, "result", event.target.value);
   };
+
+  function getSelectIndexFromShotNumber(holeShotDetails: IShotDetail[], shotNumber: number) {
+    const indexOfShotNumber = holeShotDetails.findIndex(shot => shot.shotNumber === shotNumber);
+    const targetIndex = indexOfShotNumber == -1 ? holeShotDetails.length : indexOfShotNumber;
+    if (roundContext.state.holeShotDetails[holeIndex][targetIndex]?.club != "Putter") {
+      setYardsOrFeet("Yards");
+    } else {
+      setYardsOrFeet("Feet");
+    }
+    setShotDetailIndexToUpdate(targetIndex);
+  }
 
   function handleHoleReset() {
     const shotDetailsWithResetHole = roundContext.state.holeShotDetails.map(
@@ -224,13 +230,14 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     });
   }
 
+  function handleYardsOrFeet(currentShot: IShotDetail, club: string) {
+    console.log(currentShot);
+    if (club == "Putter") return setYardsOrFeet("Feet");
+    return setYardsOrFeet("Yards");
+  }
+
   async function saveScorecard() {
     const updatedHoleScores = updatedHoleScoresContext(roundContext.state);
-    if (roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.club != "Putter") {
-      setYardsOrFeet("Yards");
-    } else {
-      setYardsOrFeet("Feet");
-    }
 
     const updatedHoleShotDetails = roundContext.state.holeShotDetails.map(
       (holeDetail: IShotDetail[], index: number) => {
@@ -269,9 +276,10 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     );
 
     roundContext.dispatch({
-      type: "update hole shot details",
+      type: "update scores and shot details",
       payload: {
         ...roundContext.state,
+        holeScores: updatedHoleScores,
         holeShotDetails: updatedHoleShotDetails,
       },
     });
@@ -287,6 +295,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   }
 
   useEffect(() => {
+    getSelectIndexFromShotNumber(roundContext.state.holeShotDetails[holeIndex], shotNumber);
     saveScorecard();
   }, [shotNumber, open]);
 
@@ -320,7 +329,9 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
             aria-label="Distance to pin"
             key={row.score}
             value={
-              roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.distanceToPin || dtp
+              //   roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.distanceToPin || dtp
+              roundContext.state.holeShotDetails[holeIndex][shotDetailIndexToUpdate]
+                ?.distanceToPin || dtp
             }
             getAriaValueText={valuetext}
             step={yardsOrFeet === "Yards" ? 5 : 1}
@@ -336,7 +347,9 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
               labelId="demo-simple-select-label"
               id="demo-simple-select"
               defaultValue="--"
-              value={roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.club || "--"}
+              value={
+                roundContext.state.holeShotDetails[holeIndex][shotDetailIndexToUpdate]?.club || "--"
+              }
               label="Club"
               onChange={handleClubChange}
             >
@@ -353,7 +366,10 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
               autoWidth
               labelId="demo-simple-select-label"
               id="demo-simple-select"
-              value={roundContext.state.holeShotDetails[holeIndex][shotNumber - 1]?.result || "--"}
+              value={
+                roundContext.state.holeShotDetails[holeIndex][shotDetailIndexToUpdate]?.result ||
+                "--"
+              }
               label="Result"
               onChange={handleShotResultChange}
             >
