@@ -1,5 +1,6 @@
 import { errorOccured } from "../pages/api/graphql/graphqlUtils";
-import { IErrorMessage, IUser } from "../lib/user/register";
+import { IUser } from "../lib/user/register";
+import { IErrorMessage } from "../utils/errorMessage";
 
 test("If type IUser don't throw error", () => {
   const user: IUser = {

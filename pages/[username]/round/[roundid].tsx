@@ -76,6 +76,7 @@ export interface IScoreCardProps extends ICourseDetails {
   round_id: string;
   username: string;
   front_or_back_nine: string;
+  temperature: number;
   course_name: string;
   is_user_added_course: boolean;
   user_added_course_name: string;

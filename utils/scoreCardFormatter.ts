@@ -77,7 +77,7 @@ export function buildScoreCardRowsArray() {
   });
 }
 
-function hydrateScoreCardRows(scoreCardRows: IHoleDetails[], props: IScoreCardProps) {
+export function hydrateScoreCardRows(scoreCardRows: IHoleDetails[], props: IScoreCardProps) {
   const teeColor: string = getFallbackTeeColor(props);
 
   let totalPar = 0;
@@ -252,8 +252,8 @@ function mapOneOffProperties(
 }
 
 export function formatScoreCard(props: IScoreCardProps) {
-  let scoreCardRows: IHoleDetails[] = buildScoreCardRowsArray();
-  let hydratedScoreCardRows = hydrateScoreCardRows(scoreCardRows, props);
+  const scoreCardRows: IHoleDetails[] = buildScoreCardRowsArray();
+  const hydratedScoreCardRows = hydrateScoreCardRows(scoreCardRows, props);
 
   return hydratedScoreCardRows;
 }
