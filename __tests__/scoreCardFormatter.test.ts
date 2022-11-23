@@ -529,11 +529,11 @@ test("score card formatter populates tee specific IHoleDetails for 18 holes", ()
     { hole: "17", par: "3", yardage: "159", handicap: "6" },
     { hole: "18", par: "4", yardage: "291", handicap: "18" },
     { hole: "in", par: "35", backTotalYardage: "2540" },
-    { hole: "total", par: "3", totalPar: "71", totalYardage: "5299" },
-    { hole: "rating", par: "3", rating: "110" },
-    { hole: "slope", par: "3", slope: "67.3" },
-    { hole: "HCP", par: "3" },
-    { hole: "NET", par: "3" },
+    { hole: "total", par: "", totalPar: "71", totalYardage: "5299" },
+    { hole: "rating", par: "", rating: "110" },
+    { hole: "slope", par: "", slope: "67.3" },
+    { hole: "HCP", par: "" },
+    { hole: "NET", par: "" },
   ]);
 
   const redScoreCard = returnTeeColorProps("red");
@@ -558,11 +558,11 @@ test("score card formatter populates tee specific IHoleDetails for 18 holes", ()
     { hole: "17", par: "3", yardage: "122", handicap: "6" },
     { hole: "18", par: "4", yardage: "270", handicap: "18" },
     { hole: "in", par: "35", backTotalYardage: "2243" },
-    { hole: "total", par: "3", totalPar: "71", totalYardage: "4658" },
-    { hole: "rating", par: "3", rating: "113" },
-    { hole: "slope", par: "3", slope: "67.7" },
-    { hole: "HCP", par: "3" },
-    { hole: "NET", par: "3" },
+    { hole: "total", par: "", totalPar: "71", totalYardage: "4658" },
+    { hole: "rating", par: "", rating: "113" },
+    { hole: "slope", par: "", slope: "67.7" },
+    { hole: "HCP", par: "" },
+    { hole: "NET", par: "" },
   ]);
 
   const blueScoreCard = returnTeeColorProps("blue");
@@ -587,11 +587,11 @@ test("score card formatter populates tee specific IHoleDetails for 18 holes", ()
     { hole: "17", par: "3", yardage: "191", handicap: "6" },
     { hole: "18", par: "4", yardage: "309", handicap: "18" },
     { hole: "in", par: "35", backTotalYardage: "2744" },
-    { hole: "total", par: "3", totalPar: "71", totalYardage: "5687" },
-    { hole: "rating", par: "3", rating: "114" },
-    { hole: "slope", par: "3", slope: "69.2" },
-    { hole: "HCP", par: "3" },
-    { hole: "NET", par: "3" },
+    { hole: "total", par: "", totalPar: "71", totalYardage: "5687" },
+    { hole: "rating", par: "", rating: "114" },
+    { hole: "slope", par: "", slope: "69.2" },
+    { hole: "HCP", par: "" },
+    { hole: "NET", par: "" },
   ]);
 });
 
@@ -674,10 +674,10 @@ test("score card formatter populates front 9 holes again when on 9 hole course",
       { hole: "17", par: "3", yardage: "126", handicap: "8" },
       { hole: "18", par: "4", yardage: "216", handicap: "7" },
       { hole: "in", par: "35", frontTotalYardage: "2358" },
-      { hole: "total", par: "3", totalPar: "70", totalYardage: "4716" },
-      { hole: "rating", par: "3", rating: "112" },
-      { hole: "slope", par: "3", slope: "65.2" },
-      { hole: "HCP", par: "3" },
-      { hole: "NET", par: "3" },
+      { hole: "total", par: "", totalPar: "70", totalYardage: "4716" },
+      { hole: "rating", par: "", rating: "112" },
+      { hole: "slope", par: "", slope: "65.2" },
+      { hole: "HCP", par: "" },
+      { hole: "NET", par: "" },
   ]);
 });

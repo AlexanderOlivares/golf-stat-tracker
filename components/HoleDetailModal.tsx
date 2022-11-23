@@ -41,7 +41,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
 
   const [open, setOpen] = useState(false);
   const [shotNumber, setShotNumber] = useState(roundContext.state.holeScores[holeIndex] || 1);
-  const holeTotalYardage = Number(row.yardage);
+  const holeTotalYardage = Number(row.yardage || 100);
   const [shotDetailIndexToUpdate, setShotDetailIndexToUpdate] = useState(shotNumber - 1);
   const [dtp, setDtp] = useState(
     roundContext.state.holeShotDetails[holeIndex][shotDetailIndexToUpdate]?.distanceToPin ||

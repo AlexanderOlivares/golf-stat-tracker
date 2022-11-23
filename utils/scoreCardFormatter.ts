@@ -60,7 +60,7 @@ export function getFallbackTeeColor(props: IScoreCardProps): string {
 export function buildScoreCardRowsArray() {
   const SCORE_CARD_ROWS_LENGTH = 25;
   return Array.from({ length: SCORE_CARD_ROWS_LENGTH }, (_, i) => {
-    let holeDetails: IHoleDetails = { hole: "1", par: "3" }; // defualt values - should change this
+    let holeDetails: IHoleDetails = { hole: "1", par: "" }; // defualt values - should change this
 
     if (i == 9 || i > 18) {
       if (i in NON_HOLE_ROWS) {
