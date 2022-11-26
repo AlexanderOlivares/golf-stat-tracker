@@ -26,6 +26,7 @@ export interface IRoundDetails {
   unverified_course_id: string | null;
   is_nine_hole_course: boolean;
   weather_conditions: string;
+  clubs: string[];
   hole_scores: number[];
   hole_shot_details: IShotDetail[][];
 }
@@ -85,6 +86,7 @@ export interface IScoreCardProps extends ICourseDetails {
   unverified_course_id: string | null;
   is_nine_hole_course: boolean;
   weather_conditions: string;
+  clubs: string[];
   hole_scores: number[];
   hole_shot_details: IShotDetail[][];
 }
@@ -109,6 +111,7 @@ export default function Round() {
     variables: {
       roundid,
     },
+    fetchPolicy: "network-only",
   });
 
   useEffect(() => {

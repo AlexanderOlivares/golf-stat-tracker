@@ -18,6 +18,7 @@ export const getRoundByIdQuery = gql`
       user_added_city
       user_added_state
       unverified_course_id
+      clubs
       hole_scores
       hole_shot_details
     }

@@ -119,30 +119,15 @@ function formatParArray(holes: IHoleDetails[]) {
 export default function ScoreCard(props: IScoreCardProps) {
   const roundContext = useRoundContext();
   const router = useRouter();
-  const { username } = router.query;
 
   const scoreCardRows: IHoleDetails[] = formatScoreCard(props);
   const holeScores = props.hole_scores;
   const holeShotDetails = props.hole_shot_details;
+  const clubs = props.clubs;
   const { rating } = scoreCardRows[21];
   const { slope } = scoreCardRows[22];
 
-  const { data, loading, error } = useQuery(getUserClubsQuery, {
-    variables: {
-      username: queryParamToString(username),
-    },
-  });
-
   useEffect(() => {
-    if (data?.clubs.clubs) {
-      roundContext.dispatch({
-        type: "update clubs",
-        payload: {
-          ...roundContext.state,
-          clubs: [...data.clubs.clubs, "--"],
-        },
-      });
-    }
     roundContext.dispatch({
       type: "update scores and shot details",
       payload: {
@@ -152,7 +137,17 @@ export default function ScoreCard(props: IScoreCardProps) {
         par: formatParArray(scoreCardRows),
       },
     });
-  }, [data, holeScores, holeShotDetails]);
+  }, [holeScores, holeShotDetails]);
+
+  useEffect(() => {
+    roundContext.dispatch({
+      type: "update clubs",
+      payload: {
+        ...roundContext.state,
+        clubs: [...clubs, "--"],
+      },
+    });
+  }, []);
 
   let roundRows: ICompleteScoreCard[] = [];
 

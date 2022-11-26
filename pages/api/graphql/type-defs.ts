@@ -92,6 +92,7 @@ export const typeDefs = gql`
     userAddedCity: String
     userAddedState: String
     unverifiedCourseId: String
+    clubs: [String]
   }
 
   scalar JSON
@@ -112,6 +113,7 @@ export const typeDefs = gql`
     user_added_city: String
     user_added_state: String
     unverified_course_id: String
+    clubs: [String]
     hole_scores: [Int]
     hole_shot_details: JSON
     # hole_shot_details: String
