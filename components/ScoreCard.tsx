@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
 import Collapse from "@mui/material/Collapse";
@@ -15,9 +15,6 @@ import { HoleDetailModal } from "../components/HoleDetailModal";
 import { IShotDetail } from "../utils/roundFormatter";
 import { useRoundContext } from "../context/RoundContext";
 import { useRouter } from "next/router";
-import { useQuery } from "@apollo/client";
-import { queryParamToString } from "../utils/queryParamFormatter";
-import { getUserClubsQuery } from "../pages/api/graphql/queries/clubQueries";
 const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
 function showAltTableHeaders(holeNumber: string | undefined): boolean {
@@ -56,7 +53,6 @@ function Row(props: { row: ICompleteScoreCard }) {
           {row.hole}
         </TableCell>
         <TableCell align="right">{row.totalPar ? row.totalPar : row.par}</TableCell>
-        {/* <TableCell align="right">{row.score}</TableCell> */}
         <TableCell align="right">{state.holeScores[holeIndex]}</TableCell>
         <TableCell align="right">{row.yardage}</TableCell>
         <TableCell align="right">{row.handicap}</TableCell>
@@ -118,14 +114,16 @@ function formatParArray(holes: IHoleDetails[]) {
 
 export default function ScoreCard(props: IScoreCardProps) {
   const roundContext = useRoundContext();
-  const router = useRouter();
 
   const scoreCardRows: IHoleDetails[] = formatScoreCard(props);
   const holeScores = props.hole_scores;
   const holeShotDetails = props.hole_shot_details;
+  const isUserAddedCourse = props.is_user_added_course;
   const clubs = props.clubs;
   const { rating } = scoreCardRows[21];
   const { slope } = scoreCardRows[22];
+
+  const [roundRows, setRoundRows] = useState<ICompleteScoreCard[]>([]);
 
   useEffect(() => {
     roundContext.dispatch({
@@ -133,8 +131,9 @@ export default function ScoreCard(props: IScoreCardProps) {
       payload: {
         ...roundContext.state,
         holeScores: holeScores,
+        isUserAddedCourse,
         holeShotDetails,
-        par: formatParArray(scoreCardRows),
+        par: isUserAddedCourse ? props.user_added_par : formatParArray(scoreCardRows),
       },
     });
   }, [holeScores, holeShotDetails]);
@@ -147,18 +146,17 @@ export default function ScoreCard(props: IScoreCardProps) {
         clubs: [...clubs, "--"],
       },
     });
+
+    let roundRows: ICompleteScoreCard[] = [];
+    for (let i = 0; i < 21; i++) {
+      roundRows[i] = {
+        ...scoreCardRows[i],
+        score: roundContext.state.holeScores[i],
+        holeShotDetails: roundContext.state.holeShotDetails[i],
+      };
+    }
+    setRoundRows(roundRows);
   }, []);
-
-  let roundRows: ICompleteScoreCard[] = [];
-
-  // hiding rating, slope, index and handicap for now. should be i < scoreCardRows.length
-  for (let i = 0; i < 21; i++) {
-    roundRows[i] = {
-      ...scoreCardRows[i],
-      score: roundContext.state.holeScores[i],
-      holeShotDetails: roundContext.state.holeShotDetails[i],
-    };
-  }
 
   return (
     <>

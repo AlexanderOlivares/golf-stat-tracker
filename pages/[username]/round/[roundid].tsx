@@ -9,6 +9,7 @@ import { queryParamToString, queryParamToBoolean } from "../../../utils/queryPar
 import { IShotDetail } from "../../../utils/roundFormatter";
 import { buildScoreCardRowsArray } from "../../../utils/scoreCardFormatter";
 import { RoundContextProvider } from "../../../context/RoundContext";
+import { getUnverifiedCourseForRound } from "../../api/graphql/queries/unverifiedCourseQueries";
 
 export interface IRoundDetails {
   tee_color: string;
@@ -83,6 +84,7 @@ export interface IScoreCardProps extends ICourseDetails {
   user_added_course_name: string;
   user_added_city: string;
   user_added_state: string;
+  user_added_par: string[];
   unverified_course_id: string | null;
   is_nine_hole_course: boolean;
   weather_conditions: string;
@@ -93,7 +95,7 @@ export interface IScoreCardProps extends ICourseDetails {
 
 export default function Round() {
   const router = useRouter();
-  const { roundid, courseId, teeColor, isUserAddedCourse } = router.query;
+  const { roundid, courseId, unverifiedCourseId, teeColor, isUserAddedCourse } = router.query;
 
   const [scoreCardProps, setScoreCardProps] = useState<IScoreCardProps | null>(null);
   const [courseDetails, setCourseDetails] = useState<ICourseDetails | null>(null);
@@ -102,9 +104,16 @@ export default function Round() {
   const courseForRound = useQuery(getCourseForRound, {
     variables: {
       courseId: queryParamToString(courseId),
-      teeColor: queryParamToString(teeColor),
+      isUserAddedCourse: queryParamToBoolean(isUserAddedCourse),
     },
     skip: queryParamToBoolean(isUserAddedCourse),
+  });
+
+  const unverifiedCourseForRound = useQuery(getUnverifiedCourseForRound, {
+    variables: {
+      unverifiedCourseId: queryParamToString(unverifiedCourseId),
+    },
+    skip: !queryParamToBoolean(isUserAddedCourse),
   });
 
   const round = useQuery(getRoundByIdQuery, {
@@ -120,6 +129,9 @@ export default function Round() {
     }
     if (router.isReady && courseForRound.data) {
       setCourseDetails(courseForRound.data.course[0]);
+    }
+    if (router.isReady && unverifiedCourseForRound.data) {
+      setCourseDetails(unverifiedCourseForRound.data.unverifiedCourse[0]);
     }
     if (courseDetails && roundDetails) {
       const builtProps = buildProps(roundDetails, courseDetails);

@@ -10,6 +10,7 @@ import { getRoundPreviewByUsernameQuery } from "../api/graphql/queries/roundQuer
 export interface IRoundPreview {
   round_id: string;
   course_id: string;
+  unverified_course_id: string;
   course_name: string;
   tee_color: string;
   round_date: string;

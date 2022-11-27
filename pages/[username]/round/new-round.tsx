@@ -220,6 +220,7 @@ export default function NewRound() {
             courseId,
             teeColor,
             isUserAddedCourse,
+            unverifiedCourseId: newRoundRequestBody.unverifiedCourseId,
           },
         },
         `/${username}/round/${roundid}`

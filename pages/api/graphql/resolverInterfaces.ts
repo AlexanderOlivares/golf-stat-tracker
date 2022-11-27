@@ -23,14 +23,21 @@ export interface ILoginMutationArgs {
 }
 
 export interface INewRoundMutationArgs {
-  input: IRoundRequestBody
+  input: IRoundRequestBody;
 }
 
 export interface IEditClubsMutationArgs {
   input: {
     clubs: string[];
     username: string;
-  }
+  };
+}
+
+export interface IUpdateUserAddedParArgs {
+  input: {
+    unverifiedCourseId: string;
+    userAddedPar: string[]
+  };
 }
 
 export interface IContext {
@@ -46,5 +53,5 @@ export interface IRoundQueryArgs {
 
 export interface ICourseQueryArgs {
   courseId: string;
-  teeColor: string;
+  isUserAddedCourse: boolean;
 }

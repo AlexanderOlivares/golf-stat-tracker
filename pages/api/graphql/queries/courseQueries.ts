@@ -1,8 +1,8 @@
 import { gql } from "@apollo/client";
 
 export const getCourseForRound = gql`
-  query course($courseId: String!, $teeColor: String!) {
-    course(courseId: $courseId, teeColor: $teeColor) {
+  query course($courseId: String!) {
+    course(courseId: $courseId) {
       course_name
       course_country
       course_city

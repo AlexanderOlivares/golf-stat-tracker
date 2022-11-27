@@ -155,7 +155,7 @@ export const typeDefs = gql`
     round_date: String
     is_user_added_course: Boolean!
     #   user_added_course_name
-    #   unverified_course_id
+    unverified_course_id: String
     score: Int
     fairwaysHit: String
     greensInReg: Int
@@ -163,10 +163,20 @@ export const typeDefs = gql`
     totalPutts: Int
   }
 
+  type UnverifiedCourse {
+    user_added_par: [String]!
+  }
+
+  input UpdateUserAddedCourseParInput {
+    unverifiedCourseId: String!
+    userAddedPar: [String]!
+  }
+
   type Query {
     user(username: String!): User
     courses: [CourseNamesAndIds]
-    course(courseId: String!, teeColor: String!): [Course]!
+    course(courseId: String!): [Course]!
+    unverifiedCourse(unverifiedCourseId: String!): [UnverifiedCourse]
     round(roundid: String!): NewRoundResponse
     roundPreview(username: String!): [RoundPreviewResponse]
     clubs(username: String!): UserClubs!
@@ -179,5 +189,6 @@ export const typeDefs = gql`
     newRound(input: NewRound!): NewRoundResponse
     editClubs(input: UpdateClubsInput!): ClubList
     saveRound(input: RoundStats!): RoundStatsResponse
+    saveUnverifiedCoursePar(input: UpdateUserAddedCourseParInput): UnverifiedCourse
   }
 `;

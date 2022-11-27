@@ -6,6 +6,7 @@ import { createHoleDetailsJson, IShotDetail } from "../utils/roundFormatter";
 export interface IRoundState {
   clubs: string[];
   holeScores: number[];
+  isUserAddedCourse: boolean;
   holeShotDetails: IShotDetail[][];
   par: string[];
 }
@@ -13,6 +14,7 @@ export interface IRoundState {
 const defualtState: IRoundState = {
   clubs: defaultClubs.slice(0, 14),
   holeScores: [],
+  isUserAddedCourse: false,
   holeShotDetails: createHoleDetailsJson(),
   par: [],
 };
@@ -42,6 +44,7 @@ function roundContextReducer(state: IRoundState, action: Action): any {
       return {
         ...state,
         holeScores: payload.holeScores,
+        isUserAddedCourse: payload.isUserAddedCourse,
         holeShotDetails: payload.holeShotDetails,
         par: payload.par,
       };
@@ -54,6 +57,11 @@ function roundContextReducer(state: IRoundState, action: Action): any {
       return {
         ...state,
         holeShotDetails: payload.holeShotDetails,
+      };
+    case "set par for user added course":
+      return {
+        ...state,
+        par: payload.par,
       };
     default:
       return state;

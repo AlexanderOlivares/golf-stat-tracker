@@ -27,6 +27,7 @@ import { useMutation } from "@apollo/client";
 import { saveRound as saveRoundMutation } from "../pages/api/graphql/mutations/roundMutations";
 import { useRouter } from "next/router";
 import { queryParamToString } from "../utils/queryParamFormatter";
+import { saveUnverifiedCourseParMutation } from "../pages/api/graphql/mutations/unverifiedCourseMutations";
 
 function valuetext(value: number) {
   return `${value}`;
@@ -34,8 +35,9 @@ function valuetext(value: number) {
 
 export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const router = useRouter();
-  const { roundid } = router.query;
+  const { roundid, unverifiedCourseId } = router.query;
   const [saveRound] = useMutation(saveRoundMutation);
+  const [saveUnverifiedCoursePar] = useMutation(saveUnverifiedCourseParMutation);
   const roundContext = useRoundContext();
   const holeIndex = getHoleIndexToUpdate(row.hole);
 
@@ -48,6 +50,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       holeTotalYardage
   );
   const [yardsOrFeet, setYardsOrFeet] = useState<string>("Yards");
+  const [userAddedPar, setUserAddedPar] = useState<string>("");
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -173,6 +176,29 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const handleShotNumberChange = (_: Event, newValue: number | number[]) => {
     setShotNumber(newValue as number);
     updatedHoleScoresContext(roundContext.state);
+  };
+
+  const handleUserAddedParChange = async (_: Event, newValue: number | number[]) => {
+    const parString = newValue.toString();
+    setUserAddedPar(parString);
+    const updatedUserAddedPar = roundContext.state.par.map((par: string, i: number) => {
+      if (holeIndex != i) return par;
+      return parString;
+    });
+    roundContext.dispatch({
+      type: "set par for user added course",
+      payload: {
+        ...roundContext.state,
+        par: updatedUserAddedPar,
+      },
+    });
+    const { data } = await saveUnverifiedCoursePar({
+      variables: {
+        userAddedPar: updatedUserAddedPar,
+        unverifiedCourseId,
+      },
+    });
+    console.log("-----------Saved user added par-----------");
   };
 
   function handleDistanceToPin(event: Event, newValue: number | number[]) {
@@ -305,6 +331,22 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       <Dialog fullWidth={true} open={open} onClose={handleClose}>
         <DialogTitle textAlign="center">My Score {shotNumber}</DialogTitle>
         <DialogContent>
+          {roundContext.state.isUserAddedCourse && (
+            <>
+              <DialogContentText>Par</DialogContentText>
+              <Slider
+                aria-label="Par"
+                defaultValue={3}
+                getAriaValueText={valuetext}
+                step={1}
+                min={3}
+                max={5}
+                valueLabelDisplay="on"
+                value={Number(roundContext.state.par[holeIndex])}
+                onChange={handleUserAddedParChange}
+              />
+            </>
+          )}
           <DialogContentText>Shot number</DialogContentText>
           <Slider
             aria-label="Shot number"

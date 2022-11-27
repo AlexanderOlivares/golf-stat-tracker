@@ -35,7 +35,7 @@ export const getRoundPreviewByUsernameQuery = gql`
       round_date
       is_user_added_course
       #   user_added_course_name
-      #   unverified_course_id
+      unverified_course_id
       score
       fairwaysHit
       greensInReg

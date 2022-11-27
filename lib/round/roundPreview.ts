@@ -7,7 +7,9 @@ import { formatRoundPreviewGrid } from "../../utils/roundPreviewFormatter";
 export interface IRoundPreviewDbResponse {
   round_id: string;
   course_id: string;
+  unverified_course_id: string;
   course_name: string;
+  user_added_course_name: string;
   tee_color: string;
   round_date: string;
   is_user_added_course: boolean;
@@ -18,7 +20,7 @@ export async function getRoundPreview(username: string): Promise<IRoundPreview[]
   try {
 
     const userRounds = await pool.query(
-        `SELECT round_id, course_id, course_name, tee_color, round_date, is_user_added_course, hole_scores, hole_shot_details
+        `SELECT round_id, course_id, unverified_course_id, course_name, tee_color, round_date, is_user_added_course, user_added_course_name, hole_scores, hole_shot_details
             FROM round
             WHERE username = ($1)`, [username]
     );

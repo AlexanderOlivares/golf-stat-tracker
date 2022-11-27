@@ -69,6 +69,7 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
   function viewRound(row: IRoundPreview) {
     const {
       course_id: courseId,
+      unverified_course_id: unverifiedCourseId,
       round_id: roundid,
       tee_color: teeColor,
       is_user_added_course: isUserAddedCourse,
@@ -81,6 +82,7 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
           courseId,
           teeColor,
           isUserAddedCourse,
+          unverifiedCourseId,
         },
       },
       `/${username}/round/${roundid}`

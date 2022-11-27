@@ -12,12 +12,16 @@ import {
   IRoundQueryArgs, 
   ICourseQueryArgs,
   IEditClubsMutationArgs,
+  IUpdateUserAddedParArgs,
 } from "./resolverInterfaces";
 import { errorOccured } from "./graphqlUtils";
 import { createNewRound, getRound } from "../../../lib/round/createNewRound";
 import { getUserClubs, updateUserClubs } from "../../../lib/user/getUserClubs";
 import { saveRoundDetails } from "../../../lib/round/updateRound";
 import { getRoundPreview } from "../../../lib/round/roundPreview";
+import { createUnverifiedCourse } from "../../../lib/course/createUnverifiedCourse";
+import { getUnverifiedCourse } from "../../../lib/course/getCourse";
+import { updateUnverifiedCoursePar } from "../../../lib/course/updateUnverifiedCoursePar";
 
 export const resolvers = {
   Query: {
@@ -32,10 +36,17 @@ export const resolvers = {
     },
     course: async (_parent: undefined, args: ICourseQueryArgs, context: IContext) => {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
-      const { courseId, teeColor } = args;
+      const { courseId } = args;
       const course = await getCourseForNewRound(courseId);
       if (errorOccured(course)) return new Error(course.errorMessage);
       return course;
+    },
+    unverifiedCourse: async (_parent: undefined, args: {unverifiedCourseId: string}, context: IContext) => {
+      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
+      const { unverifiedCourseId } = args;
+      const unverifiedCourse = await getUnverifiedCourse(unverifiedCourseId);
+      if (errorOccured(unverifiedCourse)) return new Error(unverifiedCourse.errorMessage);
+      return unverifiedCourse;
     },
     round: async (_parent: undefined, args: IRoundQueryArgs, context: IContext) => {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
@@ -82,6 +93,10 @@ export const resolvers = {
     },
     async newRound(_parent: undefined, args: INewRoundMutationArgs, _context: IContext) {
         const { input } = args
+        if (input.unverifiedCourseId) {
+            const unverifiedCourse = await createUnverifiedCourse(input);
+            if (errorOccured(unverifiedCourse)) return new Error(unverifiedCourse.errorMessage)
+        }
         const round = await createNewRound(input);
         if (errorOccured(round)) return new Error(round.errorMessage)
         return round;
@@ -101,5 +116,12 @@ export const resolvers = {
         if (errorOccured(savedRoundStats)) return new Error(savedRoundStats.errorMessage)
         return savedRoundStats;
     },
+    async saveUnverifiedCoursePar(_parent: undefined, args: IUpdateUserAddedParArgs, context: IContext) {
+        if (errorOccured(context.token)) return new Error(context.token.errorMessage);
+          const { unverifiedCourseId, userAddedPar  } = args.input
+          const unverifiedCoursePar = await updateUnverifiedCoursePar(unverifiedCourseId, userAddedPar);
+          if (errorOccured(unverifiedCoursePar)) return new Error(unverifiedCoursePar.errorMessage)
+          return unverifiedCoursePar;
+      },
   },
 };
