@@ -43,14 +43,14 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
 
   const [open, setOpen] = useState(false);
   const [shotNumber, setShotNumber] = useState(roundContext.state.holeScores[holeIndex] || 1);
-  const holeTotalYardage = Number(row.yardage || 100);
+  const holeTotalYardage = Number(row.yardage || 400);
   const [shotDetailIndexToUpdate, setShotDetailIndexToUpdate] = useState(shotNumber - 1);
   const [dtp, setDtp] = useState(
     roundContext.state.holeShotDetails[holeIndex][shotDetailIndexToUpdate]?.distanceToPin ||
       holeTotalYardage
   );
   const [yardsOrFeet, setYardsOrFeet] = useState<string>("Yards");
-  const [userAddedPar, setUserAddedPar] = useState<string>("");
+  const [userAddedPar, setUserAddedPar] = useState<string>(roundContext.state.par[holeIndex] || "");
 
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
@@ -58,7 +58,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   function getFairwaysHit(frontOrBackNine?: string) {
     const frontNineFairwayIndices = getNonParThreeIndices(roundContext.state.par, 0, 9);
     const backNineFairwayIndices = getNonParThreeIndices(roundContext.state.par, 10, 19);
-    const totalFairways = roundContext.state.par.filter(par => Number(par) > 3).length - 2; // minus in/out total par
+    const totalFairways = frontNineFairwayIndices.length + backNineFairwayIndices.length;
     const frontFairwaysHit = calculateFairwaysHit(
       roundContext.state.holeShotDetails,
       frontNineFairwayIndices
@@ -181,27 +181,9 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const handleUserAddedParChange = async (_: Event, newValue: number | number[]) => {
     const parString = newValue.toString();
     setUserAddedPar(parString);
-    const updatedUserAddedPar = roundContext.state.par.map((par: string, i: number) => {
-      if (holeIndex != i) return par;
-      return parString;
-    });
-    roundContext.dispatch({
-      type: "set par for user added course",
-      payload: {
-        ...roundContext.state,
-        par: updatedUserAddedPar,
-      },
-    });
-    const { data } = await saveUnverifiedCoursePar({
-      variables: {
-        userAddedPar: updatedUserAddedPar,
-        unverifiedCourseId,
-      },
-    });
-    console.log("-----------Saved user added par-----------");
   };
 
-  function handleDistanceToPin(event: Event, newValue: number | number[]) {
+  function handleDistanceToPin(_: Event, newValue: number | number[]) {
     setDtp(newValue as number);
     addNewHoleDetailsEntries(roundContext.state, "distanceToPin", newValue as number);
   }
@@ -295,15 +277,6 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       }
     );
 
-    roundContext.dispatch({
-      type: "update scores and shot details",
-      payload: {
-        ...roundContext.state,
-        holeScores: updatedHoleScores,
-        holeShotDetails: updatedHoleShotDetails,
-      },
-    });
-
     const { data } = await saveRound({
       variables: {
         holeScores: updatedHoleScores,
@@ -311,13 +284,58 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
         roundid: queryParamToString(roundid),
       },
     });
+
+    const {
+      hole_scores: dbHoleScores,
+      hole_shot_details: dbHoleShotDetails,
+    }: { hole_scores: number[]; hole_shot_details: IShotDetail[][] } = data.saveRound;
+
+    roundContext.dispatch({
+      type: "update scores and shot details",
+      payload: {
+        ...roundContext.state,
+        holeScores: dbHoleScores,
+        holeShotDetails: dbHoleShotDetails,
+      },
+    });
+
     console.log("SAVED!!!!!!!!!!!!!!!!!");
+  }
+
+  async function saveUnverifiedPar() {
+    const updatedUserAddedPar = roundContext.state.par.map((par: string, i: number) => {
+      if (holeIndex != i) return par;
+      return userAddedPar || "4";
+    });
+
+    const { data } = await saveUnverifiedCoursePar({
+      variables: {
+        userAddedPar: updatedUserAddedPar,
+        unverifiedCourseId,
+      },
+    });
+
+    const dbUserAddedPar = data.saveUnverifiedCoursePar.user_added_par;
+
+    roundContext.dispatch({
+      type: "set par for user added course",
+      payload: {
+        ...roundContext.state,
+        par: dbUserAddedPar,
+      },
+    });
   }
 
   useEffect(() => {
     getSelectIndexFromShotNumber(roundContext.state.holeShotDetails[holeIndex], shotNumber);
     saveScorecard();
   }, [shotNumber, open]);
+
+  useEffect(() => {
+    if (roundContext.state.isUserAddedCourse) {
+      saveUnverifiedPar();
+    }
+  }, [userAddedPar, open]);
 
   useEffect(() => {
     addNewHoleDetailsEntries(roundContext.state, "distanceToPin", dtp);

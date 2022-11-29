@@ -14,7 +14,6 @@ import { formatScoreCard, IHoleDetails, NON_HOLE_ROWS } from "../utils/scoreCard
 import { HoleDetailModal } from "../components/HoleDetailModal";
 import { IShotDetail } from "../utils/roundFormatter";
 import { useRoundContext } from "../context/RoundContext";
-import { useRouter } from "next/router";
 const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
 function showAltTableHeaders(holeNumber: string | undefined): boolean {
@@ -39,6 +38,13 @@ export function getHoleIndexToUpdate(hole: string): number {
   return Number(hole) <= 9 ? Number(hole) - 1 : Number(hole);
 }
 
+function displayDistanceYardage(row: ICompleteScoreCard) {
+  if (row.frontTotalYardage) return row.frontTotalYardage;
+  if (row.backTotalYardage) return row.backTotalYardage;
+  if (row.totalYardage) return row.totalYardage;
+  return row.yardage;
+}
+
 function Row(props: { row: ICompleteScoreCard }) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
@@ -54,8 +60,12 @@ function Row(props: { row: ICompleteScoreCard }) {
         </TableCell>
         <TableCell align="right">{row.totalPar ? row.totalPar : row.par}</TableCell>
         <TableCell align="right">{state.holeScores[holeIndex]}</TableCell>
-        <TableCell align="right">{row.yardage}</TableCell>
-        <TableCell align="right">{row.handicap}</TableCell>
+        {!roundContext.state.isUserAddedCourse && (
+          <>
+            <TableCell align="right">{displayDistanceYardage(row)}</TableCell>
+            <TableCell align="right">{row.handicap}</TableCell>
+          </>
+        )}
       </TableRow>
       <TableRow>
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
@@ -151,12 +161,13 @@ export default function ScoreCard(props: IScoreCardProps) {
     for (let i = 0; i < 21; i++) {
       roundRows[i] = {
         ...scoreCardRows[i],
+        par: roundContext.state.par[i],
         score: roundContext.state.holeScores[i],
         holeShotDetails: roundContext.state.holeShotDetails[i],
       };
     }
     setRoundRows(roundRows);
-  }, []);
+  }, [roundContext.state.par]);
 
   return (
     <>
@@ -175,8 +186,12 @@ export default function ScoreCard(props: IScoreCardProps) {
               <TableCell>Hole</TableCell>
               <TableCell align="right">Par</TableCell>
               <TableCell align="right">Score</TableCell>
-              <TableCell align="right">Distance</TableCell>
-              <TableCell align="right">Handicap</TableCell>
+              {!roundContext.state.isUserAddedCourse && (
+                <>
+                  <TableCell align="right">Distance</TableCell>
+                  <TableCell align="right">Handicap</TableCell>
+                </>
+              )}
             </TableRow>
           </TableHead>
           <TableBody>
