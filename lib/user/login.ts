@@ -2,7 +2,8 @@ import { usernameAndPasswordValidator, emailAddressValidator } from "../../utils
 import { jwtGenerator } from "../../utils/jwtGenerator";
 import pool from "../../db/dbConfig";
 import bcrypt from "bcryptjs";
-import { IUser, errorMessage } from "./register";
+import { IUser  } from "./register";
+import { errorMessage } from "../../utils/errorMessage";
 
 export default async function loginUser(email: string, password: string) {
   try {

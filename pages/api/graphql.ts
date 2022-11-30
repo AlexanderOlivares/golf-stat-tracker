@@ -4,14 +4,14 @@ import { typeDefs } from "./graphql/type-defs";
 import { resolvers } from "./graphql/resolvers";
 import pool from "../../db/dbConfig";
 import { validateAuthCookie } from "../../lib/auth-cookie";
-import { IErrorMessage } from "../../lib/user/register";
+import { IErrorMessage } from "../../utils/errorMessage";
 import { JWTPayload } from "jose";
 
 const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
   context: async ({ req, res }) => {
-    const token: JWTPayload| IErrorMessage = await validateAuthCookie(req);
+    const token: JWTPayload| IErrorMessage= await validateAuthCookie(req);
     console.log(token);
     return {
       req,
