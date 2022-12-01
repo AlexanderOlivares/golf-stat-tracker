@@ -4,6 +4,7 @@ import { ApolloProvider } from "@apollo/client";
 import appolloClient from "../apollo-client";
 import { onError } from "@apollo/client/link/error";
 import Head from "next/head";
+import { useEffect } from "react";
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -14,6 +15,15 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
+  useEffect(() => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then(registration =>
+        console.log("Service Worker registration successful with scope: ", registration.scope)
+      )
+      .catch(err => console.log("Service Worker registration failed: ", err));
+  }, []);
+
   return (
     <>
       <Head>
