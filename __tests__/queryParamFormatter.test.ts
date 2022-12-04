@@ -34,10 +34,14 @@ test("should convert ParsedUrlQuery type strings of 'true' and 'false' to real b
     const query4: ParsedUrlQuery = {
         is_user_added_course: []
     }
+    const query5: ParsedUrlQuery = {
+        is_user_added_course: "f6451ae8-1319-45e3-9824-5a4045e14d07"
+    }
 
   expect(queryParamToBoolean(query.is_user_added_course)).toEqual(true);
   expect(queryParamToBoolean(query1.is_user_added_course)).toEqual(false)
   expect(queryParamToBoolean(query2.is_user_added_course)).toEqual(false);
   expect(queryParamToBoolean(query3.is_user_added_course)).toEqual(true);
   expect(queryParamToBoolean(query4.is_user_added_course)).toEqual(false);
+  expect(queryParamToBoolean(query5.is_user_added_course)).toEqual(true);
 });

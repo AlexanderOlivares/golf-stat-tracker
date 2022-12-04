@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 import { getRoundByIdQuery } from "../../api/graphql/queries/roundQueries";
 import { queryParamToString, queryParamToBoolean } from "../../../utils/queryParamFormatter";
 import { IShotDetail } from "../../../utils/roundFormatter";
-import { buildScoreCardRowsArray } from "../../../utils/scoreCardFormatter";
 import { RoundContextProvider } from "../../../context/RoundContext";
 import { getUnverifiedCourseForRound } from "../../api/graphql/queries/unverifiedCourseQueries";
 
@@ -97,23 +96,36 @@ export default function Round() {
   const router = useRouter();
   const { roundid, courseId, unverifiedCourseId, teeColor, isUserAddedCourse } = router.query;
 
+  // save reference to hidden query params so they aren't lost on refresh
+  if (courseId || unverifiedCourseId) {
+    localStorage.setItem(queryParamToString(roundid), JSON.stringify(router.query));
+  }
+
+  const [queryParams, setQueryParams] = useState({
+    roundid,
+    courseId,
+    unverifiedCourseId,
+    teeColor,
+    isUserAddedCourse,
+  });
+
   const [scoreCardProps, setScoreCardProps] = useState<IScoreCardProps | null>(null);
   const [courseDetails, setCourseDetails] = useState<ICourseDetails | null>(null);
   const [roundDetails, setRoundDetails] = useState<IRoundDetails | null>(null);
 
   const courseForRound = useQuery(getCourseForRound, {
     variables: {
-      courseId: queryParamToString(courseId),
-      isUserAddedCourse: queryParamToBoolean(isUserAddedCourse),
+      courseId: queryParamToString(queryParams.courseId),
+      isUserAddedCourse: queryParamToBoolean(queryParams.isUserAddedCourse),
     },
-    skip: queryParamToBoolean(isUserAddedCourse),
+    skip: queryParamToBoolean(queryParams.isUserAddedCourse),
   });
 
   const unverifiedCourseForRound = useQuery(getUnverifiedCourseForRound, {
     variables: {
-      unverifiedCourseId: queryParamToString(unverifiedCourseId),
+      unverifiedCourseId: queryParamToString(queryParams.unverifiedCourseId),
     },
-    skip: !queryParamToBoolean(isUserAddedCourse),
+    skip: !queryParamToBoolean(queryParams.isUserAddedCourse),
   });
 
   const round = useQuery(getRoundByIdQuery, {
@@ -124,22 +136,32 @@ export default function Round() {
   });
 
   useEffect(() => {
+    if (router.isReady) {
+      if (!courseId || !unverifiedCourseId) {
+        const key = queryParamToString(roundid);
+        const savedParams = localStorage.getItem(key);
+        if (savedParams) setQueryParams(JSON.parse(savedParams));
+      } else {
+        setQueryParams({
+          ...queryParams,
+          roundid,
+        });
+      }
+    }
+  }, [router.isReady]);
+
+  useEffect(() => {
     if (router.isReady && round.data) {
       setRoundDetails(round.data.round);
     }
-    if (router.isReady && courseForRound.data) {
+    if (queryParams.courseId && courseForRound.data) {
       setCourseDetails(courseForRound.data.course[0]);
     }
-    if (router.isReady && unverifiedCourseForRound.data) {
+    if (queryParams.unverifiedCourseId && unverifiedCourseForRound.data) {
       setCourseDetails(unverifiedCourseForRound.data.unverifiedCourse[0]);
     }
     if (courseDetails && roundDetails) {
       const builtProps = buildProps(roundDetails, courseDetails);
-      setScoreCardProps(builtProps);
-    }
-    if (!courseDetails && roundDetails) {
-      const genericScoreCard = buildScoreCardRowsArray();
-      const builtProps = buildProps(roundDetails, genericScoreCard);
       setScoreCardProps(builtProps);
     }
   }, [round, router.isReady, courseForRound, roundDetails, courseDetails]);
