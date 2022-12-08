@@ -14,6 +14,7 @@ import { formatScoreCard, IHoleDetails, NON_HOLE_ROWS } from "../utils/scoreCard
 import { HoleDetailModal } from "../components/HoleDetailModal";
 import { IShotDetail } from "../utils/roundFormatter";
 import { useRoundContext } from "../context/RoundContext";
+import { Button } from "@mui/material";
 const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
 function showAltTableHeaders(holeNumber: string | undefined): boolean {
@@ -129,6 +130,7 @@ export default function ScoreCard(props: IScoreCardProps) {
   const holeScores = props.hole_scores;
   const holeShotDetails = props.hole_shot_details;
   const isUserAddedCourse = props.is_user_added_course;
+  const roundid = props.round_id;
   const clubs = props.clubs;
   const { rating } = scoreCardRows[21];
   const { slope } = scoreCardRows[22];
@@ -169,6 +171,29 @@ export default function ScoreCard(props: IScoreCardProps) {
     setRoundRows(roundRows);
   }, [roundContext.state.par]);
 
+  useEffect(() => {
+    const indexedDB = window.indexedDB;
+    const request = indexedDB.open("GolfStatDb", 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      const store = db.createObjectStore("rounds", { keyPath: "id" });
+      store.createIndex(
+        "roundDetails",
+        ["clubs", "holeScores", "holeShotDetails", "isUserAddedCourse", "par"],
+        { unique: false }
+      );
+    };
+    request.onsuccess = () => {
+      const db = request.result;
+      const transaction = db.transaction("rounds", "readwrite");
+      const store = transaction.objectStore("rounds");
+      store.put({
+        id: roundid,
+        ...roundContext.state,
+      });
+    };
+  }, [roundContext.state]);
+
   return (
     <>
       <Box>
@@ -178,6 +203,11 @@ export default function ScoreCard(props: IScoreCardProps) {
         <Typography variant="h6" component="h2">
           Rating {rating}
         </Typography>
+      </Box>
+      <Box m={3}>
+        <Button type="submit" size="medium" variant="contained" color="primary">
+          Go Offline
+        </Button>
       </Box>
       <TableContainer component={Paper}>
         <Table aria-label="collapsible table">

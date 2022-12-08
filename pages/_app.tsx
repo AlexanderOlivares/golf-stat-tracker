@@ -5,6 +5,8 @@ import appolloClient from "../apollo-client";
 import { onError } from "@apollo/client/link/error";
 import Head from "next/head";
 import { useEffect } from "react";
+import { NetworkContextProvider } from "../context/NetworkContext";
+import ConnectionListener from "../components/ConnectionListener";
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -33,7 +35,10 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="manifest" href="/manifest.json" />
       </Head>
       <ApolloProvider client={appolloClient}>
-        <Component {...pageProps} />
+        <NetworkContextProvider>
+          <Component {...pageProps} />
+          <ConnectionListener />
+        </NetworkContextProvider>
       </ApolloProvider>
     </>
   );
