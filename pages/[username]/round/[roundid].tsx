@@ -9,6 +9,9 @@ import { queryParamToString, queryParamToBoolean } from "../../../utils/queryPar
 import { IShotDetail } from "../../../utils/roundFormatter";
 import { RoundContextProvider } from "../../../context/RoundContext";
 import { getUnverifiedCourseForRound } from "../../api/graphql/queries/unverifiedCourseQueries";
+import { useNetworkContext } from "../../../context/NetworkContext";
+import { Button } from "@mui/material";
+import Box from "@mui/material/Box";
 
 export interface IRoundDetails {
   tee_color: string;
@@ -94,6 +97,7 @@ export interface IScoreCardProps extends ICourseDetails {
 
 export default function Round() {
   const router = useRouter();
+  const networkContext = useNetworkContext();
   const { roundid, courseId, unverifiedCourseId, teeColor, isUserAddedCourse } = router.query;
 
   // save reference to hidden query params so they aren't lost on refresh
@@ -113,12 +117,15 @@ export default function Round() {
   const [courseDetails, setCourseDetails] = useState<ICourseDetails | null>(null);
   const [roundDetails, setRoundDetails] = useState<IRoundDetails | null>(null);
 
+  // only make these network calls if networkContext is online/good connection
+  // save these into their own indexed db
   const courseForRound = useQuery(getCourseForRound, {
     variables: {
       courseId: queryParamToString(queryParams.courseId),
       isUserAddedCourse: queryParamToBoolean(queryParams.isUserAddedCourse),
     },
     skip: queryParamToBoolean(queryParams.isUserAddedCourse),
+    fetchPolicy: "network-only",
   });
 
   const unverifiedCourseForRound = useQuery(getUnverifiedCourseForRound, {
@@ -126,6 +133,7 @@ export default function Round() {
       unverifiedCourseId: queryParamToString(queryParams.unverifiedCourseId),
     },
     skip: !queryParamToBoolean(queryParams.isUserAddedCourse),
+    fetchPolicy: "network-only",
   });
 
   const round = useQuery(getRoundByIdQuery, {
@@ -184,6 +192,17 @@ export default function Round() {
     return roundProps;
   }
 
+  // TODO make this smarter than toggle
+  function toggleOfflineMode() {
+    networkContext.dispatch({
+      type: "update offline mode enabled",
+      payload: {
+        ...networkContext.state,
+        offlineModeEnabled: !networkContext.state.offlineModeEnabled,
+      },
+    });
+  }
+
   return (
     <>
       <RoundContextProvider>
@@ -201,6 +220,17 @@ export default function Round() {
             <h3>Conditions {roundDetails.weather_conditions}</h3>
             <h3>Temperature {roundDetails.temperature}</h3>
             <h3>{teeColor} tees</h3>
+            <Box m={3}>
+              <Button
+                onClick={toggleOfflineMode}
+                type="submit"
+                size="medium"
+                variant="contained"
+                color="primary"
+              >
+                Go Offline
+              </Button>
+            </Box>
             {scoreCardProps && <ScoreCard {...scoreCardProps} />}
           </>
         )}

@@ -13,8 +13,7 @@ import Box from "@mui/material/Box";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { IShotDetail } from "../utils/roundFormatter";
 import { getHoleIndexToUpdate, ICompleteScoreCard } from "../components/ScoreCard";
-import { useRoundContext } from "../context/RoundContext";
-import { IRoundState } from "../context/RoundContext";
+import { useRoundContext, IRoundState } from "../context/RoundContext";
 import { NON_HOLE_ROWS } from "../utils/scoreCardFormatter";
 import { shotResultOptions } from "../lib/selectOptions";
 import {
@@ -28,6 +27,7 @@ import { saveRound as saveRoundMutation } from "../pages/api/graphql/mutations/r
 import { useRouter } from "next/router";
 import { queryParamToString } from "../utils/queryParamFormatter";
 import { saveUnverifiedCourseParMutation } from "../pages/api/graphql/mutations/unverifiedCourseMutations";
+import { useNetworkContext } from "../context/NetworkContext";
 
 function valuetext(value: number) {
   return `${value}`;
@@ -39,6 +39,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const [saveRound] = useMutation(saveRoundMutation);
   const [saveUnverifiedCoursePar] = useMutation(saveUnverifiedCourseParMutation);
   const roundContext = useRoundContext();
+  const networkConext = useNetworkContext();
   const holeIndex = getHoleIndexToUpdate(row.hole);
 
   const [open, setOpen] = useState(false);
@@ -239,6 +240,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   }
 
   async function saveScorecard() {
+    // TODO ADD TRY CATCH HERE
     const updatedHoleScores = updatedHoleScoresContext(roundContext.state);
 
     const updatedHoleShotDetails = roundContext.state.holeShotDetails.map(
@@ -277,29 +279,43 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       }
     );
 
-    const { data } = await saveRound({
-      variables: {
-        holeScores: updatedHoleScores,
-        holeShotDetails: updatedHoleShotDetails,
-        roundid: queryParamToString(roundid),
-      },
-    });
+    const { hasNetworkConnection, offlineModeEnabled } = networkConext.state;
 
-    const {
-      hole_scores: dbHoleScores,
-      hole_shot_details: dbHoleShotDetails,
-    }: { hole_scores: number[]; hole_shot_details: IShotDetail[][] } = data.saveRound;
+    if (!offlineModeEnabled && hasNetworkConnection) {
+      // save to db if online
+      const { data } = await saveRound({
+        variables: {
+          holeScores: updatedHoleScores,
+          holeShotDetails: updatedHoleShotDetails,
+          roundid: queryParamToString(roundid),
+        },
+      });
 
-    roundContext.dispatch({
-      type: "update scores and shot details",
-      payload: {
-        ...roundContext.state,
-        holeScores: dbHoleScores,
-        holeShotDetails: dbHoleShotDetails,
-      },
-    });
+      const {
+        hole_scores: dbHoleScores,
+        hole_shot_details: dbHoleShotDetails,
+      }: { hole_scores: number[]; hole_shot_details: IShotDetail[][] } = data.saveRound;
 
-    console.log("SAVED!!!!!!!!!!!!!!!!!");
+      roundContext.dispatch({
+        type: "update scores and shot details",
+        payload: {
+          ...roundContext.state,
+          holeScores: dbHoleScores,
+          holeShotDetails: dbHoleShotDetails,
+        },
+      });
+      console.log("++++++++++ SAVED TO POSTGRES ++++++++++");
+    } else {
+      roundContext.dispatch({
+        type: "update scores and shot details",
+        payload: {
+          ...roundContext.state,
+          holeScores: updatedHoleScores,
+          holeShotDetails: updatedHoleShotDetails,
+        },
+      });
+      console.log("---------- SAVED TO INDEXEDB ----------");
+    }
   }
 
   async function saveUnverifiedPar() {
@@ -308,22 +324,34 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       return userAddedPar || "4";
     });
 
-    const { data } = await saveUnverifiedCoursePar({
-      variables: {
-        userAddedPar: updatedUserAddedPar,
-        unverifiedCourseId,
-      },
-    });
+    const { hasNetworkConnection, offlineModeEnabled } = networkConext.state;
 
-    const dbUserAddedPar = data.saveUnverifiedCoursePar.user_added_par;
+    if (hasNetworkConnection && !offlineModeEnabled) {
+      const { data } = await saveUnverifiedCoursePar({
+        variables: {
+          userAddedPar: updatedUserAddedPar,
+          unverifiedCourseId,
+        },
+      });
 
-    roundContext.dispatch({
-      type: "set par for user added course",
-      payload: {
-        ...roundContext.state,
-        par: dbUserAddedPar,
-      },
-    });
+      const dbUserAddedPar = data.saveUnverifiedCoursePar.user_added_par;
+
+      roundContext.dispatch({
+        type: "set par for user added course",
+        payload: {
+          ...roundContext.state,
+          par: dbUserAddedPar,
+        },
+      });
+    } else {
+      roundContext.dispatch({
+        type: "set par for user added course",
+        payload: {
+          ...roundContext.state,
+          par: updatedUserAddedPar,
+        },
+      });
+    }
   }
 
   useEffect(() => {
@@ -340,6 +368,16 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   useEffect(() => {
     addNewHoleDetailsEntries(roundContext.state, "distanceToPin", dtp);
   }, []);
+
+  useEffect(() => {
+    const { hasNetworkConnection, offlineModeEnabled } = networkConext.state;
+    if (hasNetworkConnection && !offlineModeEnabled) {
+      saveScorecard();
+      if (roundContext.state.isUserAddedCourse) {
+        saveUnverifiedPar();
+      }
+    }
+  }, [networkConext.state.offlineModeEnabled]);
 
   return (
     <div>

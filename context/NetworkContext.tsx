@@ -4,14 +4,13 @@ import type { ReactNode } from "react";
 export interface INetworkState {
   hasNetworkConnection: boolean;
   offlineModeEnabled: boolean;
-  //   timeSinceNetworkChange: number;
-  //   typeOfConnection: string;
-  //   effectiveType: string;
+  mbps: number;
 }
 
 const defaultNetworkState: INetworkState = {
   hasNetworkConnection: true,
   offlineModeEnabled: false,
+  mbps: 50, // arbitrary
 };
 export type NetworkAction = {
   type: string;
@@ -39,6 +38,17 @@ function networkContextReducer(state: INetworkState, action: NetworkAction): any
       return {
         ...state,
         offlineModeEnabled: payload.offlineModeEnabled,
+      };
+    case "update mbps":
+      return {
+        ...state,
+        mbps: payload.mbps,
+      };
+    case "update mbps and offline mode enabled":
+      return {
+        ...state,
+        offlineModeEnabled: payload.offlineModeEnabled,
+        mbps: payload.mbps,
       };
     default:
       return state;

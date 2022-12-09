@@ -204,11 +204,6 @@ export default function ScoreCard(props: IScoreCardProps) {
           Rating {rating}
         </Typography>
       </Box>
-      <Box m={3}>
-        <Button type="submit" size="medium" variant="contained" color="primary">
-          Go Offline
-        </Button>
-      </Box>
       <TableContainer component={Paper}>
         <Table aria-label="collapsible table">
           <TableHead>
