@@ -174,19 +174,19 @@ export default function ScoreCard(props: IScoreCardProps) {
   useEffect(() => {
     const indexedDB = window.indexedDB;
     const request = indexedDB.open("GolfStatDb", 1);
-    request.onupgradeneeded = () => {
-      const db = request.result;
-      const store = db.createObjectStore("rounds", { keyPath: "id" });
-      store.createIndex(
-        "roundDetails",
-        ["clubs", "holeScores", "holeShotDetails", "isUserAddedCourse", "par"],
-        { unique: false }
-      );
-    };
+    // request.onupgradeneeded = () => {
+    //   const db = request.result;
+    //   const store = db.createObjectStore("round", { keyPath: "id" });
+    //   store.createIndex(
+    //     "roundDetails",
+    //     ["clubs", "holeScores", "holeShotDetails", "isUserAddedCourse", "par"],
+    //     { unique: false }
+    //   );
+    // };
     request.onsuccess = () => {
       const db = request.result;
-      const transaction = db.transaction("rounds", "readwrite");
-      const store = transaction.objectStore("rounds");
+      const transaction = db.transaction("round", "readwrite");
+      const store = transaction.objectStore("round");
       store.put({
         id: roundid,
         ...roundContext.state,
