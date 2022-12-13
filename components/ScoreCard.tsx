@@ -174,15 +174,7 @@ export default function ScoreCard(props: IScoreCardProps) {
   useEffect(() => {
     const indexedDB = window.indexedDB;
     const request = indexedDB.open("GolfStatDb", 1);
-    // request.onupgradeneeded = () => {
-    //   const db = request.result;
-    //   const store = db.createObjectStore("round", { keyPath: "id" });
-    //   store.createIndex(
-    //     "roundDetails",
-    //     ["clubs", "holeScores", "holeShotDetails", "isUserAddedCourse", "par"],
-    //     { unique: false }
-    //   );
-    // };
+
     request.onsuccess = () => {
       const db = request.result;
       const transaction = db.transaction("round", "readwrite");
@@ -191,6 +183,20 @@ export default function ScoreCard(props: IScoreCardProps) {
         id: roundid,
         ...roundContext.state,
       });
+
+      const roundTransaction = db.transaction("roundBuildProps", "readwrite");
+      const roundStore = roundTransaction.objectStore("roundBuildProps");
+      const existingRoundQuery = roundStore.get(roundid);
+      existingRoundQuery.onsuccess = () => {
+        if (existingRoundQuery.result) {
+          const copy = { ...existingRoundQuery.result };
+          copy.hole_scores = roundContext.state.holeScores;
+          copy.hole_shot_details = roundContext.state.holeShotDetails;
+          roundStore.put({
+            ...copy,
+          });
+        }
+      };
     };
   }, [roundContext.state]);
 

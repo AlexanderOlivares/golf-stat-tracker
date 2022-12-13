@@ -1,6 +1,6 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { useQuery } from "@apollo/client";
+import { useQuery, useLazyQuery } from "@apollo/client";
 import ScoreCard from "../../../components/ScoreCard";
 import { getCourseForRound } from "../../api/graphql/queries/courseQueries";
 import { useEffect, useState } from "react";
@@ -118,30 +118,20 @@ export default function Round() {
   const [roundDetails, setRoundDetails] = useState<IRoundDetails | null>(null);
 
   // only make these network calls if networkContext is online/good connection
-  // save these into their own indexed db
-  const courseForRound = useQuery(getCourseForRound, {
-    variables: {
-      courseId: queryParamToString(queryParams.courseId),
-      isUserAddedCourse: queryParamToBoolean(queryParams.isUserAddedCourse),
-    },
-    skip: queryParamToBoolean(queryParams.isUserAddedCourse),
-    fetchPolicy: "network-only",
-  });
+  function onNetwork() {
+    const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
+    if (!hasNetworkConnection || offlineModeEnabled) {
+      return false;
+    }
+  }
 
-  const unverifiedCourseForRound = useQuery(getUnverifiedCourseForRound, {
-    variables: {
-      unverifiedCourseId: queryParamToString(queryParams.unverifiedCourseId),
-    },
-    skip: !queryParamToBoolean(queryParams.isUserAddedCourse),
-    fetchPolicy: "network-only",
-  });
-
-  const round = useQuery(getRoundByIdQuery, {
-    variables: {
-      roundid,
-    },
-    fetchPolicy: "network-only",
-  });
+  const [getRound, { loading, error, data }] = useLazyQuery(getRoundByIdQuery);
+  const [getVerifiedCourse, { loading: courseLoading, error: courseError, data: courseData }] =
+    useLazyQuery(getCourseForRound);
+  const [
+    getUnverifiedCourse,
+    { loading: unverifiedCourseLoading, error: unverifiedCourseError, data: unverifiedCourseData },
+  ] = useLazyQuery(getUnverifiedCourseForRound);
 
   useEffect(() => {
     if (router.isReady) {
@@ -159,26 +149,117 @@ export default function Round() {
   }, [router.isReady]);
 
   useEffect(() => {
-    if (router.isReady && round.data) {
-      setRoundDetails(round.data.round);
+    const indexedDB = window.indexedDB;
+    const request = indexedDB.open("GolfStatDb", 1);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      const roundBuildPropsStore = db.createObjectStore("roundBuildProps", { keyPath: "id" });
+      roundBuildPropsStore.createIndex("roundBuildProps", ["hole_scores", "hole_shot_details"], {
+        unique: false,
+      });
+      const courseBuildPropsStore = db.createObjectStore("courseBuildProps", { keyPath: "id" });
+      courseBuildPropsStore.createIndex("courseBuildProps", ["courseBuildProps"], {
+        unique: false,
+      });
+      const roundStore = db.createObjectStore("round", { keyPath: "id" });
+      roundStore.createIndex(
+        "roundDetails",
+        ["clubs", "holeScores", "holeShotDetails", "isUserAddedCourse", "par"],
+        { unique: false }
+      );
+    };
+    request.onsuccess = async () => {
+      const db = request.result;
+      const roundidKey = queryParamToString(roundid);
+
+      const transaction = db.transaction("roundBuildProps", "readwrite");
+      const roundStore = transaction.objectStore("roundBuildProps");
+      const existingRoundQuery = roundStore.get(roundidKey); // will be undefined if new round
+      existingRoundQuery.onsuccess = () => {
+        if (existingRoundQuery.result) {
+          setRoundDetails(existingRoundQuery.result);
+        }
+        if (!existingRoundQuery.result) {
+          getRound({ variables: { roundid } });
+        }
+        if (!existingRoundQuery.result && data) {
+          roundStore.put({
+            id: roundid,
+            ...data.round,
+          });
+        }
+      };
+
+      const courseTransaction = db.transaction("courseBuildProps", "readwrite");
+      const courseStore = courseTransaction.objectStore("courseBuildProps");
+
+      const verifiedCourseKey = queryParamToString(queryParams.courseId);
+      const verifiedCourseQuery = courseStore.get(verifiedCourseKey);
+      verifiedCourseQuery.onsuccess = () => {
+        if (verifiedCourseQuery.result) {
+          setCourseDetails(verifiedCourseQuery.result);
+        }
+        if (!verifiedCourseQuery.result && !queryParams.unverifiedCourseId) {
+          getVerifiedCourse({
+            variables: {
+              courseId: queryParamToString(queryParams.courseId),
+              isUserAddedCourse: queryParamToBoolean(queryParams.isUserAddedCourse),
+            },
+          });
+        }
+        if (!verifiedCourseQuery.result && courseData) {
+          courseStore.put({
+            id: queryParams.courseId,
+            ...courseData.course[0],
+          });
+        }
+      };
+
+      const unverifiedCourseKey = queryParamToString(queryParams.unverifiedCourseId);
+      const unverifiedCourseQuery = courseStore.get(unverifiedCourseKey);
+      unverifiedCourseQuery.onsuccess = () => {
+        // could possibly be pumping in outdated pars for unverified courses
+        if (unverifiedCourseQuery.result) {
+          setCourseDetails(unverifiedCourseQuery.result);
+        }
+        if (!unverifiedCourseQuery.result && !queryParams.courseId) {
+          getUnverifiedCourse({
+            variables: {
+              unverifiedCourseId: queryParamToString(queryParams.unverifiedCourseId),
+            },
+          });
+        }
+        if (!unverifiedCourseQuery.result && unverifiedCourseData) {
+          courseStore.put({
+            id: queryParams.unverifiedCourseId,
+            ...unverifiedCourseData.unverifiedCourse[0],
+          });
+        }
+      };
+    };
+  }, [data, queryParams, courseData, unverifiedCourseData]);
+
+  useEffect(() => {
+    if (router.isReady && data) {
+      setRoundDetails(data.round);
     }
-    if (queryParams.courseId && courseForRound.data) {
-      setCourseDetails(courseForRound.data.course[0]);
+    if (queryParams.courseId && courseData) {
+      setCourseDetails(courseData.course[0]);
     }
-    if (queryParams.unverifiedCourseId && unverifiedCourseForRound.data) {
-      setCourseDetails(unverifiedCourseForRound.data.unverifiedCourse[0]);
+    if (queryParams.unverifiedCourseId && unverifiedCourseData) {
+      setCourseDetails(unverifiedCourseData.unverifiedCourse[0]);
     }
     if (courseDetails && roundDetails) {
       const builtProps = buildProps(roundDetails, courseDetails);
       setScoreCardProps(builtProps);
     }
-  }, [round, router.isReady, courseForRound, roundDetails, courseDetails]);
+  }, [getRound, router.isReady, courseData, roundDetails, courseDetails]);
 
-  if (round.loading || courseForRound.loading) return "Loading...";
+  if (loading || courseLoading) return "Loading...";
 
-  if (round.error || courseForRound.error) {
+  if (error || courseLoading) {
     // TODO add toast error
-    console.log(round.error || courseForRound.error);
+    console.log(error || courseError);
     router.push("/login");
   }
 
