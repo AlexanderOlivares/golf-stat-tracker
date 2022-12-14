@@ -15,6 +15,12 @@ import { HoleDetailModal } from "../components/HoleDetailModal";
 import { IShotDetail } from "../utils/roundFormatter";
 import { useRoundContext } from "../context/RoundContext";
 import { Button } from "@mui/material";
+import { useNetworkContext } from "../context/NetworkContext";
+import { useMutation } from "@apollo/client";
+import { saveRound as saveRoundMutation } from "../pages/api/graphql/mutations/roundMutations";
+import { queryParamToString } from "../utils/queryParamFormatter";
+import { saveUnverifiedCourseParMutation } from "../pages/api/graphql/mutations/unverifiedCourseMutations";
+
 const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
 function showAltTableHeaders(holeNumber: string | undefined): boolean {
@@ -125,6 +131,9 @@ function formatParArray(holes: IHoleDetails[]) {
 
 export default function ScoreCard(props: IScoreCardProps) {
   const roundContext = useRoundContext();
+  const networkContext = useNetworkContext();
+  const [saveRound] = useMutation(saveRoundMutation);
+  const [saveUnverifiedCoursePar] = useMutation(saveUnverifiedCourseParMutation);
 
   const scoreCardRows: IHoleDetails[] = formatScoreCard(props);
   const holeScores = props.hole_scores;
@@ -197,8 +206,54 @@ export default function ScoreCard(props: IScoreCardProps) {
           });
         }
       };
+
+      if (props.unverified_course_id) {
+        const courseTransaction = db.transaction("courseBuildProps", "readwrite");
+        const courseStore = courseTransaction.objectStore("courseBuildProps");
+        const unverifiedCourseKey = queryParamToString(props.unverified_course_id);
+        const unverifiedCourseQuery = courseStore.get(unverifiedCourseKey);
+        unverifiedCourseQuery.onsuccess = () => {
+          if (unverifiedCourseQuery.result) {
+            const copy = { ...unverifiedCourseQuery.result };
+            copy.user_added_par = roundContext.state.par;
+            courseStore.put({
+              ...copy,
+            });
+          }
+        };
+      }
     };
   }, [roundContext.state]);
+
+  async function saveScoreCard() {
+    const { holeScores, holeShotDetails } = roundContext.state;
+    const { data } = await saveRound({
+      variables: {
+        holeScores,
+        holeShotDetails,
+        roundid: queryParamToString(roundid),
+      },
+    });
+  }
+
+  async function saveUnverifiedPar() {
+    const { data } = await saveUnverifiedCoursePar({
+      variables: {
+        userAddedPar: roundContext.state.par,
+        unverifiedCourseId: props.unverified_course_id,
+      },
+    });
+  }
+
+  useEffect(() => {
+    //   const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
+    //   if (hasNetworkConnection && !offlineModeEnabled) {
+    //     saveScoreCard();
+    //     if (roundContext.state.isUserAddedCourse) {
+    //       saveUnverifiedPar();
+    //     }
+    //   }
+  }, [networkContext.state.offlineModeEnabled]);
 
   return (
     <>

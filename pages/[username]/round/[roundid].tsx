@@ -179,7 +179,7 @@ export default function Round() {
         if (existingRoundQuery.result) {
           setRoundDetails(existingRoundQuery.result);
         }
-        if (!existingRoundQuery.result) {
+        if (!existingRoundQuery.result && roundid) {
           getRound({ variables: { roundid } });
         }
         if (!existingRoundQuery.result && data) {
@@ -219,16 +219,23 @@ export default function Round() {
       const unverifiedCourseQuery = courseStore.get(unverifiedCourseKey);
       unverifiedCourseQuery.onsuccess = () => {
         // could possibly be pumping in outdated pars for unverified courses
+        const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
+
+        if (hasNetworkConnection && !offlineModeEnabled) {
+          if (!unverifiedCourseQuery.result && queryParams.unverifiedCourseId) {
+            console.log("hiiii");
+            getUnverifiedCourse({
+              variables: {
+                unverifiedCourseId: queryParamToString(queryParams.unverifiedCourseId),
+              },
+            });
+          }
+        }
+
         if (unverifiedCourseQuery.result) {
           setCourseDetails(unverifiedCourseQuery.result);
         }
-        if (!unverifiedCourseQuery.result && !queryParams.courseId) {
-          getUnverifiedCourse({
-            variables: {
-              unverifiedCourseId: queryParamToString(queryParams.unverifiedCourseId),
-            },
-          });
-        }
+
         if (!unverifiedCourseQuery.result && unverifiedCourseData) {
           courseStore.put({
             id: queryParams.unverifiedCourseId,

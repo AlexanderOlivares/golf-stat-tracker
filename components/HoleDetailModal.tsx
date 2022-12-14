@@ -39,7 +39,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const [saveRound] = useMutation(saveRoundMutation);
   const [saveUnverifiedCoursePar] = useMutation(saveUnverifiedCourseParMutation);
   const roundContext = useRoundContext();
-  const networkConext = useNetworkContext();
+  const networkContext = useNetworkContext();
   const holeIndex = getHoleIndexToUpdate(row.hole);
 
   const [open, setOpen] = useState(false);
@@ -279,7 +279,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       }
     );
 
-    const { hasNetworkConnection, offlineModeEnabled } = networkConext.state;
+    const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
 
     if (!offlineModeEnabled && hasNetworkConnection) {
       // save to db if online
@@ -324,7 +324,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       return userAddedPar || "4";
     });
 
-    const { hasNetworkConnection, offlineModeEnabled } = networkConext.state;
+    const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
 
     if (hasNetworkConnection && !offlineModeEnabled) {
       const { data } = await saveUnverifiedCoursePar({
@@ -368,16 +368,6 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   useEffect(() => {
     addNewHoleDetailsEntries(roundContext.state, "distanceToPin", dtp);
   }, []);
-
-  useEffect(() => {
-    const { hasNetworkConnection, offlineModeEnabled } = networkConext.state;
-    if (hasNetworkConnection && !offlineModeEnabled) {
-      saveScorecard();
-      if (roundContext.state.isUserAddedCourse) {
-        saveUnverifiedPar();
-      }
-    }
-  }, [networkConext.state.offlineModeEnabled]);
 
   return (
     <div>
