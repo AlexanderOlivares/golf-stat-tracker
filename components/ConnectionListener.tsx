@@ -33,6 +33,15 @@ export default function ConnectionListener() {
   useEffect(() => {
     const connectionPing = setInterval(() => {
       measureConnectionSpeed(networkContext.state.hasNetworkConnection);
+      if (networkContext.state.mbps < 10) {
+        networkContext.dispatch({
+          type: "update offline mode enabled",
+          payload: {
+            ...networkContext.state,
+            offlineModeEnabled: true,
+          },
+        });
+      }
     }, 10000);
     return () => clearInterval(connectionPing);
   }, [networkContext.state.hasNetworkConnection]);

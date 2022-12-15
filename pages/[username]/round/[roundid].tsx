@@ -316,7 +316,7 @@ export default function Round() {
                 variant="contained"
                 color="primary"
               >
-                Go Offline
+                {`offline mode enabled: ${networkContext.state.offlineModeEnabled}`}
               </Button>
             </Box>
             {scoreCardProps && <ScoreCard {...scoreCardProps} />}
