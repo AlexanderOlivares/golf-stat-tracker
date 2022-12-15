@@ -240,81 +240,86 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   }
 
   async function saveScorecard() {
-    // TODO ADD TRY CATCH HERE
-    const updatedHoleScores = updatedHoleScoresContext(roundContext.state);
+    try {
+      const updatedHoleScores = updatedHoleScoresContext(roundContext.state);
 
-    const updatedHoleShotDetails = roundContext.state.holeShotDetails.map(
-      (holeDetail: IShotDetail[], index: number) => {
-        if (index === 9) {
-          return [
-            {
-              fairwaysHit: getFairwaysHit("front"),
-              greensInReg: getGreensInReg("front"),
-              threePutts: getThreePutts("front"),
-              totalPutts: getTotalPutts("front"),
-            },
-          ];
+      const updatedHoleShotDetails = roundContext.state.holeShotDetails.map(
+        (holeDetail: IShotDetail[], index: number) => {
+          if (index === 9) {
+            return [
+              {
+                fairwaysHit: getFairwaysHit("front"),
+                greensInReg: getGreensInReg("front"),
+                threePutts: getThreePutts("front"),
+                totalPutts: getTotalPutts("front"),
+              },
+            ];
+          }
+          if (index === 19) {
+            return [
+              {
+                fairwaysHit: getFairwaysHit("back"),
+                greensInReg: getGreensInReg("back"),
+                threePutts: getThreePutts("back"),
+                totalPutts: getTotalPutts("back"),
+              },
+            ];
+          }
+          if (index === 20) {
+            return [
+              {
+                fairwaysHit: getFairwaysHit(),
+                greensInReg: getGreensInReg(),
+                threePutts: getThreePutts(),
+                totalPutts: getTotalPutts(),
+              },
+            ];
+          }
+          return holeDetail;
         }
-        if (index === 19) {
-          return [
-            {
-              fairwaysHit: getFairwaysHit("back"),
-              greensInReg: getGreensInReg("back"),
-              threePutts: getThreePutts("back"),
-              totalPutts: getTotalPutts("back"),
-            },
-          ];
-        }
-        if (index === 20) {
-          return [
-            {
-              fairwaysHit: getFairwaysHit(),
-              greensInReg: getGreensInReg(),
-              threePutts: getThreePutts(),
-              totalPutts: getTotalPutts(),
-            },
-          ];
-        }
-        return holeDetail;
+      );
+
+      const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
+
+      if (!offlineModeEnabled && hasNetworkConnection) {
+        // save to db if online
+        const { data } = await saveRound({
+          variables: {
+            holeScores: updatedHoleScores,
+            holeShotDetails: updatedHoleShotDetails,
+            roundid: queryParamToString(roundid),
+          },
+        });
+
+        const {
+          hole_scores: dbHoleScores,
+          hole_shot_details: dbHoleShotDetails,
+        }: { hole_scores: number[]; hole_shot_details: IShotDetail[][] } = data.saveRound;
+
+        roundContext.dispatch({
+          type: "update scores and shot details and timestamp",
+          payload: {
+            ...roundContext.state,
+            lastSaveTimestamp: Date.now(),
+            holeScores: dbHoleScores,
+            holeShotDetails: dbHoleShotDetails,
+          },
+        });
+        console.log("++++++++++ SAVED TO POSTGRES ++++++++++");
+      } else {
+        roundContext.dispatch({
+          type: "update scores and shot details and timestamp",
+          payload: {
+            ...roundContext.state,
+            holeScores: updatedHoleScores,
+            holeShotDetails: updatedHoleShotDetails,
+          },
+        });
+        console.log("---------- SAVED TO INDEXEDB ----------");
       }
-    );
-
-    const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
-
-    if (!offlineModeEnabled && hasNetworkConnection) {
-      // save to db if online
-      const { data } = await saveRound({
-        variables: {
-          holeScores: updatedHoleScores,
-          holeShotDetails: updatedHoleShotDetails,
-          roundid: queryParamToString(roundid),
-        },
-      });
-
-      const {
-        hole_scores: dbHoleScores,
-        hole_shot_details: dbHoleShotDetails,
-      }: { hole_scores: number[]; hole_shot_details: IShotDetail[][] } = data.saveRound;
-
-      roundContext.dispatch({
-        type: "update scores and shot details",
-        payload: {
-          ...roundContext.state,
-          holeScores: dbHoleScores,
-          holeShotDetails: dbHoleShotDetails,
-        },
-      });
-      console.log("++++++++++ SAVED TO POSTGRES ++++++++++");
-    } else {
-      roundContext.dispatch({
-        type: "update scores and shot details",
-        payload: {
-          ...roundContext.state,
-          holeScores: updatedHoleScores,
-          holeShotDetails: updatedHoleShotDetails,
-        },
-      });
-      console.log("---------- SAVED TO INDEXEDB ----------");
+    } catch (error) {
+      // TODO add toast error
+      console.log(error);
     }
   }
 

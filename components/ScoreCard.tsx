@@ -132,6 +132,7 @@ function formatParArray(holes: IHoleDetails[]) {
 export default function ScoreCard(props: IScoreCardProps) {
   const roundContext = useRoundContext();
   const networkContext = useNetworkContext();
+  const { hasNetworkConnection, offlineModeEnabled, mbps } = networkContext.state;
   const [saveRound] = useMutation(saveRoundMutation);
   const [saveUnverifiedCoursePar] = useMutation(saveUnverifiedCourseParMutation);
 
@@ -148,7 +149,7 @@ export default function ScoreCard(props: IScoreCardProps) {
 
   useEffect(() => {
     roundContext.dispatch({
-      type: "update scores and shot details",
+      type: "update scores and shot details and timestamp",
       payload: {
         ...roundContext.state,
         holeScores: holeScores,
@@ -234,6 +235,16 @@ export default function ScoreCard(props: IScoreCardProps) {
         roundid: queryParamToString(roundid),
       },
     });
+    if (data) {
+      console.log("+++ saved scorecard to postgres +++");
+      roundContext.dispatch({
+        type: "update last save timestamp",
+        payload: {
+          ...roundContext.state,
+          lastSaveTimestamp: Date.now(),
+        },
+      });
+    }
   }
 
   async function saveUnverifiedPar() {
@@ -243,17 +254,49 @@ export default function ScoreCard(props: IScoreCardProps) {
         unverifiedCourseId: props.unverified_course_id,
       },
     });
+    if (data) console.log("+++ saved unverified par to postgres +++");
+  }
+
+  // check this func and behavior when refreshing on/offline
+  function roundContextHydrationCheck() {
+    const { holeScores, par, holeShotDetails } = roundContext.state;
+    if (holeScores.length != 25 || holeShotDetails.length != 25 || !par.length) {
+      return false;
+    }
+    return true;
   }
 
   useEffect(() => {
-    //   const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
-    //   if (hasNetworkConnection && !offlineModeEnabled) {
-    //     saveScoreCard();
-    //     if (roundContext.state.isUserAddedCourse) {
-    //       saveUnverifiedPar();
-    //     }
-    //   }
-  }, [networkContext.state.offlineModeEnabled]);
+    const roundContextIsHydrated = roundContextHydrationCheck();
+    if (roundContextIsHydrated) {
+      if (hasNetworkConnection && !offlineModeEnabled) {
+        saveScoreCard();
+        if (roundContext.state.isUserAddedCourse) {
+          saveUnverifiedPar();
+        }
+      }
+    }
+  }, [offlineModeEnabled, hasNetworkConnection]);
+
+  useEffect(() => {
+    const backgroundSyncInterval = setInterval(() => {
+      // make sure connection is good enough to sync
+      if (hasNetworkConnection && mbps > 10) {
+        const now = Date.now();
+        console.log(now);
+        const roundContextIsHydrated = roundContextHydrationCheck();
+        console.log(roundContextIsHydrated);
+        if (now - roundContext.state.lastSaveTimestamp > 30000 && roundContextIsHydrated) {
+          saveScoreCard();
+          if (roundContext.state.isUserAddedCourse) {
+            saveUnverifiedPar();
+          }
+        }
+      }
+    }, 5000);
+
+    return () => clearInterval(backgroundSyncInterval);
+  }, [roundContext.state.lastSaveTimestamp]);
 
   return (
     <>

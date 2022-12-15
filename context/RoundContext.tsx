@@ -9,6 +9,7 @@ export interface IRoundState {
   isUserAddedCourse: boolean;
   holeShotDetails: IShotDetail[][];
   par: string[];
+  lastSaveTimestamp: number;
 }
 
 const defualtState: IRoundState = {
@@ -17,6 +18,7 @@ const defualtState: IRoundState = {
   isUserAddedCourse: false,
   holeShotDetails: createHoleDetailsJson(),
   par: [],
+  lastSaveTimestamp: Date.now(),
 };
 
 export type Action = {
@@ -40,9 +42,10 @@ function roundContextReducer(state: IRoundState, action: Action): any {
         ...state,
         clubs: payload.clubs,
       };
-    case "update scores and shot details":
+    case "update scores and shot details and timestamp":
       return {
         ...state,
+        lastSaveTimestamp: payload.lastSaveTimestamp,
         holeScores: payload.holeScores,
         isUserAddedCourse: payload.isUserAddedCourse,
         holeShotDetails: payload.holeShotDetails,
@@ -62,6 +65,11 @@ function roundContextReducer(state: IRoundState, action: Action): any {
       return {
         ...state,
         par: payload.par,
+      };
+    case "update last save timestamp":
+      return {
+        ...state,
+        lastSaveTimestamp: payload.lastSaveTimestamp,
       };
     default:
       return state;
