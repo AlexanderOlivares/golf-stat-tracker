@@ -181,6 +181,31 @@ export default function Round() {
     }
   }, [getRound, router.isReady, courseData, roundDetails, courseDetails]);
 
+  useEffect(() => {
+    const warningText = "You may have unsaved changes - do you want to navigate away?";
+    const handleWindowClose = (e: BeforeUnloadEvent) => {
+      if (!networkContext.state.offlineModeEnabled) return;
+      e.preventDefault();
+      return (e.returnValue = warningText);
+    };
+    const handleBrowseAway = () => {
+      if (window.confirm(warningText)) return;
+      router.events.emit("routeChangeError");
+      throw "routeChange aborted.";
+    };
+
+    if (networkContext.state.offlineModeEnabled) {
+      window.addEventListener("beforeunload", handleWindowClose);
+      window.addEventListener("beforeunload", handleBrowseAway);
+      router.events.on("routeChangeStart", handleBrowseAway);
+    }
+    return () => {
+      window.removeEventListener("beforeunload", handleBrowseAway);
+      window.removeEventListener("beforeunload", handleWindowClose);
+      router.events.off("routeChangeStart", handleBrowseAway);
+    };
+  }, [networkContext.state.offlineModeEnabled]);
+
   if (loading || courseLoading) return "Loading...";
 
   if (error || courseLoading) {

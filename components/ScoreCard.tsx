@@ -203,14 +203,14 @@ export default function ScoreCard(props: IScoreCardProps) {
         console.log(now);
         const roundContextIsHydrated = roundContextHydrationCheck();
         console.log(roundContextIsHydrated);
-        if (now - roundContext.state.lastSaveTimestamp > 30000 && roundContextIsHydrated) {
+        if (now - roundContext.state.lastSaveTimestamp > 60000 && roundContextIsHydrated) {
           saveScoreCard();
           if (roundContext.state.isUserAddedCourse) {
             saveUnverifiedPar();
           }
         }
       }
-    }, 5000);
+    }, 15000);
 
     return () => clearInterval(backgroundSyncInterval);
   }, [

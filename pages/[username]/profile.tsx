@@ -6,6 +6,7 @@ import { Box, Button } from "@mui/material";
 import RoundPreviewGrid from "../../components/RoundPreviewGrid";
 import Typography from "@mui/material/Typography";
 import { getRoundPreviewByUsernameQuery } from "../api/graphql/queries/roundQueries";
+import { useNetworkContext } from "../../context/NetworkContext";
 
 export interface IRoundPreview {
   round_id: string;
@@ -24,6 +25,7 @@ export interface IRoundPreview {
 
 export default function Profile() {
   const router = useRouter();
+  const networkContext = useNetworkContext();
 
   const username = router.query.username;
   const [roundPreviewRows, setRoundPrviewRows] = useState<IRoundPreview[] | null>(null);
@@ -44,6 +46,9 @@ export default function Profile() {
       const roundPreviewArray: IRoundPreview[] = roundPreviews.data.roundPreview;
       setRoundPrviewRows(roundPreviewArray);
     }
+    if (networkContext.state.offlineModeEnabled) {
+      // TODO add toast "you are in offline mode scores may not be up to date"
+    }
   }, [roundPreviews]);
 
   if (loading) return "Loading...";
@@ -51,8 +56,6 @@ export default function Profile() {
 
   const startNewRound = () => router.push(`/${username}/round/new-round`);
   const editClubSelection = () => router.push(`/${username}/edit-profile`);
-
-  console.log(roundPreviewRows);
 
   return (
     <>
