@@ -21,6 +21,7 @@ import { validUserAddedCourseFields } from "../../../utils/formValidator";
 import { queryParamToString } from "../../../utils/queryParamFormatter";
 import { useMutation } from "@apollo/client";
 import { createNewRound } from "../../api/graphql/mutations/roundMutations";
+import { useNetworkContext } from "../../../context/NetworkContext";
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
@@ -81,6 +82,7 @@ export function populateUserAddedCourseFields(
 
 export default function NewRound() {
   const router = useRouter();
+  const networkContext = useNetworkContext();
   const [newRound] = useMutation(createNewRound);
   const { loading, error, data } = useQuery(getCourses);
   const [holeCount, setHoleCount] = useState(18);
@@ -104,6 +106,16 @@ export default function NewRound() {
     getCourseId();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [courseName]);
+
+  useEffect(() => {
+    networkContext.dispatch({
+      type: "update offline mode enabled",
+      payload: {
+        ...networkContext.state,
+        offlineModeEnabled: false, // we need to be online for a new round
+      },
+    });
+  }, []);
 
   if (loading) return null;
   if (error) return `Error! ${error}`;

@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Box from "@mui/material/Box";
 import Typography from "@mui/material/Typography";
-import Collapse from "@mui/material/Collapse";
 import Table from "@mui/material/Table";
 import TableBody from "@mui/material/TableBody";
 import TableCell from "@mui/material/TableCell";
@@ -9,25 +8,18 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { IScoreCardProps } from "../pages/[username]/round/[roundid]";
 import { formatScoreCard, IHoleDetails, NON_HOLE_ROWS } from "../utils/scoreCardFormatter";
-import { HoleDetailModal } from "../components/HoleDetailModal";
 import { IShotDetail } from "../utils/roundFormatter";
 import { useRoundContext } from "../context/RoundContext";
-import { Button } from "@mui/material";
 import { useNetworkContext } from "../context/NetworkContext";
 import { useMutation } from "@apollo/client";
 import { saveRound as saveRoundMutation } from "../pages/api/graphql/mutations/roundMutations";
 import { queryParamToString } from "../utils/queryParamFormatter";
 import { saveUnverifiedCourseParMutation } from "../pages/api/graphql/mutations/unverifiedCourseMutations";
+import Row from "./ScoreCardRow";
+import { IScoreCardProps } from "../interfaces/scorecardInterface";
 
-const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
-
-function showAltTableHeaders(holeNumber: string | undefined): boolean {
-  if (!holeNumber) return false;
-  const altHoleMatches = ["in", "out", "total", "rating", "slope", "HCP", "NET"];
-  return altHoleMatches.includes(holeNumber);
-}
+export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
 export function getHoleIndexToUpdate(hole: string): number {
   if (statsOnlyHoles.includes(hole)) {
@@ -43,81 +35,6 @@ export function getHoleIndexToUpdate(hole: string): number {
     return holeIndexLookup[hole as keyof typeof holeIndexLookup];
   }
   return Number(hole) <= 9 ? Number(hole) - 1 : Number(hole);
-}
-
-function displayDistanceYardage(row: ICompleteScoreCard) {
-  if (row.frontTotalYardage) return row.frontTotalYardage;
-  if (row.backTotalYardage) return row.backTotalYardage;
-  if (row.totalYardage) return row.totalYardage;
-  return row.yardage;
-}
-
-function Row(props: { row: ICompleteScoreCard }) {
-  const { row } = props;
-  const [open, setOpen] = React.useState(false);
-  const roundContext = useRoundContext();
-  const { state } = roundContext;
-  const holeIndex = getHoleIndexToUpdate(row.hole);
-
-  return (
-    <>
-      <TableRow onClick={() => setOpen(!open)} sx={{ "& > *": { borderBottom: "unset" } }}>
-        <TableCell component="th" scope="row">
-          {row.hole}
-        </TableCell>
-        <TableCell align="right">{row.totalPar ? row.totalPar : row.par}</TableCell>
-        <TableCell align="right">{state.holeScores[holeIndex]}</TableCell>
-        {!roundContext.state.isUserAddedCourse && (
-          <>
-            <TableCell align="right">{displayDistanceYardage(row)}</TableCell>
-            <TableCell align="right">{row.handicap}</TableCell>
-          </>
-        )}
-      </TableRow>
-      <TableRow>
-        <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
-          <Collapse in={open} timeout="auto" unmountOnExit>
-            <Box sx={{ margin: 1 }}>
-              {!statsOnlyHoles.includes(String(row.hole)) && (
-                <Box textAlign="center" p={1}>
-                  <HoleDetailModal row={row} />
-                </Box>
-              )}
-              <Table size="small" aria-label="purchases">
-                <TableHead>
-                  <TableRow>
-                    <TableCell>
-                      {showAltTableHeaders(row.hole) ? "Fairways Hit" : "Shot #"}
-                    </TableCell>
-                    <TableCell>
-                      {showAltTableHeaders(row.hole) ? "GIR" : "Distance to Pin"}
-                    </TableCell>
-                    <TableCell>{showAltTableHeaders(row.hole) ? "3-Putts" : "Club"}</TableCell>
-                    <TableCell>
-                      {showAltTableHeaders(row.hole) ? "Total Putts" : "Result"}
-                    </TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {state.holeShotDetails[holeIndex].map((detail: IShotDetail, i: number) => (
-                    // make a better key here
-                    <TableRow key={i}>
-                      <TableCell>{detail.shotNumber || detail.fairwaysHit}</TableCell>
-                      <TableCell>{detail.distanceToPin || detail.greensInReg}</TableCell>
-                      <TableCell component="th" scope="row">
-                        {detail.club || detail.threePutts}
-                      </TableCell>
-                      <TableCell>{detail.result || detail.totalPutts}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </Box>
-          </Collapse>
-        </TableCell>
-      </TableRow>
-    </>
-  );
 }
 
 export interface ICompleteScoreCard extends IHoleDetails {
@@ -296,7 +213,11 @@ export default function ScoreCard(props: IScoreCardProps) {
     }, 5000);
 
     return () => clearInterval(backgroundSyncInterval);
-  }, [roundContext.state.lastSaveTimestamp]);
+  }, [
+    roundContext.state.lastSaveTimestamp,
+    roundContext.state.holeScores,
+    roundContext.state.holeShotDetails,
+  ]);
 
   return (
     <>

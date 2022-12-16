@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import Button from "@mui/material/Button";
-import TextField from "@mui/material/TextField";
 import Dialog from "@mui/material/Dialog";
 import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
@@ -21,6 +20,7 @@ import {
   calculateGreensInReg,
   calculateTotalPutts,
   getNonParThreeIndices,
+  sliceSum,
 } from "../utils/holeDetailsFormatter";
 import { useMutation } from "@apollo/client";
 import { saveRound as saveRoundMutation } from "../pages/api/graphql/mutations/roundMutations";
@@ -148,10 +148,6 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       },
     });
   };
-
-  function sliceSum(arr: number[], start: number, end: number) {
-    return arr.slice(start, end).reduce((a, c) => a + c, 0);
-  }
 
   const updatedHoleScoresContext = (prevState: IRoundState) => {
     const updatedScores = prevState.holeScores.map((existingScore: number, i: number) => {

@@ -1,0 +1,38 @@
+export interface ICourseDetails {
+  course_id: string;
+  course_name: string;
+  course_country: string;
+  course_city: string;
+  course_state: string;
+  is_nine_hole_course: boolean;
+  blue_par_front: string[] | null;
+  blue_par_back: string[] | null;
+  blue_hole_yardage_front: string[] | null;
+  blue_hole_yardage_back: string[] | null;
+  blue_total_yardage_front: string | null;
+  blue_total_yardage_back: string | null;
+  blue_handicap_front: string[] | null;
+  blue_handicap_back: string[] | null;
+  blue_slope: string | null;
+  blue_rating: string | null;
+  white_par_front: string[] | null;
+  white_par_back: string[] | null;
+  white_hole_yardage_front: string[] | null;
+  white_hole_yardage_back: string[] | null;
+  white_total_yardage_front: string | null;
+  white_total_yardage_back: string | null;
+  white_handicap_front: string[] | null;
+  white_handicap_back: string[] | null;
+  white_slope: string | null;
+  white_rating: string | null;
+  red_par_front: string[] | null;
+  red_par_back: string[] | null;
+  red_hole_yardage_front: string[] | null;
+  red_hole_yardage_back: string[] | null;
+  red_total_yardage_front: string | null;
+  red_total_yardage_back: string | null;
+  red_handicap_front: string[] | null;
+  red_handicap_back: string[] | null;
+  red_slope: string | null;
+  red_rating: string | null;
+}

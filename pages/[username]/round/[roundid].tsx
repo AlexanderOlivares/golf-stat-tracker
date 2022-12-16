@@ -1,99 +1,19 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { useQuery, useLazyQuery } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client";
 import ScoreCard from "../../../components/ScoreCard";
 import { getCourseForRound } from "../../api/graphql/queries/courseQueries";
 import { useEffect, useState } from "react";
 import { getRoundByIdQuery } from "../../api/graphql/queries/roundQueries";
 import { queryParamToString, queryParamToBoolean } from "../../../utils/queryParamFormatter";
-import { IShotDetail } from "../../../utils/roundFormatter";
 import { RoundContextProvider } from "../../../context/RoundContext";
 import { getUnverifiedCourseForRound } from "../../api/graphql/queries/unverifiedCourseQueries";
 import { useNetworkContext } from "../../../context/NetworkContext";
 import { Button } from "@mui/material";
 import Box from "@mui/material/Box";
-
-export interface IRoundDetails {
-  tee_color: string;
-  hole_count: number;
-  round_date: string;
-  round_id: string;
-  username: string;
-  front_or_back_nine: string;
-  course_name: string;
-  temperature: number;
-  is_user_added_course: boolean;
-  user_added_course_name: string;
-  user_added_city: string;
-  user_added_state: string;
-  unverified_course_id: string | null;
-  is_nine_hole_course: boolean;
-  weather_conditions: string;
-  clubs: string[];
-  hole_scores: number[];
-  hole_shot_details: IShotDetail[][];
-}
-
-export interface ICourseDetails {
-  course_id: string;
-  course_name: string;
-  course_country: string;
-  course_city: string;
-  course_state: string;
-  is_nine_hole_course: boolean;
-  blue_par_front: string[] | null;
-  blue_par_back: string[] | null;
-  blue_hole_yardage_front: string[] | null;
-  blue_hole_yardage_back: string[] | null;
-  blue_total_yardage_front: string | null;
-  blue_total_yardage_back: string | null;
-  blue_handicap_front: string[] | null;
-  blue_handicap_back: string[] | null;
-  blue_slope: string | null;
-  blue_rating: string | null;
-  white_par_front: string[] | null;
-  white_par_back: string[] | null;
-  white_hole_yardage_front: string[] | null;
-  white_hole_yardage_back: string[] | null;
-  white_total_yardage_front: string | null;
-  white_total_yardage_back: string | null;
-  white_handicap_front: string[] | null;
-  white_handicap_back: string[] | null;
-  white_slope: string | null;
-  white_rating: string | null;
-  red_par_front: string[] | null;
-  red_par_back: string[] | null;
-  red_hole_yardage_front: string[] | null;
-  red_hole_yardage_back: string[] | null;
-  red_total_yardage_front: string | null;
-  red_total_yardage_back: string | null;
-  red_handicap_front: string[] | null;
-  red_handicap_back: string[] | null;
-  red_slope: string | null;
-  red_rating: string | null;
-}
-
-export interface IScoreCardProps extends ICourseDetails {
-  tee_color: string;
-  hole_count: number;
-  round_date: string;
-  round_id: string;
-  username: string;
-  front_or_back_nine: string;
-  temperature: number;
-  course_name: string;
-  is_user_added_course: boolean;
-  user_added_course_name: string;
-  user_added_city: string;
-  user_added_state: string;
-  user_added_par: string[];
-  unverified_course_id: string | null;
-  is_nine_hole_course: boolean;
-  weather_conditions: string;
-  clubs: string[];
-  hole_scores: number[];
-  hole_shot_details: IShotDetail[][];
-}
+import { IScoreCardProps } from "../../../interfaces/scorecardInterface";
+import { ICourseDetails } from "../../../interfaces/course";
+import { IRoundDetails } from "../../../interfaces/round";
 
 export default function Round() {
   const router = useRouter();
@@ -223,7 +143,6 @@ export default function Round() {
 
         if (hasNetworkConnection && !offlineModeEnabled) {
           if (!unverifiedCourseQuery.result && queryParams.unverifiedCourseId) {
-            console.log("hiiii");
             getUnverifiedCourse({
               variables: {
                 unverifiedCourseId: queryParamToString(queryParams.unverifiedCourseId),
