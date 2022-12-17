@@ -55,7 +55,7 @@ export default function Profile() {
   if (error) return `Error! ${error.message}`;
 
   const startNewRound = () => router.push(`/${username}/round/new-round`);
-  const editClubSelection = () => router.push(`/${username}/edit-profile`);
+  const editClubSelection = () => router.push(`/${username}/my-clubs`);
 
   return (
     <>

@@ -316,42 +316,49 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     } catch (error) {
       // TODO add toast error
       console.log(error);
+      return router.push("/login");
     }
   }
 
   async function saveUnverifiedPar() {
-    const updatedUserAddedPar = roundContext.state.par.map((par: string, i: number) => {
-      if (holeIndex != i) return par;
-      return userAddedPar || "4";
-    });
-
-    const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
-
-    if (hasNetworkConnection && !offlineModeEnabled) {
-      const { data } = await saveUnverifiedCoursePar({
-        variables: {
-          userAddedPar: updatedUserAddedPar,
-          unverifiedCourseId,
-        },
+    try {
+      const updatedUserAddedPar = roundContext.state.par.map((par: string, i: number) => {
+        if (holeIndex != i) return par;
+        return userAddedPar || "4";
       });
 
-      const dbUserAddedPar = data.saveUnverifiedCoursePar.user_added_par;
+      const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
 
-      roundContext.dispatch({
-        type: "set par for user added course",
-        payload: {
-          ...roundContext.state,
-          par: dbUserAddedPar,
-        },
-      });
-    } else {
-      roundContext.dispatch({
-        type: "set par for user added course",
-        payload: {
-          ...roundContext.state,
-          par: updatedUserAddedPar,
-        },
-      });
+      if (hasNetworkConnection && !offlineModeEnabled) {
+        const { data } = await saveUnverifiedCoursePar({
+          variables: {
+            userAddedPar: updatedUserAddedPar,
+            unverifiedCourseId,
+          },
+        });
+
+        const dbUserAddedPar = data.saveUnverifiedCoursePar.user_added_par;
+
+        roundContext.dispatch({
+          type: "set par for user added course",
+          payload: {
+            ...roundContext.state,
+            par: dbUserAddedPar,
+          },
+        });
+      } else {
+        roundContext.dispatch({
+          type: "set par for user added course",
+          payload: {
+            ...roundContext.state,
+            par: updatedUserAddedPar,
+          },
+        });
+      }
+    } catch (error) {
+      // TODO add toast error
+      console.log(error);
+      return router.push("/login");
     }
   }
 

@@ -7,6 +7,7 @@ import Head from "next/head";
 import { useEffect } from "react";
 import { NetworkContextProvider } from "../context/NetworkContext";
 import ConnectionListener from "../components/ConnectionListener";
+import Nav from "../components/Nav";
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -36,6 +37,7 @@ function MyApp({ Component, pageProps }: AppProps) {
       </Head>
       <ApolloProvider client={appolloClient}>
         <NetworkContextProvider>
+          <Nav />
           <Component {...pageProps} />
           <ConnectionListener />
         </NetworkContextProvider>

@@ -18,6 +18,7 @@ import { queryParamToString } from "../utils/queryParamFormatter";
 import { saveUnverifiedCourseParMutation } from "../pages/api/graphql/mutations/unverifiedCourseMutations";
 import Row from "./ScoreCardRow";
 import { IScoreCardProps } from "../interfaces/scorecardInterface";
+import { useRouter } from "next/router";
 
 export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
@@ -47,6 +48,7 @@ function formatParArray(holes: IHoleDetails[]) {
 }
 
 export default function ScoreCard(props: IScoreCardProps) {
+  const router = useRouter();
   const roundContext = useRoundContext();
   const networkContext = useNetworkContext();
   const { hasNetworkConnection, offlineModeEnabled, mbps } = networkContext.state;
@@ -144,34 +146,46 @@ export default function ScoreCard(props: IScoreCardProps) {
   }, [roundContext.state]);
 
   async function saveScoreCard() {
-    const { holeScores, holeShotDetails } = roundContext.state;
-    const { data } = await saveRound({
-      variables: {
-        holeScores,
-        holeShotDetails,
-        roundid: queryParamToString(roundid),
-      },
-    });
-    if (data) {
-      console.log("+++ saved scorecard to postgres +++");
-      roundContext.dispatch({
-        type: "update last save timestamp",
-        payload: {
-          ...roundContext.state,
-          lastSaveTimestamp: Date.now(),
+    try {
+      const { holeScores, holeShotDetails } = roundContext.state;
+      const { data } = await saveRound({
+        variables: {
+          holeScores,
+          holeShotDetails,
+          roundid: queryParamToString(roundid),
         },
       });
+      if (data) {
+        console.log("+++ saved scorecard to postgres +++");
+        roundContext.dispatch({
+          type: "update last save timestamp",
+          payload: {
+            ...roundContext.state,
+            lastSaveTimestamp: Date.now(),
+          },
+        });
+      }
+    } catch (error) {
+      // TODO add error toast
+      console.log(error);
+      return router.push("/login");
     }
   }
 
   async function saveUnverifiedPar() {
-    const { data } = await saveUnverifiedCoursePar({
-      variables: {
-        userAddedPar: roundContext.state.par,
-        unverifiedCourseId: props.unverified_course_id,
-      },
-    });
-    if (data) console.log("+++ saved unverified par to postgres +++");
+    try {
+      const { data } = await saveUnverifiedCoursePar({
+        variables: {
+          userAddedPar: roundContext.state.par,
+          unverifiedCourseId: props.unverified_course_id,
+        },
+      });
+      if (data) console.log("+++ saved unverified par to postgres +++");
+    } catch (error) {
+      // TODO add error toast
+      console.log(error);
+      return router.push("/login");
+    }
   }
 
   // check this func and behavior when refreshing on/offline
