@@ -233,6 +233,44 @@ export default function ScoreCard(props: IScoreCardProps) {
     roundContext.state.holeShotDetails,
   ]);
 
+  useEffect(() => {
+    const warningText = "Click OK to save offline changes before navigating away";
+    const offlineWarningText = "Poor network connection. Re-connect to save changes";
+    const handleWindowClose = (e: BeforeUnloadEvent) => {
+      if (!networkContext.state.offlineModeEnabled) return;
+      e.preventDefault();
+      return (e.returnValue = warningText);
+    };
+    const handleBrowseAway = () => {
+      const roundContextIsHydrated = roundContextHydrationCheck();
+      if (!hasNetworkConnection) {
+        window.alert(offlineWarningText);
+      } else {
+        if (window.confirm(warningText)) {
+          if (hasNetworkConnection && roundContextIsHydrated) {
+            saveScoreCard();
+            if (roundContext.state.isUserAddedCourse) saveUnverifiedPar();
+            return;
+          }
+          return;
+        }
+      }
+      router.events.emit("routeChangeError");
+      throw "routeChange aborted.";
+    };
+
+    if (offlineModeEnabled || !hasNetworkConnection) {
+      window.addEventListener("beforeunload", handleWindowClose);
+      window.addEventListener("beforeunload", handleBrowseAway);
+      router.events.on("routeChangeStart", handleBrowseAway);
+    }
+    return () => {
+      window.removeEventListener("beforeunload", handleBrowseAway);
+      window.removeEventListener("beforeunload", handleWindowClose);
+      router.events.off("routeChangeStart", handleBrowseAway);
+    };
+  }, [offlineModeEnabled, hasNetworkConnection]);
+
   return (
     <>
       <Box>
