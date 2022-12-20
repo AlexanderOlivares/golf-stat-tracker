@@ -1,10 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import { Typography, Box, TextField, Button } from "@mui/material";
 import { emailAddressValidator, usernameAndPasswordValidator } from "../utils/formValidator";
 import { useMutation } from "@apollo/client";
 import SignOut from "../components/SignOut";
 import { loginMutation } from "./api/graphql/mutations/authMutations";
+import { useAuthContext } from "../context/AuthContext";
 
 interface ILoginCreds {
   email: string;
@@ -12,6 +13,7 @@ interface ILoginCreds {
 }
 
 export default function Login() {
+  const authContext = useAuthContext();
   const [login] = useMutation(loginMutation);
   const router = useRouter();
   const [emailError, setEmailError] = useState<boolean>(false);
@@ -59,12 +61,30 @@ export default function Login() {
 
       const { username } = data.login;
 
+      authContext.dispatch({
+        type: "update auth status",
+        payload: {
+          ...authContext.state,
+          isAuth: true,
+        },
+      });
+
       router.push(`/${username}/profile`);
     } catch (error) {
       console.log(error);
       // add toast error here
     }
   };
+
+  useEffect(() => {
+    authContext.dispatch({
+      type: "update auth status",
+      payload: {
+        ...authContext.state,
+        isAuth: false,
+      },
+    });
+  }, []);
 
   const validateUserNameAndPassword = ({ password }: ILoginCreds) => {
     const validPassword = usernameAndPasswordValidator(password);

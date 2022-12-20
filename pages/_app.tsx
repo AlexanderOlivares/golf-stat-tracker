@@ -6,6 +6,7 @@ import { onError } from "@apollo/client/link/error";
 import Head from "next/head";
 import { useEffect } from "react";
 import { NetworkContextProvider } from "../context/NetworkContext";
+import { AuthContextProvider } from "../context/AuthContext";
 import ConnectionListener from "../components/ConnectionListener";
 import Nav from "../components/Nav";
 
@@ -36,11 +37,13 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="manifest" href="/manifest.json" />
       </Head>
       <ApolloProvider client={appolloClient}>
-        <NetworkContextProvider>
-          <Nav />
-          <Component {...pageProps} />
-          <ConnectionListener />
-        </NetworkContextProvider>
+        <AuthContextProvider>
+          <NetworkContextProvider>
+            <Nav />
+            <Component {...pageProps} />
+            <ConnectionListener />
+          </NetworkContextProvider>
+        </AuthContextProvider>
       </ApolloProvider>
     </>
   );

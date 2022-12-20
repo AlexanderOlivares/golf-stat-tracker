@@ -3,12 +3,21 @@ import { useMutation } from "@apollo/client";
 import { Button } from "@mui/material";
 import { SignOutMutation } from "../pages/api/graphql/mutations/authMutations";
 import { useRouter } from "next/router";
+import { useAuthContext } from "../context/AuthContext";
 
 function SignOut() {
+  const authContext = useAuthContext();
   const router = useRouter();
   const [signOut] = useMutation(SignOutMutation);
   const signOutUser = () => {
     signOut();
+    authContext.dispatch({
+      type: "update auth status",
+      payload: {
+        ...authContext.state,
+        isAuth: false,
+      },
+    });
     return router.push("/login");
   };
   return (

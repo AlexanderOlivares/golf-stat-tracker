@@ -7,6 +7,7 @@ import RoundPreviewGrid from "../../components/RoundPreviewGrid";
 import Typography from "@mui/material/Typography";
 import { getRoundPreviewByUsernameQuery } from "../api/graphql/queries/roundQueries";
 import { useNetworkContext } from "../../context/NetworkContext";
+import { useAuthContext } from "../../context/AuthContext";
 
 export interface IRoundPreview {
   round_id: string;
@@ -26,6 +27,8 @@ export interface IRoundPreview {
 export default function Profile() {
   const router = useRouter();
   const networkContext = useNetworkContext();
+  const authContext = useAuthContext();
+  const { isAuth } = authContext.state;
 
   const username = router.query.username;
   const [roundPreviewRows, setRoundPrviewRows] = useState<IRoundPreview[] | null>(null);
@@ -67,14 +70,18 @@ export default function Profile() {
           <h3>uerId: {data.user.userid}</h3>
           <h3>uername: {data.user.username}</h3>
           <h3>email: {data.user.email}</h3>
-          <Button onClick={editClubSelection} size="medium" variant="contained" color="primary">
-            Edit my clubs
-          </Button>
-          <Box m={2}>
-            <Button onClick={startNewRound} size="medium" variant="contained" color="primary">
-              new round
-            </Button>
-          </Box>
+          {isAuth && (
+            <>
+              <Button onClick={editClubSelection} size="medium" variant="contained" color="primary">
+                Edit my clubs
+              </Button>
+              <Box m={2}>
+                <Button onClick={startNewRound} size="medium" variant="contained" color="primary">
+                  new round
+                </Button>
+              </Box>
+            </>
+          )}
           <Box>
             <Typography variant="h6" component="h2">
               Latest Rounds

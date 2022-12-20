@@ -4,6 +4,7 @@ import { Typography, Box, TextField, Button } from "@mui/material";
 import { emailAddressValidator, usernameAndPasswordValidator } from "../utils/formValidator";
 import { registerMutation } from "./api/graphql/mutations/authMutations";
 import { useMutation } from "@apollo/client";
+import { useAuthContext } from "../context/AuthContext";
 
 export interface IRegistrationCreds {
   username: string;
@@ -12,6 +13,7 @@ export interface IRegistrationCreds {
 }
 
 export default function Register() {
+  const authContext = useAuthContext();
   const [register] = useMutation(registerMutation);
   const router = useRouter();
   const [usernameError, setUsernameError] = useState<boolean>(false);
@@ -62,6 +64,14 @@ export default function Register() {
       });
 
       const { username } = data.register;
+
+      authContext.dispatch({
+        type: "update auth status",
+        payload: {
+          ...authContext.state,
+          isAuth: true,
+        },
+      });
 
       router.push(`/${username}/profile`);
     } catch (error) {
