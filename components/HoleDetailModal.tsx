@@ -292,6 +292,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
             holeScores: updatedHoleScores,
             holeShotDetails: updatedHoleShotDetails,
             roundid: queryParamToString(roundid),
+            username: queryParamToString(username),
           },
         });
 
@@ -344,6 +345,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
           variables: {
             userAddedPar: updatedUserAddedPar,
             unverifiedCourseId,
+            username: queryParamToString(username),
           },
         });
 

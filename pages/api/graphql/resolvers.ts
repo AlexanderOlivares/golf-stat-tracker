@@ -13,6 +13,7 @@ import {
   ICourseQueryArgs,
   IEditClubsMutationArgs,
   IUpdateUserAddedParArgs,
+  IUpdateRoundArgs,
 } from "./resolverInterfaces";
 import { errorOccured } from "./graphqlUtils";
 import { createNewRound, getRound } from "../../../lib/round/createNewRound";
@@ -90,7 +91,7 @@ export const resolvers = {
     async newRound(_parent: undefined, args: INewRoundMutationArgs, context: IContext) {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
         const { input } = args
-        if (input.username !== context.token.username) return new Error("Unauthorized"); // verify username
+        if (input.username !== context.token.username) return new Error("Unauthorized"); // make func for this? verify username
         if (input.unverifiedCourseId) {
             const unverifiedCourse = await createUnverifiedCourse(input);
             if (errorOccured(unverifiedCourse)) return new Error(unverifiedCourse.errorMessage)
@@ -102,22 +103,23 @@ export const resolvers = {
     async editClubs(_parent: undefined, args: IEditClubsMutationArgs, context: IContext) {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
         const { username, clubs } = args.input
-        if (username !== context.token.username) return new Error("Unauthorized"); // verify username
+        if (username !== context.token.username) return new Error("Unauthorized"); 
         const updatedClubs = await updateUserClubs(clubs, username);
         if (errorOccured(updatedClubs)) return new Error(updatedClubs.errorMessage)
         return updatedClubs;
     },
-    // TODO update args 
-    async saveRound(_parent: undefined, args: any, context: IContext) {
+    async saveRound(_parent: undefined, args: IUpdateRoundArgs, context: IContext) {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
-        const { holeScores, holeShotDetails, roundid } = args.input
-        const savedRoundStats = await saveRoundDetails(holeScores, holeShotDetails, roundid); // add username or userid here
+        const { holeScores, holeShotDetails, roundid, username } = args.input
+        if (username !== context.token.username) return new Error("Unauthorized"); 
+        const savedRoundStats = await saveRoundDetails(holeScores, holeShotDetails, roundid); 
         if (errorOccured(savedRoundStats)) return new Error(savedRoundStats.errorMessage)
         return savedRoundStats;
     },
     async saveUnverifiedCoursePar(_parent: undefined, args: IUpdateUserAddedParArgs, context: IContext) {
         if (errorOccured(context.token)) return new Error(context.token.errorMessage);
-          const { unverifiedCourseId, userAddedPar  } = args.input
+          const { unverifiedCourseId, userAddedPar, username  } = args.input
+        if (username !== context.token.username) return new Error("Unauthorized");
           const unverifiedCoursePar = await updateUnverifiedCoursePar(unverifiedCourseId, userAddedPar);
           if (errorOccured(unverifiedCoursePar)) return new Error(unverifiedCoursePar.errorMessage)
           return unverifiedCoursePar;

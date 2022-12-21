@@ -57,8 +57,8 @@ export const createNewRound = gql`
 `;
 
 export const saveRound = gql`
-  mutation SaveRound($holeScores: [Int], $holeShotDetails: JSON, $roundid: String) {
-    saveRound(input: { holeScores: $holeScores, holeShotDetails: $holeShotDetails, roundid: $roundid }) {
+  mutation SaveRound($holeScores: [Int], $holeShotDetails: JSON, $roundid: String, $username: String) {
+    saveRound(input: { holeScores: $holeScores, holeShotDetails: $holeShotDetails, roundid: $roundid, username: $username }) {
       hole_scores
       hole_shot_details
     }

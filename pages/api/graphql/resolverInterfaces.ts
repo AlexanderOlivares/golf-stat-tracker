@@ -1,6 +1,7 @@
 import { JWTPayload } from "jose";
 import { Pool } from "pg";
 import { IErrorMessage } from "../../../utils/errorMessage";
+import { IShotDetail } from "../../../utils/roundFormatter";
 import { IRoundRequestBody } from "../../[username]/round/new-round";
 
 export interface IUserQueryArgs {
@@ -36,7 +37,17 @@ export interface IEditClubsMutationArgs {
 export interface IUpdateUserAddedParArgs {
   input: {
     unverifiedCourseId: string;
-    userAddedPar: string[]
+    userAddedPar: string[];
+    username: string;
+  };
+}
+
+export interface IUpdateRoundArgs {
+  input: {
+    holeScores: (number | null)[];
+    holeShotDetails: IShotDetail[][];
+    roundid: string;
+    username: string;
   };
 }
 

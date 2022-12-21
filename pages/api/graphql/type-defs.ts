@@ -140,11 +140,13 @@ export const typeDefs = gql`
     holeScores: [Int]
     holeShotDetails: JSON
     roundid: String
+    username: String
   }
 
   type RoundStatsResponse {
     hole_scores: [Int]
     hole_shot_details: JSON
+    username: String
   }
 
   type RoundPreviewResponse {
@@ -170,6 +172,7 @@ export const typeDefs = gql`
   input UpdateUserAddedCourseParInput {
     unverifiedCourseId: String!
     userAddedPar: [String]!
+    username: String!
   }
 
   type Query {
