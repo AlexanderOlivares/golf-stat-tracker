@@ -59,12 +59,16 @@ export default function Login() {
         },
       });
 
-      const { username } = data.login;
+      const { username, token } = data.login;
+
+      if (!token) throw Error("Error logging in");
+      const decodedPayload = window.atob(data.login.token.split(".")[1]);
+      const payload = JSON.parse(decodedPayload);
 
       authContext.dispatch({
         type: "update auth status",
         payload: {
-          ...authContext.state,
+          tokenPayload: payload,
           isAuth: true,
         },
       });

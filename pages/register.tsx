@@ -63,12 +63,16 @@ export default function Register() {
         },
       });
 
-      const { username } = data.register;
+      const { username, token } = data.register;
+
+      if (!token) throw Error("Error logging in");
+      const decodedPayload = window.atob(data.register.token.split(".")[1]);
+      const payload = JSON.parse(decodedPayload);
 
       authContext.dispatch({
         type: "update auth status",
         payload: {
-          ...authContext.state,
+          tokenPayload: payload,
           isAuth: true,
         },
       });

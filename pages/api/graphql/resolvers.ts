@@ -35,28 +35,24 @@ export const resolvers = {
       return courseNamesAndIds;
     },
     course: async (_parent: undefined, args: ICourseQueryArgs, context: IContext) => {
-      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
       const { courseId } = args;
       const course = await getCourseForNewRound(courseId);
       if (errorOccured(course)) return new Error(course.errorMessage);
       return course;
     },
     unverifiedCourse: async (_parent: undefined, args: {unverifiedCourseId: string}, context: IContext) => {
-      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
       const { unverifiedCourseId } = args;
       const unverifiedCourse = await getUnverifiedCourse(unverifiedCourseId);
       if (errorOccured(unverifiedCourse)) return new Error(unverifiedCourse.errorMessage);
       return unverifiedCourse;
     },
     round: async (_parent: undefined, args: IRoundQueryArgs, context: IContext) => {
-      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
       const { roundid } = args;
       const round = await getRound(roundid);
       if (errorOccured(round)) return new Error(round.errorMessage);
       return round;
     },
     roundPreview: async (_parent: undefined, args: { username: string }, context: IContext) => {
-      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
       const { username } = args;
       const round = await getRoundPreview(username);
       if (errorOccured(round)) return new Error(round.errorMessage);
@@ -91,8 +87,10 @@ export const resolvers = {
       removeAuthCookie(context.res);
       return true;
     },
-    async newRound(_parent: undefined, args: INewRoundMutationArgs, _context: IContext) {
+    async newRound(_parent: undefined, args: INewRoundMutationArgs, context: IContext) {
+      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
         const { input } = args
+        if (input.username !== context.token.username) return new Error("Unauthorized"); // verify username
         if (input.unverifiedCourseId) {
             const unverifiedCourse = await createUnverifiedCourse(input);
             if (errorOccured(unverifiedCourse)) return new Error(unverifiedCourse.errorMessage)
@@ -104,6 +102,7 @@ export const resolvers = {
     async editClubs(_parent: undefined, args: IEditClubsMutationArgs, context: IContext) {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
         const { username, clubs } = args.input
+        if (username !== context.token.username) return new Error("Unauthorized"); // verify username
         const updatedClubs = await updateUserClubs(clubs, username);
         if (errorOccured(updatedClubs)) return new Error(updatedClubs.errorMessage)
         return updatedClubs;
@@ -112,7 +111,7 @@ export const resolvers = {
     async saveRound(_parent: undefined, args: any, context: IContext) {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
         const { holeScores, holeShotDetails, roundid } = args.input
-        const savedRoundStats = await saveRoundDetails(holeScores, holeShotDetails, roundid);
+        const savedRoundStats = await saveRoundDetails(holeScores, holeShotDetails, roundid); // add username or userid here
         if (errorOccured(savedRoundStats)) return new Error(savedRoundStats.errorMessage)
         return savedRoundStats;
     },

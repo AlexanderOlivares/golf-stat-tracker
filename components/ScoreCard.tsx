@@ -19,6 +19,7 @@ import { saveUnverifiedCourseParMutation } from "../pages/api/graphql/mutations/
 import Row from "./ScoreCardRow";
 import { IScoreCardProps } from "../interfaces/scorecardInterface";
 import { useRouter } from "next/router";
+import { useAuthContext } from "../context/AuthContext";
 
 export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
@@ -52,6 +53,9 @@ export default function ScoreCard(props: IScoreCardProps) {
   const roundContext = useRoundContext();
   const networkContext = useNetworkContext();
   const { hasNetworkConnection, offlineModeEnabled, mbps } = networkContext.state;
+  const authContext = useAuthContext();
+  const { isAuth, tokenPayload } = authContext.state;
+
   const [saveRound] = useMutation(saveRoundMutation);
   const [saveUnverifiedCoursePar] = useMutation(saveUnverifiedCourseParMutation);
 
@@ -61,6 +65,9 @@ export default function ScoreCard(props: IScoreCardProps) {
   const isUserAddedCourse = props.is_user_added_course;
   const roundid = props.round_id;
   const clubs = props.clubs;
+  const username = props.username;
+  const usernameIsAuthorized = isAuth && tokenPayload?.username == username;
+
   const { rating } = scoreCardRows[21];
   const { slope } = scoreCardRows[22];
 
@@ -198,13 +205,11 @@ export default function ScoreCard(props: IScoreCardProps) {
   }
 
   useEffect(() => {
-    const roundContextIsHydrated = roundContextHydrationCheck();
-    if (roundContextIsHydrated) {
-      if (hasNetworkConnection && !offlineModeEnabled) {
+    if (usernameIsAuthorized) {
+      const roundContextIsHydrated = roundContextHydrationCheck();
+      if (roundContextIsHydrated && hasNetworkConnection && !offlineModeEnabled) {
         saveScoreCard();
-        if (roundContext.state.isUserAddedCourse) {
-          saveUnverifiedPar();
-        }
+        if (roundContext.state.isUserAddedCourse) saveUnverifiedPar();
       }
     }
   }, [offlineModeEnabled, hasNetworkConnection]);
@@ -212,11 +217,9 @@ export default function ScoreCard(props: IScoreCardProps) {
   useEffect(() => {
     const backgroundSyncInterval = setInterval(() => {
       // make sure connection is good enough to sync
-      if (hasNetworkConnection && mbps > 10) {
+      if (usernameIsAuthorized && hasNetworkConnection && mbps > 10) {
         const now = Date.now();
-        console.log(now);
         const roundContextIsHydrated = roundContextHydrationCheck();
-        console.log(roundContextIsHydrated);
         if (now - roundContext.state.lastSaveTimestamp > 60000 && roundContextIsHydrated) {
           saveScoreCard();
           if (roundContext.state.isUserAddedCourse) {
@@ -225,7 +228,6 @@ export default function ScoreCard(props: IScoreCardProps) {
         }
       }
     }, 15000);
-
     return () => clearInterval(backgroundSyncInterval);
   }, [
     roundContext.state.lastSaveTimestamp,
@@ -259,16 +261,18 @@ export default function ScoreCard(props: IScoreCardProps) {
       throw "routeChange aborted.";
     };
 
-    if (offlineModeEnabled || !hasNetworkConnection) {
-      window.addEventListener("beforeunload", handleWindowClose);
-      window.addEventListener("beforeunload", handleBrowseAway);
-      router.events.on("routeChangeStart", handleBrowseAway);
+    if (usernameIsAuthorized) {
+      if (offlineModeEnabled || !hasNetworkConnection) {
+        window.addEventListener("beforeunload", handleWindowClose);
+        window.addEventListener("beforeunload", handleBrowseAway);
+        router.events.on("routeChangeStart", handleBrowseAway);
+      }
+      return () => {
+        window.removeEventListener("beforeunload", handleBrowseAway);
+        window.removeEventListener("beforeunload", handleWindowClose);
+        router.events.off("routeChangeStart", handleBrowseAway);
+      };
     }
-    return () => {
-      window.removeEventListener("beforeunload", handleBrowseAway);
-      window.removeEventListener("beforeunload", handleWindowClose);
-      router.events.off("routeChangeStart", handleBrowseAway);
-    };
   }, [offlineModeEnabled, hasNetworkConnection]);
 
   return (

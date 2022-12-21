@@ -10,6 +10,8 @@ import { HoleDetailModal } from "../components/HoleDetailModal";
 import { IShotDetail } from "../utils/roundFormatter";
 import { useRoundContext } from "../context/RoundContext";
 import { getHoleIndexToUpdate, ICompleteScoreCard, statsOnlyHoles } from "./ScoreCard";
+import { useAuthContext } from "../context/AuthContext";
+import { useRouter } from "next/router";
 
 function showAltTableHeaders(holeNumber: string | undefined): boolean {
   if (!holeNumber) return false;
@@ -25,11 +27,16 @@ function displayDistanceYardage(row: ICompleteScoreCard) {
 }
 
 export default function Row(props: { row: ICompleteScoreCard }) {
+  const router = useRouter();
+  const { username } = router.query;
   const { row } = props;
   const [open, setOpen] = useState(false);
   const roundContext = useRoundContext();
   const { state } = roundContext;
   const holeIndex = getHoleIndexToUpdate(row.hole);
+  const authContext = useAuthContext();
+  const { isAuth, tokenPayload } = authContext.state;
+  const usernameIsAuthorized = isAuth && tokenPayload?.username == username;
 
   return (
     <>
@@ -50,7 +57,7 @@ export default function Row(props: { row: ICompleteScoreCard }) {
         <TableCell style={{ paddingBottom: 0, paddingTop: 0 }} colSpan={6}>
           <Collapse in={open} timeout="auto" unmountOnExit>
             <Box sx={{ margin: 1 }}>
-              {!statsOnlyHoles.includes(String(row.hole)) && (
+              {usernameIsAuthorized && !statsOnlyHoles.includes(String(row.hole)) && (
                 <Box textAlign="center" p={1}>
                   <HoleDetailModal row={row} />
                 </Box>

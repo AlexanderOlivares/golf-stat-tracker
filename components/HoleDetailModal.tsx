@@ -28,6 +28,7 @@ import { useRouter } from "next/router";
 import { queryParamToString } from "../utils/queryParamFormatter";
 import { saveUnverifiedCourseParMutation } from "../pages/api/graphql/mutations/unverifiedCourseMutations";
 import { useNetworkContext } from "../context/NetworkContext";
+import { useAuthContext } from "../context/AuthContext";
 
 function valuetext(value: number) {
   return `${value}`;
@@ -35,13 +36,16 @@ function valuetext(value: number) {
 
 export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const router = useRouter();
-  const { roundid, unverifiedCourseId } = router.query;
+  const { roundid, unverifiedCourseId, username } = router.query;
   const [saveRound] = useMutation(saveRoundMutation);
   const [saveUnverifiedCoursePar] = useMutation(saveUnverifiedCourseParMutation);
   const roundContext = useRoundContext();
   const networkContext = useNetworkContext();
-  const holeIndex = getHoleIndexToUpdate(row.hole);
+  const authContext = useAuthContext();
+  const { isAuth, tokenPayload } = authContext.state;
+  const usernameIsAuthorized = isAuth && tokenPayload?.username == username;
 
+  const holeIndex = getHoleIndexToUpdate(row.hole);
   const [open, setOpen] = useState(false);
   const [shotNumber, setShotNumber] = useState(roundContext.state.holeScores[holeIndex] || 1);
   const holeTotalYardage = Number(row.yardage || 400);
@@ -140,13 +144,15 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       }
     );
 
-    roundContext.dispatch({
-      type: "update hole shot details",
-      payload: {
-        ...roundContext.state,
-        holeShotDetails: updatedHoleShotDetails,
-      },
-    });
+    if (usernameIsAuthorized) {
+      roundContext.dispatch({
+        type: "update hole shot details",
+        payload: {
+          ...roundContext.state,
+          holeShotDetails: updatedHoleShotDetails,
+        },
+      });
+    }
   };
 
   const updatedHoleScoresContext = (prevState: IRoundState) => {
@@ -225,14 +231,16 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     setShotNumber(1);
     addNewHoleDetailsEntries(roundContext.state, "distanceToPin", holeTotalYardage);
 
-    roundContext.dispatch({
-      type: "update scores and shot details",
-      payload: {
-        ...roundContext.state,
-        holeScores: roundContext.state.holeScores,
-        holeShotDetails: shotDetailsWithResetHole,
-      },
-    });
+    if (usernameIsAuthorized) {
+      roundContext.dispatch({
+        type: "update scores and shot details",
+        payload: {
+          ...roundContext.state,
+          holeScores: roundContext.state.holeScores,
+          holeShotDetails: shotDetailsWithResetHole,
+        },
+      });
+    }
   }
 
   async function saveScorecard() {
@@ -303,15 +311,17 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
         });
         console.log("++++++++++ SAVED TO POSTGRES ++++++++++");
       } else {
-        roundContext.dispatch({
-          type: "update scores and shot details and timestamp",
-          payload: {
-            ...roundContext.state,
-            holeScores: updatedHoleScores,
-            holeShotDetails: updatedHoleShotDetails,
-          },
-        });
-        console.log("---------- SAVED TO INDEXEDB ----------");
+        if (usernameIsAuthorized) {
+          roundContext.dispatch({
+            type: "update scores and shot details and timestamp",
+            payload: {
+              ...roundContext.state,
+              holeScores: updatedHoleScores,
+              holeShotDetails: updatedHoleShotDetails,
+            },
+          });
+          console.log("---------- SAVED TO INDEXEDB ----------");
+        }
       }
     } catch (error) {
       // TODO add toast error
@@ -347,13 +357,15 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
           },
         });
       } else {
-        roundContext.dispatch({
-          type: "set par for user added course",
-          payload: {
-            ...roundContext.state,
-            par: updatedUserAddedPar,
-          },
-        });
+        if (usernameIsAuthorized) {
+          roundContext.dispatch({
+            type: "set par for user added course",
+            payload: {
+              ...roundContext.state,
+              par: updatedUserAddedPar,
+            },
+          });
+        }
       }
     } catch (error) {
       // TODO add toast error

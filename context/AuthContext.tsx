@@ -2,14 +2,21 @@ import { createContext, useContext, useReducer } from "react";
 import type { ReactNode } from "react";
 import { JWTPayload } from "jose";
 
+interface ITokenPayload {
+  userid: string;
+  username: string;
+  email: string;
+  exp: number;
+}
+
 export interface IAuthState {
   isAuth: boolean;
-  token: JWTPayload | null;
+  tokenPayload: ITokenPayload | null;
 }
 
 const defualtState: IAuthState = {
   isAuth: false,
-  token: null,
+  tokenPayload: null,
 };
 
 export type AuthAction = {
@@ -31,8 +38,8 @@ function authContextReducer(state: IAuthState, action: AuthAction): any {
   switch (type) {
     case "update auth status":
       return {
-        ...state,
         isAuth: payload.isAuth,
+        tokenPayload: payload.tokenPayload,
       };
     default:
       return state;
