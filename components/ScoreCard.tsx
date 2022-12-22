@@ -160,6 +160,7 @@ export default function ScoreCard(props: IScoreCardProps) {
           holeScores,
           holeShotDetails,
           roundid: queryParamToString(roundid),
+          username,
         },
       });
       if (data) {
@@ -185,6 +186,7 @@ export default function ScoreCard(props: IScoreCardProps) {
         variables: {
           userAddedPar: roundContext.state.par,
           unverifiedCourseId: props.unverified_course_id,
+          username,
         },
       });
       if (data) console.log("+++ saved unverified par to postgres +++");
@@ -195,7 +197,6 @@ export default function ScoreCard(props: IScoreCardProps) {
     }
   }
 
-  // check this func and behavior when refreshing on/offline
   function roundContextHydrationCheck() {
     const { holeScores, par, holeShotDetails } = roundContext.state;
     if (holeScores.length != 25 || holeShotDetails.length != 25 || !par.length) {

@@ -5,6 +5,9 @@ import { emailAddressValidator, usernameAndPasswordValidator } from "../utils/fo
 import { registerMutation } from "./api/graphql/mutations/authMutations";
 import { useMutation } from "@apollo/client";
 import { useAuthContext } from "../context/AuthContext";
+import Link from "next/link";
+import { toast } from "react-toastify";
+import { parseErrorMessage } from "../utils/errorMessage";
 
 export interface IRegistrationCreds {
   username: string;
@@ -77,10 +80,11 @@ export default function Register() {
         },
       });
 
-      router.push(`/${username}/profile`);
+      toast.success(`Welcome ${username}! Start by selecting your clubs`);
+      router.push(`/${username}/my-clubs`);
     } catch (error) {
       console.log(error);
-      // add toast error here
+      toast.error(parseErrorMessage(error));
     }
   };
 
@@ -99,51 +103,75 @@ export default function Register() {
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={submitForm}
-      sx={{
-        "& > :not(style)": { m: 1, width: "25ch" },
-      }}
-      noValidate
-      autoComplete="off"
-    >
-      <TextField
-        onChange={handleFormInput}
-        name="username"
-        id="outlined-basic"
-        label="username"
-        variant="filled"
-        error={usernameError}
-        helperText={usernameError ? "must be at least 8 characters" : ""}
-        required
-      />
-      <TextField
-        onChange={handleFormInput}
-        name="email"
-        id="filled-basic"
-        label="email"
-        variant="filled"
-        type="email"
-        error={emailError}
-        helperText={emailError ? "invalid email address" : ""}
-        required
-      />
-      <TextField
-        onChange={handleFormInput}
-        name="password"
-        id="standard-basic"
-        label="password"
-        variant="filled"
-        type="password"
-        error={passwordError}
-        helperText={passwordError ? "must be at least 8 characters" : ""}
-        required
-      />
-      <Box m={3}>
+    <Box component="form" textAlign="center" onSubmit={submitForm} noValidate autoComplete="off">
+      <Box
+        mt={3}
+        sx={{
+          "& > :not(style)": { mx: 1, width: "25ch" },
+        }}
+      >
+        <TextField
+          onChange={handleFormInput}
+          margin="dense"
+          name="username"
+          id="outlined-basic"
+          label="username"
+          variant="filled"
+          error={usernameError}
+          helperText={usernameError ? "must be at least 8 characters" : ""}
+          required
+        />
+      </Box>
+      <Box
+        sx={{
+          "& > :not(style)": { mx: 1, width: "25ch" },
+        }}
+      >
+        <TextField
+          onChange={handleFormInput}
+          margin="dense"
+          name="email"
+          id="filled-basic"
+          label="email"
+          variant="filled"
+          type="email"
+          error={emailError}
+          helperText={emailError ? "invalid email address" : ""}
+          required
+        />
+      </Box>
+      <Box
+        sx={{
+          "& > :not(style)": { mx: 1, width: "25ch" },
+        }}
+      >
+        <TextField
+          onChange={handleFormInput}
+          margin="dense"
+          name="password"
+          id="standard-basic"
+          label="password"
+          variant="filled"
+          type="password"
+          error={passwordError}
+          helperText={passwordError ? "must be at least 8 characters" : ""}
+          required
+        />
+      </Box>
+      <Box mt={3}>
         <Button type="submit" size="medium" variant="contained" color="primary">
           create golfer account
         </Button>
+      </Box>
+      <Box pt={3}>
+        <Link href="/login">
+          <a>
+            <Typography variant="subtitle2">
+              Already have an account?&nbsp;
+              <u>Login</u>
+            </Typography>
+          </a>
+        </Link>
       </Box>
     </Box>
   );

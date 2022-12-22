@@ -1,4 +1,4 @@
-import { IScoreCardProps } from "../pages/[username]/round/[roundid]";
+import { IScoreCardProps } from "../interfaces/scorecardInterface";
 
 export interface IHoleDetails {
   hole: string;

@@ -6,6 +6,9 @@ import { useMutation } from "@apollo/client";
 import SignOut from "../components/SignOut";
 import { loginMutation } from "./api/graphql/mutations/authMutations";
 import { useAuthContext } from "../context/AuthContext";
+import Link from "next/link";
+import { toast } from "react-toastify";
+import { parseErrorMessage } from "../utils/errorMessage";
 
 interface ILoginCreds {
   email: string;
@@ -73,10 +76,10 @@ export default function Login() {
         },
       });
 
+      toast.success(`Welcome back ${username}`);
       router.push(`/${username}/profile`);
     } catch (error) {
-      console.log(error);
-      // add toast error here
+      toast.error(parseErrorMessage(error));
     }
   };
 
@@ -103,41 +106,73 @@ export default function Login() {
   };
 
   return (
-    <Box
-      component="form"
-      onSubmit={submitForm}
-      sx={{
-        "& > :not(style)": { m: 1, width: "25ch" },
-      }}
-      noValidate
-      autoComplete="off"
-    >
-      <TextField
-        onChange={handleFormInput}
-        name="email"
-        id="filled-basic"
-        label="email"
-        variant="filled"
-        type="email"
-        error={emailError}
-        helperText={emailError ? "invalid email address" : ""}
-        required
-      />
-      <TextField
-        onChange={handleFormInput}
-        name="password"
-        id="standard-basic"
-        label="password"
-        variant="filled"
-        type="password"
-        error={passwordError}
-        helperText={passwordError ? "must be at least 8 characters" : ""}
-        required
-      />
-      <Box m={3}>
-        <Button type="submit" size="medium" variant="contained" color="primary">
+    <Box component="form" onSubmit={submitForm} textAlign="center" noValidate autoComplete="off">
+      <Box
+        mt={3}
+        sx={{
+          "& > :not(style)": { mx: 1, width: "25ch" },
+        }}
+      >
+        <TextField
+          onChange={handleFormInput}
+          margin="dense"
+          name="email"
+          id="filled-basic"
+          label="email"
+          variant="filled"
+          type="email"
+          error={emailError}
+          helperText={emailError ? "invalid email address" : ""}
+          required
+        />
+      </Box>
+      <Box
+        m={2}
+        sx={{
+          "& > :not(style)": { mx: 1, width: "25ch" },
+        }}
+      >
+        <TextField
+          onChange={handleFormInput}
+          margin="dense"
+          name="password"
+          id="standard-basic"
+          label="password"
+          variant="filled"
+          type="password"
+          error={passwordError}
+          helperText={passwordError ? "must be at least 8 characters" : ""}
+          required
+        />
+      </Box>
+      <Box
+        pt={2}
+        sx={{
+          "& > :not(style)": { mx: 1, width: "25ch" },
+        }}
+      >
+        <Button type="submit" size="large" variant="contained" color="primary">
           login
         </Button>
+      </Box>
+      <Box pt={3}>
+        <Link href="/register">
+          <a>
+            <Typography variant="subtitle2">
+              <u>Forgot password?</u>
+            </Typography>
+          </a>
+        </Link>
+      </Box>
+      <Box pt={3}>
+        <Link href="/register">
+          <a>
+            <Typography variant="subtitle2">
+              Not registered?&nbsp;
+              <u>Create golfer account</u>
+            </Typography>
+          </a>
+        </Link>
       </Box>
       <Box m={3}>
         <SignOut />

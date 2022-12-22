@@ -16,12 +16,16 @@ import HideNavOnScroll from "./HideNavOnScroll";
 import { useRouter } from "next/router";
 import SignOut from "./SignOut";
 import { queryParamToString } from "../utils/queryParamFormatter";
+import { useAuthContext } from "../context/AuthContext";
 
 const pages = ["profile", "my clubs", "settings"];
 const settings = ["login"];
 
 function Nav() {
+  const authContext = useAuthContext();
+  const { isAuth } = authContext.state;
   const router = useRouter();
+  const { pathname } = router;
   const { username } = router.query;
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
@@ -73,7 +77,7 @@ function Nav() {
                 textDecoration: "none",
               }}
             >
-              LOGO
+              GOLF STATS
             </Typography>
 
             <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
@@ -129,7 +133,7 @@ function Nav() {
                 textDecoration: "none",
               }}
             >
-              LOGO
+              GOLF
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
               {pages.map(page => (
@@ -146,14 +150,18 @@ function Nav() {
             <Box sx={{ flexGrow: 0 }}>
               <Tooltip title="Open settings">
                 <>
-                  <IconButton onClick={goToLogin} sx={{ my: 2, color: "white", display: "block" }}>
-                    {/* <Avatar alt="Remy Sharp" src="/static/images/avatar/2.jpg" /> */}
-                    <Typography variant="button" display="block" gutterBottom>
-                      login
-                    </Typography>
-                  </IconButton>
-                  {/* or */}
-                  <SignOut />
+                  {isAuth ? (
+                    <SignOut />
+                  ) : (
+                    <IconButton
+                      onClick={goToLogin}
+                      sx={{ my: 2, color: "white", display: "block" }}
+                    >
+                      <Typography variant="button" display="block" gutterBottom>
+                        {pathname == "/login" ? "register" : "login"}
+                      </Typography>
+                    </IconButton>
+                  )}
                 </>
               </Tooltip>
               <Menu

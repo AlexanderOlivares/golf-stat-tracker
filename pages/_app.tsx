@@ -9,6 +9,8 @@ import { NetworkContextProvider } from "../context/NetworkContext";
 import { AuthContextProvider } from "../context/AuthContext";
 import ConnectionListener from "../components/ConnectionListener";
 import Nav from "../components/Nav";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -41,6 +43,18 @@ function MyApp({ Component, pageProps }: AppProps) {
           <NetworkContextProvider>
             <Nav />
             <Component {...pageProps} />
+            <ToastContainer
+              position="top-right"
+              autoClose={4000}
+              hideProgressBar={false}
+              newestOnTop={false}
+              closeOnClick
+              rtl={false}
+              pauseOnFocusLoss
+              draggable={false}
+              pauseOnHover={false}
+              theme="light"
+            />
             <ConnectionListener />
           </NetworkContextProvider>
         </AuthContextProvider>

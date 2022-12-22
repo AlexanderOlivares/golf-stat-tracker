@@ -1,6 +1,5 @@
 
 export var defaultClubs = [
-    "--",
     "Driver",
     "3 wood",
     "4 hybrid",

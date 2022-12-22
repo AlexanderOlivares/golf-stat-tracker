@@ -7,7 +7,6 @@ import MenuItem from "@mui/material/MenuItem";
 import FormControl from "@mui/material/FormControl";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import Chip from "@mui/material/Chip";
-// import { defaultClubs } from "../pages/[username]/edit-profile";
 import { useQuery } from "@apollo/client";
 import { queryParamToString } from "../utils/queryParamFormatter";
 import { useRouter } from "next/router";
@@ -16,6 +15,8 @@ import { Button } from "@mui/material";
 import { useMutation } from "@apollo/client";
 import { clubEditMutation } from "../pages/api/graphql/mutations/clubMutations";
 import { defaultClubs } from "../lib/selectOptions";
+import { toast } from "react-toastify";
+import { parseErrorMessage } from "../utils/errorMessage";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -65,8 +66,7 @@ export default function MultipleSelectChip() {
   async function saveClubs() {
     try {
       if (!clubsInBag.length || !clubsInBag.includes("Putter")) {
-        // add toast error
-        console.log("You must have a putter");
+        toast.error("You must have a putter");
         setClubsInBag([...clubsInBag, "Putter"]);
         return;
       }
@@ -78,14 +78,15 @@ export default function MultipleSelectChip() {
       });
       const { clubs } = savedEditedClubs.data.editClubs;
       if (clubs) setClubsInBag(clubs);
+      toast.success("Clubs saved");
     } catch (error) {
-      // TDOD add toast error
       console.log(error);
+      toast.error(parseErrorMessage(error));
     }
   }
 
   if (error) {
-    // TODO add toast error
+    toast.error(parseErrorMessage(error));
     router.push("/login");
   }
 
@@ -111,7 +112,7 @@ export default function MultipleSelectChip() {
               onChange={handleChange}
               input={<OutlinedInput id="select-multiple-chip" label="Club" />}
               renderValue={selected => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                   {selected.map(value => (
                     <Chip key={value} label={value} />
                   ))}
