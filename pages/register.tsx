@@ -8,6 +8,7 @@ import { useAuthContext } from "../context/AuthContext";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
+import { setCookie } from "../utils/authCookieGenerator";
 
 export interface IRegistrationCreds {
   username: string;
@@ -70,6 +71,7 @@ export default function Register() {
 
       if (!token) throw Error("Error logging in");
       const decodedPayload = window.atob(data.register.token.split(".")[1]);
+      setCookie(`authToken`, decodedPayload);
       const payload = JSON.parse(decodedPayload);
 
       authContext.dispatch({

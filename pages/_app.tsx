@@ -4,13 +4,13 @@ import { ApolloProvider } from "@apollo/client";
 import appolloClient from "../apollo-client";
 import { onError } from "@apollo/client/link/error";
 import Head from "next/head";
-import { useEffect } from "react";
 import { NetworkContextProvider } from "../context/NetworkContext";
 import { AuthContextProvider } from "../context/AuthContext";
 import ConnectionListener from "../components/ConnectionListener";
 import Nav from "../components/Nav";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import AuthPersist from "../components/AuthPersist";
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -21,15 +21,6 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 });
 
 function MyApp({ Component, pageProps }: AppProps) {
-  useEffect(() => {
-    navigator.serviceWorker
-      .register("/sw.js")
-      .then(registration =>
-        console.log("Service Worker registration successful with scope: ", registration.scope)
-      )
-      .catch(err => console.log("Service Worker registration failed: ", err));
-  }, []);
-
   return (
     <>
       <Head>
@@ -45,7 +36,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             <Component {...pageProps} />
             <ToastContainer
               position="top-right"
-              autoClose={4000}
+              autoClose={3000}
               hideProgressBar={false}
               newestOnTop={false}
               closeOnClick
@@ -56,6 +47,7 @@ function MyApp({ Component, pageProps }: AppProps) {
               theme="light"
             />
             <ConnectionListener />
+            <AuthPersist />
           </NetworkContextProvider>
         </AuthContextProvider>
       </ApolloProvider>

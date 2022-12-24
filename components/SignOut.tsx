@@ -4,6 +4,7 @@ import { Button } from "@mui/material";
 import { SignOutMutation } from "../pages/api/graphql/mutations/authMutations";
 import { useRouter } from "next/router";
 import { useAuthContext } from "../context/AuthContext";
+import { removeCookie } from "../utils/authCookieGenerator";
 
 function SignOut() {
   const authContext = useAuthContext();
@@ -11,10 +12,11 @@ function SignOut() {
   const [signOut] = useMutation(SignOutMutation);
   const signOutUser = () => {
     signOut();
+    removeCookie("authToken");
     authContext.dispatch({
       type: "update auth status",
       payload: {
-        ...authContext.state,
+        tokenPayload: null,
         isAuth: false,
       },
     });

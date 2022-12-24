@@ -20,7 +20,7 @@ export default function MyClubs() {
       toast.error("Please login to select clubs");
       router.push("/login");
     }
-  }, []);
+  }, [isAuth]);
 
   return (
     <>

@@ -9,6 +9,7 @@ import { useAuthContext } from "../context/AuthContext";
 import Link from "next/link";
 import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
+import { removeCookie, setCookie } from "../utils/authCookieGenerator";
 
 interface ILoginCreds {
   email: string;
@@ -66,6 +67,7 @@ export default function Login() {
 
       if (!token) throw Error("Error logging in");
       const decodedPayload = window.atob(data.login.token.split(".")[1]);
+      setCookie(`authToken`, decodedPayload);
       const payload = JSON.parse(decodedPayload);
 
       authContext.dispatch({
@@ -84,10 +86,11 @@ export default function Login() {
   };
 
   useEffect(() => {
+    removeCookie("authToken");
     authContext.dispatch({
       type: "update auth status",
       payload: {
-        ...authContext.state,
+        tokenPayload: null,
         isAuth: false,
       },
     });
