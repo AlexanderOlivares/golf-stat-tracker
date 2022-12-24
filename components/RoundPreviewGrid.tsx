@@ -1,70 +1,95 @@
-import * as React from "react";
+import React from "react";
 import Box from "@mui/material/Box";
-import { DataGrid, GridColDef, GridValueGetterParams } from "@mui/x-data-grid";
+import { DataGrid, GridColDef, GridValueGetterParams, GridSortModel } from "@mui/x-data-grid";
 import { IRoundPreview } from "../pages/[username]/profile";
 import { useRouter } from "next/router";
+import useMediaQuery from "./useMediaQuery";
 
 interface IRoundPreviewProps {
   roundPreview: IRoundPreview[];
 }
 
-const columns: GridColDef[] = [
-  {
-    field: "Date",
-    headerName: "Date",
-    width: 180,
-    valueGetter: (params: GridValueGetterParams) => `${params.row.round_date || ""}`,
-  },
-  {
-    field: "Course",
-    headerName: "Course",
-    width: 200,
-    editable: true,
-    valueGetter: (params: GridValueGetterParams) => `${params.row.course_name || ""}`,
-  },
-  {
-    field: "Score",
-    headerName: "Score",
-    width: 30,
-    editable: true,
-    valueGetter: (params: GridValueGetterParams) => `${params.row.score || ""}`,
-  },
-  {
-    field: "FW Hit",
-    headerName: "FW Hit",
-    width: 150,
-    editable: true,
-    valueGetter: (params: GridValueGetterParams) => `${params.row.fairwaysHit || ""}`,
-  },
-  {
-    field: "GIR",
-    headerName: "GIR",
-    type: "number",
-    width: 110,
-    editable: true,
-    valueGetter: (params: GridValueGetterParams) => `${params.row.greensInReg || ""}`,
-  },
-  {
-    field: "3-Putts",
-    headerName: "3-Putts",
-    description: "This column has a value getter and is not sortable.",
-    sortable: false,
-    width: 160,
-    valueGetter: (params: GridValueGetterParams) => `${params.row.threePutts || ""}`,
-  },
-  {
-    field: "Total Putts",
-    headerName: "Total Putts",
-    type: "number",
-    width: 110,
-    editable: true,
-    valueGetter: (params: GridValueGetterParams) => `${params.row.totalPutts || ""}`,
-  },
-];
-
 const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRoundPreviewProps) => {
   const router = useRouter();
   const username = router.query.username;
+  const mobileViewPort = useMediaQuery(600);
+
+  const columns: GridColDef[] = [
+    {
+      field: "Score",
+      headerName: "Score",
+      width: mobileViewPort ? 55 : 150,
+      editable: false,
+      headerAlign: "left",
+      align: "left",
+      valueGetter: (params: GridValueGetterParams) => `${params.row.score || ""}`,
+    },
+    {
+      field: "FW Hit",
+      headerName: "FW Hit",
+      width: mobileViewPort ? 75 : 150,
+      editable: false,
+      headerAlign: "left",
+      align: "left",
+      valueGetter: (params: GridValueGetterParams) => `${params.row.fairwaysHit || ""}`,
+    },
+    {
+      field: "GIR",
+      headerName: "GIR",
+      type: "number",
+      description: "Greens In Regulation",
+      headerAlign: "left",
+      align: "left",
+      width: mobileViewPort ? 55 : 150,
+      editable: false,
+      valueGetter: (params: GridValueGetterParams) => `${params.row.greensInReg || ""}`,
+    },
+    {
+      field: "3-Putts",
+      headerName: "3-Putts",
+      headerAlign: "left",
+      align: "left",
+      editable: false,
+      width: mobileViewPort ? 65 : 150,
+      valueGetter: (params: GridValueGetterParams) => `${params.row.threePutts || ""}`,
+    },
+    {
+      field: "Total Putts",
+      headerName: "Total Putts",
+      type: "number",
+      width: mobileViewPort ? 85 : 150,
+      editable: false,
+      headerAlign: "left",
+      align: "left",
+      valueGetter: (params: GridValueGetterParams) => `${params.row.totalPutts || ""}`,
+    },
+    {
+      field: "Course",
+      headerName: "Course",
+      width: 200,
+      editable: false,
+      headerAlign: "left",
+      align: "left",
+      valueGetter: (params: GridValueGetterParams) => `${params.row.course_name || ""}`,
+    },
+    {
+      field: "Date",
+      headerName: "Date",
+      type: "dateTime",
+      width: 200,
+      editable: false,
+      headerAlign: "left",
+      align: "left",
+      valueGetter: (params: GridValueGetterParams) => `${params.row.round_date || ""}`,
+    },
+  ];
+
+  const [sortModel, setSortModel] = React.useState<GridSortModel>([
+    {
+      field: "Date",
+      sort: "desc",
+    },
+  ]);
 
   function viewRound(row: IRoundPreview) {
     const {
@@ -90,7 +115,7 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
   }
 
   return (
-    <Box sx={{ height: 700, width: "100%" }}>
+    <Box sx={{ height: 700, width: "100%", cursor: "pointer" }}>
       <DataGrid
         getRowId={row => row.round_id}
         rows={roundPreview}
@@ -99,7 +124,8 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
         rowsPerPageOptions={[10]}
         onRowClick={row => viewRound(row.row)}
         density="standard"
-        sortModel={[{ field: "Date", sort: "desc" }]}
+        sortModel={sortModel}
+        onSortModelChange={newSortModel => setSortModel(newSortModel)}
       />
     </Box>
   );

@@ -49,9 +49,6 @@ export default function Profile() {
       const roundPreviewArray: IRoundPreview[] = roundPreviews.data.roundPreview;
       setRoundPrviewRows(roundPreviewArray);
     }
-    if (networkContext.state.offlineModeEnabled) {
-      // TODO add toast "you are in offline mode scores may not be up to date"
-    }
   }, [roundPreviews]);
 
   if (loading) return "Loading...";
@@ -65,30 +62,45 @@ export default function Profile() {
       {loading ? (
         <h1>Loading...</h1>
       ) : (
-        <Box ml={5}>
-          <h1>Profile</h1>
-          <h3>uerId: {data.user.userid}</h3>
-          <h3>uername: {data.user.username}</h3>
-          <h3>email: {data.user.email}</h3>
-          {isAuth && (
-            <>
-              <Button onClick={editClubSelection} size="medium" variant="contained" color="primary">
-                Edit my clubs
-              </Button>
-              <Box m={2}>
-                <Button onClick={startNewRound} size="medium" variant="contained" color="primary">
-                  new round
+        <>
+          <Box textAlign="center" ml={5}>
+            <h1>Profile</h1>
+            <h3>uerId: {data.user.userid}</h3>
+            <h3>uername: {data.user.username}</h3>
+            <h3>email: {data.user.email}</h3>
+            {isAuth && (
+              <>
+                <Button
+                  onClick={editClubSelection}
+                  size="medium"
+                  variant="contained"
+                  color="primary"
+                >
+                  Edit my clubs
                 </Button>
-              </Box>
-            </>
-          )}
-          <Box>
-            <Typography variant="h6" component="h2">
-              Latest Rounds
-            </Typography>
-            {roundPreviewRows && <RoundPreviewGrid roundPreview={roundPreviewRows} />}
+                <Box m={2}>
+                  <Button onClick={startNewRound} size="medium" variant="contained" color="primary">
+                    new round
+                  </Button>
+                </Box>
+              </>
+            )}
           </Box>
-        </Box>
+          <Box
+            textAlign="center"
+            sx={{
+              maxWidth: "lg",
+              m: "auto",
+            }}
+          >
+            <Typography variant="h6" component="h2">
+              {roundPreviewRows?.length ? "Latest Rounds" : "No Rounds Recorded Yet"}
+            </Typography>
+            <Box py={2}>
+              {roundPreviewRows && <RoundPreviewGrid roundPreview={roundPreviewRows} />}
+            </Box>
+          </Box>
+        </>
       )}
     </>
   );
