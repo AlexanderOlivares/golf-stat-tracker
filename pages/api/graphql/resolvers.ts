@@ -23,9 +23,16 @@ import { getRoundPreview } from "../../../lib/round/roundPreview";
 import { createUnverifiedCourse } from "../../../lib/course/createUnverifiedCourse";
 import { getUnverifiedCourse } from "../../../lib/course/getCourse";
 import { updateUnverifiedCoursePar } from "../../../lib/course/updateUnverifiedCoursePar";
+import passwordResetEmailRequest from "../../../lib/user/passwordReset";
 
 export const resolvers = {
   Query: {
+    passwordResetEmailRequest: async (_parent: undefined, args: { email: string }, _context: IContext) => {
+      const { email } = args;
+      const passwordResetEmail = await passwordResetEmailRequest(email); 
+      if (errorOccured(passwordResetEmail)) return new Error(passwordResetEmail.errorMessage);
+      return true;
+      },
     user: async (_parent: undefined, args: IUserQueryArgs, _context: IContext) => {
       const { username } = args;
       return await getUser(username);

@@ -176,6 +176,7 @@ export const typeDefs = gql`
   }
 
   type Query {
+    passwordResetEmailRequest(email: String!): String
     user(username: String!): User
     courses: [CourseNamesAndIds]
     course(courseId: String!): [Course]!

@@ -159,7 +159,7 @@ export default function Login() {
         </Button>
       </Box>
       <Box pt={3}>
-        <Link href="/register">
+        <Link href="/request-password-reset">
           <a>
             <Typography variant="subtitle2">
               <u>Forgot password?</u>
