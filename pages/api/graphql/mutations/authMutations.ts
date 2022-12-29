@@ -26,3 +26,13 @@ export const SignOutMutation = gql`
     signOut
   }
 `;
+
+export const ResetPasswordMutation = gql`
+  mutation ResetPasswordMutation($email: String!, $password: String!, $token: String!){
+    resetPassword(input: { email: $email, password: $password, token: $token }) {
+      token
+      username
+      email
+    }
+  }
+`;

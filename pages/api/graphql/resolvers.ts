@@ -14,6 +14,7 @@ import {
   IEditClubsMutationArgs,
   IUpdateUserAddedParArgs,
   IUpdateRoundArgs,
+  IPasswordResetMutationArgs,
 } from "./resolverInterfaces";
 import { errorOccured } from "./graphqlUtils";
 import { createNewRound, getRound } from "../../../lib/round/createNewRound";
@@ -23,7 +24,7 @@ import { getRoundPreview } from "../../../lib/round/roundPreview";
 import { createUnverifiedCourse } from "../../../lib/course/createUnverifiedCourse";
 import { getUnverifiedCourse } from "../../../lib/course/getCourse";
 import { updateUnverifiedCoursePar } from "../../../lib/course/updateUnverifiedCoursePar";
-import passwordResetEmailRequest from "../../../lib/user/passwordReset";
+import passwordResetEmailRequest, { resetPassword } from "../../../lib/user/passwordReset";
 
 export const resolvers = {
   Query: {
@@ -91,6 +92,14 @@ export const resolvers = {
       setAuthCookie(context.res, token);
       return loggedInUser;
     },
+    resetPassword: async (_parent: undefined, args: IPasswordResetMutationArgs, context: IContext) => {
+        const { email, password, token } = args.input;
+        const passwordResetUser = await resetPassword(email, password, token);
+        if (errorOccured(passwordResetUser)) return new Error(passwordResetUser.errorMessage);
+        const accessToken = passwordResetUser.token;
+        setAuthCookie(context.res, accessToken);
+        return passwordResetUser;
+      },
     async signOut(_parent: undefined, _args: undefined, context: IContext) {
       removeAuthCookie(context.res);
       return true;

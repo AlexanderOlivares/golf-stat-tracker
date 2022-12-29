@@ -175,6 +175,12 @@ export const typeDefs = gql`
     username: String!
   }
 
+  input ResetPasswordInput {
+    email: String
+    password: String
+    token: String
+  }
+
   type Query {
     passwordResetEmailRequest(email: String!): String
     user(username: String!): User
@@ -189,6 +195,7 @@ export const typeDefs = gql`
   type Mutation {
     register(input: RegistrationInput!): LoggedInUser
     login(input: LoginInput!): LoggedInUser
+    resetPassword(input: ResetPasswordInput!): LoggedInUser 
     signOut: Boolean!
     newRound(input: NewRound!): NewRoundResponse
     editClubs(input: UpdateClubsInput!): ClubList

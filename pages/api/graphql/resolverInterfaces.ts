@@ -23,6 +23,14 @@ export interface ILoginMutationArgs {
   };
 }
 
+export interface IPasswordResetMutationArgs {
+  input: {
+    email: string;
+    password: string;
+    token: string;
+  };
+}
+
 export interface INewRoundMutationArgs {
   input: IRoundRequestBody;
 }

@@ -12,7 +12,8 @@ export interface IUser {
   email: string;
   token: string;
 }
-
+export const SALT_ROUNDS = 10;
+export const SALT: string = bcrypt.genSaltSync(SALT_ROUNDS);
 
 
 export default async function registerUser(username: string, email: string, password: string) {
@@ -38,9 +39,8 @@ export default async function registerUser(username: string, email: string, pass
       return errorMessage("Account with that email already exists");
     }
 
-    const SALT_ROUNDS = 10;
-    const salt: string = bcrypt.genSaltSync(SALT_ROUNDS);
-    const bcryptPassword: string = bcrypt.hashSync(password, salt);
+    
+    const bcryptPassword: string = bcrypt.hashSync(password, SALT);
 
     const userid: string = uuidv4();
 
