@@ -7,7 +7,6 @@ import Typography from "@mui/material/Typography";
 import Menu from "@mui/material/Menu";
 import MenuIcon from "@mui/icons-material/Menu";
 import Container from "@mui/material/Container";
-import Avatar from "@mui/material/Avatar";
 import Button from "@mui/material/Button";
 import Tooltip from "@mui/material/Tooltip";
 import MenuItem from "@mui/material/MenuItem";
@@ -17,8 +16,9 @@ import { useRouter } from "next/router";
 import SignOut from "./SignOut";
 import { queryParamToString } from "../utils/queryParamFormatter";
 import { useAuthContext } from "../context/AuthContext";
+import { toast } from "react-toastify";
 
-const pages = ["profile", "my clubs", "settings"];
+const pages = ["New Round", "Profile", "My Clubs"];
 const settings = ["login"];
 
 function Nav() {
@@ -48,10 +48,17 @@ function Nav() {
   const goToLogin = () => router.push("/login");
 
   function goToPage(page: string) {
-    const safePage = page.replace(/\s/g, "-");
+    const safePage = page.replace(/\s/g, "-").toLocaleLowerCase();
     const safeUsername = queryParamToString(username);
+    if (!safeUsername) {
+      toast.error("Please login to create a new round");
+      return router.push(`/login`);
+    }
     if (safeUsername) {
-      return router.push(`/${username}/${safePage}`);
+      if (page == "New Round") {
+        return router.push(`/${safeUsername}/round/${safePage}`);
+      }
+      return router.push(`/${safeUsername}/${safePage}`);
     }
     return router.push(`/login`);
   }
@@ -80,42 +87,44 @@ function Nav() {
               GOLF STATS
             </Typography>
 
-            <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
-              <IconButton
-                size="large"
-                aria-label="account of current user"
-                aria-controls="menu-appbar"
-                aria-haspopup="true"
-                onClick={handleOpenNavMenu}
-                color="inherit"
-              >
-                <MenuIcon />
-              </IconButton>
-              <Menu
-                id="menu-appbar"
-                anchorEl={anchorElNav}
-                anchorOrigin={{
-                  vertical: "bottom",
-                  horizontal: "left",
-                }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "left",
-                }}
-                open={Boolean(anchorElNav)}
-                onClose={handleCloseNavMenu}
-                sx={{
-                  display: { xs: "block", md: "none" },
-                }}
-              >
-                {pages.map(page => (
-                  <MenuItem key={page} onClick={handleCloseNavMenu}>
-                    <Typography textAlign="center">{page}</Typography>
-                  </MenuItem>
-                ))}
-              </Menu>
-            </Box>
+            {isAuth && (
+              <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+                <IconButton
+                  size="large"
+                  aria-label="account of current user"
+                  aria-controls="menu-appbar"
+                  aria-haspopup="true"
+                  onClick={handleOpenNavMenu}
+                  color="inherit"
+                >
+                  <MenuIcon />
+                </IconButton>
+                <Menu
+                  id="menu-appbar"
+                  anchorEl={anchorElNav}
+                  anchorOrigin={{
+                    vertical: "bottom",
+                    horizontal: "left",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "left",
+                  }}
+                  open={Boolean(anchorElNav)}
+                  onClose={handleCloseNavMenu}
+                  sx={{
+                    display: { xs: "block", md: "none" },
+                  }}
+                >
+                  {pages.map(page => (
+                    <MenuItem key={page} onClick={() => goToPage(page)}>
+                      <Typography textAlign="center">{page}</Typography>
+                    </MenuItem>
+                  ))}
+                </Menu>
+              </Box>
+            )}
             <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
             <Typography
               variant="h5"
@@ -136,15 +145,16 @@ function Nav() {
               GOLF
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
-              {pages.map(page => (
-                <Button
-                  key={page}
-                  onClick={() => goToPage(page)}
-                  sx={{ my: 2, color: "white", display: "block" }}
-                >
-                  {page}
-                </Button>
-              ))}
+              {isAuth &&
+                pages.map(page => (
+                  <Button
+                    key={page}
+                    onClick={() => goToPage(page)}
+                    sx={{ my: 2, color: "white", display: "block" }}
+                  >
+                    {page}
+                  </Button>
+                ))}
             </Box>
 
             <Box sx={{ flexGrow: 0 }}>
@@ -179,15 +189,7 @@ function Nav() {
                 }}
                 open={Boolean(anchorElUser)}
                 onClose={handleCloseUserMenu}
-              >
-                {/* {settings.map(setting => (
-                  <MenuItem key={setting} onClick={handleCloseUserMenu}>
-                    <Link href={`/login`}>
-                      <Typography textAlign="center">{setting}</Typography>
-                    </Link>
-                  </MenuItem>
-                ))} */}
-              </Menu>
+              ></Menu>
             </Box>
           </Toolbar>
         </Container>

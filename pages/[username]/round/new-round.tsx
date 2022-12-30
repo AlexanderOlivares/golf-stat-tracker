@@ -22,6 +22,9 @@ import { queryParamToString } from "../../../utils/queryParamFormatter";
 import { useMutation } from "@apollo/client";
 import { createNewRound } from "../../api/graphql/mutations/roundMutations";
 import { useNetworkContext } from "../../../context/NetworkContext";
+import { parseErrorMessage } from "../../../utils/errorMessage";
+import { toast } from "react-toastify";
+import LoadingSpinner from "../../../components/LoadingSpinner";
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
@@ -117,7 +120,7 @@ export default function NewRound() {
     });
   }, []);
 
-  if (loading) return null;
+  if (loading) return <LoadingSpinner />;
   if (error) return `Error! ${error}`;
 
   function getCourseId() {
@@ -238,8 +241,8 @@ export default function NewRound() {
         `/${username}/round/${roundid}`
       );
     } catch (error) {
-      // TODO add toast error or remove
       console.log(error);
+      toast.error(parseErrorMessage(error));
     }
   }
 

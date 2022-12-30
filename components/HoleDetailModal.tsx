@@ -29,6 +29,8 @@ import { queryParamToString } from "../utils/queryParamFormatter";
 import { saveUnverifiedCourseParMutation } from "../pages/api/graphql/mutations/unverifiedCourseMutations";
 import { useNetworkContext } from "../context/NetworkContext";
 import { useAuthContext } from "../context/AuthContext";
+import { parseErrorMessage } from "../utils/errorMessage";
+import { toast } from "react-toastify";
 
 function valuetext(value: number) {
   return `${value}`;
@@ -325,8 +327,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
         }
       }
     } catch (error) {
-      // TODO add toast error
-      console.log(error);
+      toast.error(parseErrorMessage(error));
       return router.push("/login");
     }
   }
@@ -370,8 +371,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
         }
       }
     } catch (error) {
-      // TODO add toast error
-      console.log(error);
+      toast.error(parseErrorMessage(error));
       return router.push("/login");
     }
   }

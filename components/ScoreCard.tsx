@@ -20,6 +20,8 @@ import Row from "./ScoreCardRow";
 import { IScoreCardProps } from "../interfaces/scorecardInterface";
 import { useRouter } from "next/router";
 import { useAuthContext } from "../context/AuthContext";
+import { parseErrorMessage } from "../utils/errorMessage";
+import { toast } from "react-toastify";
 
 export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
@@ -174,8 +176,7 @@ export default function ScoreCard(props: IScoreCardProps) {
         });
       }
     } catch (error) {
-      // TODO add error toast
-      console.log(error);
+      toast.error(parseErrorMessage(error));
       return router.push("/login");
     }
   }
@@ -191,8 +192,7 @@ export default function ScoreCard(props: IScoreCardProps) {
       });
       if (data) console.log("+++ saved unverified par to postgres +++");
     } catch (error) {
-      // TODO add error toast
-      console.log(error);
+      toast.error(parseErrorMessage(error));
       return router.push("/login");
     }
   }

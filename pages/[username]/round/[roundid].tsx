@@ -14,6 +14,9 @@ import Box from "@mui/material/Box";
 import { IScoreCardProps } from "../../../interfaces/scorecardInterface";
 import { ICourseDetails } from "../../../interfaces/course";
 import { IRoundDetails } from "../../../interfaces/round";
+import LoadingSpinner from "../../../components/LoadingSpinner";
+import { toast } from "react-toastify";
+import { parseErrorMessage } from "../../../utils/errorMessage";
 
 export default function Round() {
   const router = useRouter();
@@ -181,11 +184,16 @@ export default function Round() {
     }
   }, [getRound, router.isReady, courseData, roundDetails, courseDetails]);
 
-  if (loading || courseLoading) return "Loading...";
+  if (
+    loading ||
+    (queryParams.isUserAddedCourse && unverifiedCourseLoading) ||
+    (!queryParams.isUserAddedCourse && courseLoading)
+  ) {
+    return <LoadingSpinner />;
+  }
 
-  if (error || courseLoading) {
-    // TODO add toast error
-    console.log(error || courseError);
+  if (error) {
+    toast.error(parseErrorMessage(error));
     router.push("/login");
   }
 

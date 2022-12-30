@@ -16,6 +16,15 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
 
   const columns: GridColDef[] = [
     {
+      field: "Course",
+      headerName: "Course",
+      width: 200,
+      editable: false,
+      headerAlign: "left",
+      align: "left",
+      valueGetter: (params: GridValueGetterParams) => `${params.row.course_name || ""}`,
+    },
+    {
       field: "Score",
       headerName: "Score",
       width: mobileViewPort ? 55 : 150,
@@ -62,15 +71,6 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
       headerAlign: "left",
       align: "left",
       valueGetter: (params: GridValueGetterParams) => `${params.row.totalPutts || ""}`,
-    },
-    {
-      field: "Course",
-      headerName: "Course",
-      width: 200,
-      editable: false,
-      headerAlign: "left",
-      align: "left",
-      valueGetter: (params: GridValueGetterParams) => `${params.row.course_name || ""}`,
     },
     {
       field: "Date",

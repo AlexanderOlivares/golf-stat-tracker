@@ -17,6 +17,7 @@ import { clubEditMutation } from "../pages/api/graphql/mutations/clubMutations";
 import { defaultClubs } from "../lib/selectOptions";
 import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
+import LoadingSpinner from "./LoadingSpinner";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -95,6 +96,8 @@ export default function MultipleSelectChip() {
       setClubsInBag(data.clubs.clubs);
     }
   }, [data]);
+
+  if (loading) return <LoadingSpinner />;
 
   return (
     <>

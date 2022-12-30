@@ -8,6 +8,7 @@ import Typography from "@mui/material/Typography";
 import { getRoundPreviewByUsernameQuery } from "../api/graphql/queries/roundQueries";
 import { useNetworkContext } from "../../context/NetworkContext";
 import { useAuthContext } from "../../context/AuthContext";
+import LoadingSpinner from "../../components/LoadingSpinner";
 
 export interface IRoundPreview {
   round_id: string;
@@ -51,7 +52,7 @@ export default function Profile() {
     }
   }, [roundPreviews]);
 
-  if (loading) return "Loading...";
+  if (loading) return <LoadingSpinner />;
   if (error) return `Error! ${error.message}`;
 
   const startNewRound = () => router.push(`/${username}/round/new-round`);
@@ -59,49 +60,36 @@ export default function Profile() {
 
   return (
     <>
-      {loading ? (
-        <h1>Loading...</h1>
-      ) : (
-        <>
-          <Box textAlign="center" ml={5}>
-            <h1>Profile</h1>
-            <h3>uerId: {data.user.userid}</h3>
-            <h3>uername: {data.user.username}</h3>
-            <h3>email: {data.user.email}</h3>
-            {isAuth && (
-              <>
-                <Button
-                  onClick={editClubSelection}
-                  size="medium"
-                  variant="contained"
-                  color="primary"
-                >
-                  Edit my clubs
-                </Button>
-                <Box m={2}>
-                  <Button onClick={startNewRound} size="medium" variant="contained" color="primary">
-                    new round
-                  </Button>
-                </Box>
-              </>
-            )}
-          </Box>
-          <Box
-            textAlign="center"
-            sx={{
-              maxWidth: "lg",
-              m: "auto",
-            }}
-          >
-            <Typography variant="h6" component="h2">
-              {roundPreviewRows?.length ? "Latest Rounds" : "No Rounds Recorded Yet"}
-            </Typography>
-            <Box py={2}>
-              {roundPreviewRows && <RoundPreviewGrid roundPreview={roundPreviewRows} />}
+      <Box textAlign="center">
+        <h1>Golfer Profile</h1>
+        {/* <h3>uerId: {data.user.userid}</h3> */}
+        <h3>{data.user.username}</h3>
+        {/* <h3>email: {data.user.email}</h3> */}
+        {isAuth && (
+          <>
+            {/* <Button onClick={editClubSelection} size="medium" variant="contained" color="primary">
+                Edit my clubs
+              </Button> */}
+            <Box m={2}>
+              <Button onClick={startNewRound} size="large" variant="contained" color="primary">
+                new round
+              </Button>
             </Box>
-          </Box>
-        </>
-      )}
+          </>
+        )}
+      </Box>
+      <Box
+        textAlign="center"
+        sx={{
+          maxWidth: "lg",
+          m: "auto",
+        }}
+      >
+        <Typography variant="h6" component="h2">
+          {roundPreviewRows?.length ? "Latest Rounds" : "No Rounds Recorded Yet"}
+        </Typography>
+        <Box py={2}>{roundPreviewRows && <RoundPreviewGrid roundPreview={roundPreviewRows} />}</Box>
+      </Box>
     </>
   );
 }

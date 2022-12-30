@@ -34,9 +34,3 @@ export async function passwordResetJwtGenerator(userid: string, username: string
   
     return token;
   }
-
-
-//   export async function verifyPasswordResetToken(token: string, secret: string) {
-//     const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
-//     return payload;
-//   }
