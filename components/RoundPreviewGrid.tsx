@@ -80,7 +80,8 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
       editable: false,
       headerAlign: "left",
       align: "left",
-      valueGetter: (params: GridValueGetterParams) => `${params.row.round_date || ""}`,
+      valueGetter: (params: GridValueGetterParams) =>
+        `${params.row.round_date.split(",")[0] || ""}`,
     },
   ];
 

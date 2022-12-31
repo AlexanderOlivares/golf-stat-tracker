@@ -1,8 +1,15 @@
+import { Box, Button, Typography } from "@mui/material";
 import type { NextPage } from "next";
 import Head from "next/head";
 import styles from "../styles/Home.module.css";
+import GolfCourseRoundedIcon from "@mui/icons-material/GolfCourseRounded";
+import Link from "next/link";
+import { useRouter } from "next/router";
+import useMediaQuery from "../components/useMediaQuery";
 
 const Home: NextPage = () => {
+  const router = useRouter();
+  const mobileViewPort = useMediaQuery(600);
   return (
     <div className={styles.container}>
       <Head>
@@ -12,7 +19,54 @@ const Home: NextPage = () => {
         <link rel="manifest" href="/manifest.json" />
       </Head>
 
-      <h1>GOLF LOGS</h1>
+      <Box textAlign="center" my={4}>
+        <Typography variant="h2">Golf Logs</Typography>
+        <Box my={3}>
+          <GolfCourseRoundedIcon sx={{ fontSize: 150 }} />
+        </Box>
+        <Box
+          p={2}
+          sx={{
+            margin: "auto",
+            maxWidth: mobileViewPort ? "100%" : "50%",
+            outline: "solid",
+            borderStyle: "solid",
+            borderWidth: "thin",
+          }}
+        >
+          <Typography variant="h6">Do more than just keep score.</Typography>
+          <Box textAlign="left" mt={2}>
+            <Typography variant="body1">
+              Keep track of every single shot with Golf Logs. Record the club used, distance to pin
+              and shot result to create a snapshot of each stroke. Golf Logs will help you learn
+              your club distances, see your mishit tendancies and allow you to better understand
+              your strengths on the golf course.
+            </Typography>
+          </Box>
+        </Box>
+
+        <Box pt={3}>
+          <Typography variant="h6">Create Golfer Account</Typography>
+          <Box mt={1} mb={2}>
+            <Button
+              onClick={() => router.push("/register")}
+              size="medium"
+              variant="contained"
+              color="primary"
+            >
+              Register
+            </Button>
+          </Box>
+          <Link href="/login">
+            <a>
+              <Typography variant="subtitle2">
+                Already have an account?&nbsp;
+                <u>Login</u>
+              </Typography>
+            </a>
+          </Link>
+        </Box>
+      </Box>
     </div>
   );
 };
