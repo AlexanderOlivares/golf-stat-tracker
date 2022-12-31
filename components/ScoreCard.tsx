@@ -278,18 +278,28 @@ export default function ScoreCard(props: IScoreCardProps) {
 
   return (
     <>
-      <Box>
-        <Typography variant="h6" component="h2">
-          Slope {slope}
-        </Typography>
-        <Typography variant="h6" component="h2">
-          Rating {rating}
-        </Typography>
+      <Box display="flex" alignItems="center" justifyContent="space-between">
+        <Box pl={2}>
+          <Typography variant="h6" component="h2">
+            Score
+          </Typography>
+          <Typography variant="h6" component="h2">
+            {roundContext.state.holeScores[20]}
+          </Typography>
+        </Box>
+        <Box pr={2} justifySelf="flex-end">
+          <Typography variant="h6" component="h2">
+            Rating/Slope
+          </Typography>
+          <Typography variant="h6" component="h2">
+            {rating}/{slope}
+          </Typography>
+        </Box>
       </Box>
       <TableContainer component={Paper}>
         <Table aria-label="collapsible table">
           <TableHead>
-            <TableRow>
+            <TableRow sx={{ backgroundColor: "#ffcdd2" }}>
               <TableCell>Hole</TableCell>
               <TableCell align="right">Par</TableCell>
               <TableCell align="right">Score</TableCell>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import { Typography, Box, Button, TextField } from "@mui/material";
+import { Typography, Box, Button, TextField, InputLabel } from "@mui/material";
 import RadioGroup from "@mui/material/RadioGroup";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import FormControl from "@mui/material/FormControl";
@@ -26,7 +26,7 @@ import { parseErrorMessage } from "../../../utils/errorMessage";
 import { toast } from "react-toastify";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 
-const label = { inputProps: { "aria-label": "Checkbox demo" } };
+const label = { inputProps: { "aria-label": "Add New Course With Round" } };
 
 export interface IUserAddedCourse {
   userAddedCourseName: string;
@@ -85,6 +85,7 @@ export function populateUserAddedCourseFields(
 
 export default function NewRound() {
   const router = useRouter();
+  const { username } = router.query;
   const networkContext = useNetworkContext();
   const [newRound] = useMutation(createNewRound);
   const { loading, error, data } = useQuery(getCourses);
@@ -246,26 +247,26 @@ export default function NewRound() {
     }
   }
 
+  function cancelNewRound() {
+    router.push(`/${username}/profile`);
+  }
+
   return (
     <>
-      <Box m={10}>
-        <Typography id="modal-modal-title" variant="h6" component="h2">
+      <Box textAlign="center" my={3}>
+        <Typography id="modal-modal-title" variant="h3">
           New Round
         </Typography>
         <Box
           component="form"
           onSubmit={handleSubmit}
-          sx={{
-            "& > :not(style)": { m: 1, width: "25ch" },
-          }}
+          textAlign="center"
           noValidate
           autoComplete="off"
         >
-          <Box>
+          <Box mt={2}>
             <FormControl>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                Course Name
-              </Typography>
+              <Typography variant="h6">Course Name</Typography>
               {data && (
                 <Autocomplete
                   freeSolo
@@ -292,52 +293,46 @@ export default function NewRound() {
                 />
               )}
               <Box>
-                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" sx={{ mt: 1 }}>
                   Dont see your course?
                 </Typography>
-                <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+                <Typography variant="subtitle2" sx={{ mt: 0 }}>
                   <Checkbox onChange={handleCheckboxes} checked={isUserAddedCourse} {...label} />
-                  Add new course with round
+                  Add New Course With Round
                 </Typography>
                 {isUserAddedCourse && (
-                  <Box>
-                    <TextField
-                      onChange={handleUserAddedCourseDetails}
-                      id="user-added-course"
-                      label="course name"
-                      name="userAddedCourseName"
-                      variant="outlined"
-                    />
-                    <TextField
-                      onChange={handleUserAddedCourseDetails}
-                      id="user-added-course"
-                      label="city"
-                      name="userAddedCity"
-                      variant="outlined"
-                    />
-                    <TextField
-                      onChange={handleUserAddedCourseDetails}
-                      id="user-added-course"
-                      label="state"
-                      name="userAddedState"
-                      variant="outlined"
-                    />
-                  </Box>
+                  <>
+                    <Box my={1}>
+                      <TextField
+                        onChange={handleUserAddedCourseDetails}
+                        id="user-added-course"
+                        label="course name"
+                        name="userAddedCourseName"
+                        variant="outlined"
+                      />
+                    </Box>
+                    <Box my={1}>
+                      <TextField
+                        onChange={handleUserAddedCourseDetails}
+                        id="user-added-course"
+                        label="city"
+                        name="userAddedCity"
+                        variant="outlined"
+                      />
+                    </Box>
+                    <Box my={1}>
+                      <TextField
+                        onChange={handleUserAddedCourseDetails}
+                        id="user-added-course"
+                        label="state"
+                        name="userAddedState"
+                        variant="outlined"
+                      />
+                    </Box>
+                  </>
                 )}
               </Box>
-              <Box mt={5}>
-                <LocalizationProvider dateAdapter={AdapterDayjs}>
-                  <DatePicker
-                    label="Date of round"
-                    value={date}
-                    onChange={newValue => {
-                      setDate(newValue);
-                    }}
-                    renderInput={params => <TextField {...params} />}
-                  />
-                </LocalizationProvider>
-              </Box>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
+              {/* <Typography id="modal-modal-description" sx={{ mt: 2 }}>
                 Holes
               </Typography>
               <RadioGroup
@@ -363,44 +358,44 @@ export default function NewRound() {
                     <FormControlLabel value="back" control={<Radio />} label="back 9" />
                   </span>
                 </RadioGroup>
-              )}
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                Tee Color
+              )} */}
+              <Box mt={3}>
+                <Typography variant="h6">Tee Color</Typography>
+                <RadioGroup
+                  aria-labelledby="demo-controlled-radio-buttons-group"
+                  name="controlled-radio-buttons-group"
+                  value={teeColor}
+                  onChange={handleTeeColorChange}
+                >
+                  <span>
+                    <FormControlLabel value="red" control={<Radio />} label="red" />
+                    <FormControlLabel value="white" control={<Radio />} label="white" />
+                    <FormControlLabel value="blue" control={<Radio />} label="blue" />
+                  </span>
+                </RadioGroup>
+              </Box>
+              <Box my={3}>
+                <Typography></Typography>
+                <Typography variant="h6">Temperature</Typography>
+                <Box mt={5}>
+                  <Slider
+                    aria-label="Temperature"
+                    defaultValue={70}
+                    step={5}
+                    min={20}
+                    max={115}
+                    valueLabelDisplay="on"
+                    onChange={handleTemperatureChange}
+                  />
+                </Box>
+              </Box>
+              <Typography variant="h6" mb={2}>
+                Conditions
               </Typography>
-              <RadioGroup
-                aria-labelledby="demo-controlled-radio-buttons-group"
-                name="controlled-radio-buttons-group"
-                value={teeColor}
-                onChange={handleTeeColorChange}
-              >
-                <span>
-                  <FormControlLabel value="red" control={<Radio />} label="red" />
-                  <FormControlLabel value="white" control={<Radio />} label="white" />
-                  <FormControlLabel value="blue" control={<Radio />} label="blue" />
-                </span>
-              </RadioGroup>
-              <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                Select View
-              </Typography>
-              <RadioGroup
-                aria-labelledby="demo-controlled-radio-buttons-group"
-                name="controlled-radio-buttons-group"
-                value={roundView}
-                onChange={handleViewChange}
-              >
-                <FormControlLabel value="scorecard" control={<Radio />} label="scorecard view" />
-                <FormControlLabel
-                  value="hole-by-hole"
-                  control={<Radio />}
-                  label="hole-by-hole view"
-                />
-              </RadioGroup>
-              <Typography>Conditions</Typography>
               <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
+                labelId="new-round-weather-select"
+                id="weather-select"
                 value={weatherConditions}
-                label="Weather"
                 onChange={handleWeatherConditionsChange}
               >
                 <MenuItem value={"Clear"}>Clear</MenuItem>
@@ -409,24 +404,33 @@ export default function NewRound() {
                 <MenuItem value={"Wet"}>Wet</MenuItem>
                 <MenuItem value={"Foggy"}>Foggy</MenuItem>
               </Select>
-              <Typography>Temperature</Typography>
-              <Slider
-                aria-label="Temperature"
-                defaultValue={70}
-                step={5}
-                min={20}
-                max={115}
-                valueLabelDisplay="on"
-                onChange={handleTemperatureChange}
-              />
+              <Box mt={3}>
+                <Typography variant="h6" my={2}>
+                  Date of Round
+                </Typography>
+                <LocalizationProvider dateAdapter={AdapterDayjs}>
+                  <DatePicker
+                    label="Date"
+                    value={date}
+                    onChange={newValue => {
+                      setDate(newValue);
+                    }}
+                    renderInput={params => <TextField {...params} />}
+                  />
+                </LocalizationProvider>
+              </Box>
             </FormControl>
           </Box>
-          <Button type="submit" size="small" variant="contained" color="primary">
-            start round
-          </Button>
-          <Button size="small" variant="contained" color="primary">
-            cancel
-          </Button>
+          <Box my={5}>
+            <Box pr={2} component="span">
+              <Button onClick={cancelNewRound} size="large" variant="contained" color="primary">
+                cancel
+              </Button>
+            </Box>
+            <Button type="submit" size="large" variant="contained" color="primary">
+              start round
+            </Button>
+          </Box>
         </Box>
       </Box>
     </>

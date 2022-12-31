@@ -38,9 +38,15 @@ export default function Row(props: { row: ICompleteScoreCard }) {
   const { isAuth, tokenPayload } = authContext.state;
   const usernameIsAuthorized = isAuth && tokenPayload?.username == username;
 
+  function stripedRowLogic() {
+    if ([9, 19, 20].includes(holeIndex)) return "#ffcdd2";
+    if (holeIndex % 2 != 0) return "#c8e6c9";
+    return "white";
+  }
+
   return (
     <>
-      <TableRow onClick={() => setOpen(!open)} sx={{ "& > *": { borderBottom: "unset" } }}>
+      <TableRow onClick={() => setOpen(!open)} sx={{ backgroundColor: stripedRowLogic() }}>
         <TableCell component="th" scope="row">
           {row.hole}
         </TableCell>

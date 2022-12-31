@@ -17,6 +17,7 @@ import SignOut from "./SignOut";
 import { queryParamToString } from "../utils/queryParamFormatter";
 import { useAuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
+import GolfCourseRoundedIcon from "@mui/icons-material/GolfCourseRounded";
 
 const pages = ["New Round", "Profile", "My Clubs"];
 const settings = ["login"];
@@ -50,6 +51,7 @@ function Nav() {
   function goToPage(page: string) {
     const safePage = page.replace(/\s/g, "-").toLocaleLowerCase();
     const safeUsername = queryParamToString(username);
+    handleCloseNavMenu();
     if (!safeUsername) {
       toast.error("Please login to create a new round");
       return router.push(`/login`);
@@ -68,7 +70,7 @@ function Nav() {
       <AppBar position="sticky">
         <Container maxWidth="xl">
           <Toolbar disableGutters>
-            <AdbIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
+            <GolfCourseRoundedIcon sx={{ display: { xs: "none", md: "flex" }, mr: 1 }} />
             <Typography
               variant="h6"
               noWrap
@@ -84,7 +86,7 @@ function Nav() {
                 textDecoration: "none",
               }}
             >
-              GOLF STATS
+              GOLF LOGS
             </Typography>
 
             {isAuth && (
@@ -125,7 +127,7 @@ function Nav() {
                 </Menu>
               </Box>
             )}
-            <AdbIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
+            <GolfCourseRoundedIcon sx={{ display: { xs: "flex", md: "none" }, mr: 1 }} />
             <Typography
               variant="h5"
               noWrap
@@ -142,7 +144,7 @@ function Nav() {
                 textDecoration: "none",
               }}
             >
-              GOLF
+              GOLF LOGS
             </Typography>
             <Box sx={{ flexGrow: 1, display: { xs: "none", md: "flex" } }}>
               {isAuth &&

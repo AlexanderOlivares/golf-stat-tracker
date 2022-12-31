@@ -52,7 +52,7 @@ export default function Profile() {
     }
   }, [roundPreviews]);
 
-  if (loading) return <LoadingSpinner />;
+  if (loading || roundPreviews.loading) return <LoadingSpinner />;
   if (error) return `Error! ${error.message}`;
 
   const startNewRound = () => router.push(`/${username}/round/new-round`);
@@ -60,22 +60,15 @@ export default function Profile() {
 
   return (
     <>
-      <Box textAlign="center">
-        <h1>Golfer Profile</h1>
-        {/* <h3>uerId: {data.user.userid}</h3> */}
+      <Box textAlign="center" my={3}>
+        <Typography variant="h3">Golfer Profile</Typography>
         <h3>{data.user.username}</h3>
-        {/* <h3>email: {data.user.email}</h3> */}
         {isAuth && (
-          <>
-            {/* <Button onClick={editClubSelection} size="medium" variant="contained" color="primary">
-                Edit my clubs
-              </Button> */}
-            <Box m={2}>
-              <Button onClick={startNewRound} size="large" variant="contained" color="primary">
-                new round
-              </Button>
-            </Box>
-          </>
+          <Box m={2}>
+            <Button onClick={startNewRound} size="large" variant="contained" color="primary">
+              new round
+            </Button>
+          </Box>
         )}
       </Box>
       <Box

@@ -235,7 +235,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
 
     if (usernameIsAuthorized) {
       roundContext.dispatch({
-        type: "update scores and shot details",
+        type: "update scores and shot details and timestamp",
         payload: {
           ...roundContext.state,
           holeScores: roundContext.state.holeScores,
@@ -377,8 +377,9 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   }
 
   useEffect(() => {
+    if (roundContext.state.holeShotDetails[holeIndex][0].distanceToPin) saveScorecard();
     getSelectIndexFromShotNumber(roundContext.state.holeShotDetails[holeIndex], shotNumber);
-    saveScorecard();
+    addNewHoleDetailsEntries(roundContext.state, "distanceToPin", dtp);
   }, [shotNumber, open]);
 
   useEffect(() => {
@@ -387,17 +388,13 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     }
   }, [userAddedPar, open]);
 
-  useEffect(() => {
-    addNewHoleDetailsEntries(roundContext.state, "distanceToPin", dtp);
-  }, []);
-
   return (
     <div>
       <Button variant="contained" onClick={handleClickOpen}>
         edit shot details
       </Button>
       <Dialog fullWidth={true} open={open} onClose={handleClose}>
-        <DialogTitle textAlign="center">My Score {shotNumber}</DialogTitle>
+        <DialogTitle textAlign="center">Hole Score: {shotNumber}</DialogTitle>
         <DialogContent>
           {roundContext.state.isUserAddedCourse && (
             <>
@@ -415,7 +412,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
               />
             </>
           )}
-          <DialogContentText>Shot number</DialogContentText>
+          <DialogContentText pb={4}>Shot Number</DialogContentText>
           <Slider
             aria-label="Shot number"
             defaultValue={1}
@@ -428,7 +425,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
             onChange={handleShotNumberChange}
           />
           <DialogTitle textAlign="center">Hole Details</DialogTitle>
-          <DialogContentText>{`Distance To Pin ${yardsOrFeet}`}</DialogContentText>
+          <DialogContentText pb={5}>{`Distance To Pin in ${yardsOrFeet}`}</DialogContentText>
           <Slider
             aria-label="Distance to pin"
             key={row.score}
@@ -443,53 +440,65 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
             valueLabelDisplay="on"
             onChange={handleDistanceToPin}
           />
-          <Box>
-            <InputLabel id="demo-simple-select-label">Club</InputLabel>
-            <Select
-              autoWidth
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              defaultValue="--"
-              value={
-                roundContext.state.holeShotDetails[holeIndex][shotDetailIndexToUpdate]?.club || "--"
-              }
-              label="Club"
-              onChange={handleClubChange}
-            >
-              {roundContext.state.clubs.map((club: string) => {
-                return (
-                  <MenuItem key={club} value={club}>
-                    {club}
-                  </MenuItem>
-                );
-              })}
-            </Select>
-            <InputLabel id="demo-simple-select-label">Result</InputLabel>
-            <Select
-              autoWidth
-              labelId="demo-simple-select-label"
-              id="demo-simple-select"
-              value={
-                roundContext.state.holeShotDetails[holeIndex][shotDetailIndexToUpdate]?.result ||
-                "--"
-              }
-              label="Result"
-              onChange={handleShotResultChange}
-            >
-              {shotResultOptions.map((option: string) => {
-                return (
-                  <MenuItem key={option} value={option}>
-                    {option}
-                  </MenuItem>
-                );
-              })}
-            </Select>
+          <Box textAlign="center">
+            <Box mb={2}>
+              <InputLabel id="demo-simple-select-label">Club</InputLabel>
+              <Select
+                sx={{ minWidth: "75%" }}
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                defaultValue="--"
+                value={
+                  roundContext.state.holeShotDetails[holeIndex][shotDetailIndexToUpdate]?.club ||
+                  "--"
+                }
+                onChange={handleClubChange}
+              >
+                {roundContext.state.clubs.map((club: string) => {
+                  return (
+                    <MenuItem key={club} value={club}>
+                      {club}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </Box>
+            <Box>
+              <InputLabel id="demo-simple-select-label">Result</InputLabel>
+              <Select
+                sx={{ minWidth: "75%" }}
+                autoWidth
+                labelId="demo-simple-select-label"
+                id="demo-simple-select"
+                value={
+                  roundContext.state.holeShotDetails[holeIndex][shotDetailIndexToUpdate]?.result ||
+                  "--"
+                }
+                onChange={handleShotResultChange}
+              >
+                {shotResultOptions.map((option: string) => {
+                  return (
+                    <MenuItem key={option} value={option}>
+                      {option}
+                    </MenuItem>
+                  );
+                })}
+              </Select>
+            </Box>
           </Box>
         </DialogContent>
-        <DialogActions>
-          <Button onClick={handleHoleReset}>Reset</Button>
-          <Button onClick={handleClose}>Save</Button>
-        </DialogActions>
+        <Box display="flex" justifyContent="space-around" pb={3}>
+          <DialogActions>
+            <Box mr={4}>
+              <Button variant="contained" size="large" color="error" onClick={handleHoleReset}>
+                Reset
+              </Button>
+            </Box>
+            <Button variant="contained" size="large" onClick={handleClose}>
+              Save
+            </Button>
+          </DialogActions>
+        </Box>
       </Dialog>
     </div>
   );

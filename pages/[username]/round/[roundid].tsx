@@ -9,7 +9,7 @@ import { queryParamToString, queryParamToBoolean } from "../../../utils/queryPar
 import { RoundContextProvider } from "../../../context/RoundContext";
 import { getUnverifiedCourseForRound } from "../../api/graphql/queries/unverifiedCourseQueries";
 import { useNetworkContext } from "../../../context/NetworkContext";
-import { Button } from "@mui/material";
+import { Button, Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { IScoreCardProps } from "../../../interfaces/scorecardInterface";
 import { ICourseDetails } from "../../../interfaces/course";
@@ -17,6 +17,8 @@ import { IRoundDetails } from "../../../interfaces/round";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import { toast } from "react-toastify";
 import { parseErrorMessage } from "../../../utils/errorMessage";
+import SignalCellularConnectedNoInternet1BarRoundedIcon from "@mui/icons-material/SignalCellularConnectedNoInternet1BarRounded";
+import CellWifiRoundedIcon from "@mui/icons-material/CellWifiRounded";
 
 export default function Round() {
   const router = useRouter();
@@ -184,6 +186,12 @@ export default function Round() {
     }
   }, [getRound, router.isReady, courseData, roundDetails, courseDetails]);
 
+  useEffect(() => {
+    if (networkContext.state.offlineModeEnabled) {
+      toast.warn("You're in offline mode");
+    }
+  }, [networkContext.state.offlineModeEnabled]);
+
   if (
     loading ||
     (queryParams.isUserAddedCourse && unverifiedCourseLoading) ||
@@ -221,21 +229,32 @@ export default function Round() {
   return (
     <>
       <RoundContextProvider>
-        <h1>Round detail page</h1>
         {roundDetails && (
           <>
-            <h3>{roundDetails.round_date}</h3>
-            <h3>
-              {roundDetails.course_name
-                ? roundDetails.course_name
-                : roundDetails.user_added_course_name}
-            </h3>
-            <h3>{courseDetails ? courseDetails.course_city : roundDetails.user_added_city}</h3>
-            <h3>{courseDetails ? courseDetails.course_state : roundDetails.user_added_state}</h3>
-            <h3>Conditions {roundDetails.weather_conditions}</h3>
-            <h3>Temperature {roundDetails.temperature}</h3>
-            <h3>{teeColor} tees</h3>
-            <Box m={3}>
+            <Box textAlign="center" mt={2}>
+              <Typography variant="h5">
+                {roundDetails.course_name
+                  ? roundDetails.course_name
+                  : roundDetails.user_added_course_name}
+              </Typography>
+              <Typography variant="subtitle2">
+                {courseDetails ? courseDetails.course_city : roundDetails.user_added_city},{" "}
+                {courseDetails ? courseDetails.course_state : roundDetails.user_added_state}{" "}
+              </Typography>
+              <Typography variant="subtitle2">{roundDetails.round_date.split(",")[0]}</Typography>
+              <Box justifyContent="center" display="flex">
+                <Box pr={1} m={2}>
+                  <Typography variant="h6">{roundDetails.weather_conditions} Conditions</Typography>
+                  <Typography variant="h6">{roundDetails.temperature + "\u00B0"} F</Typography>
+                  <Typography variant="h6">{teeColor} tees</Typography>
+                </Box>
+                {/* <Box pl={1} m={2}>
+                  <Typography variant="h6">{teeColor} tees</Typography>
+                  <Typography variant="h6">Total Yardage</Typography>
+                </Box> */}
+              </Box>
+            </Box>
+            <Box mb={2} textAlign="center">
               <Button
                 onClick={toggleOfflineMode}
                 type="submit"
@@ -243,8 +262,17 @@ export default function Round() {
                 variant="contained"
                 color="primary"
               >
-                {`offline mode enabled: ${networkContext.state.offlineModeEnabled}`}
+                {networkContext.state.offlineModeEnabled ? (
+                  <SignalCellularConnectedNoInternet1BarRoundedIcon />
+                ) : (
+                  <CellWifiRoundedIcon />
+                )}
               </Button>
+              <Box pt={1}>
+                <Typography textAlign="center" variant="caption">
+                  Bad signal? Go offline
+                </Typography>
+              </Box>
             </Box>
             {scoreCardProps && <ScoreCard {...scoreCardProps} />}
           </>
