@@ -106,6 +106,9 @@ export default function Register() {
 
   return (
     <Box component="form" textAlign="center" onSubmit={submitForm} noValidate autoComplete="off">
+      <Box mt={3}>
+        <Typography variant="h4">Register</Typography>
+      </Box>
       <Box
         mt={3}
         sx={{

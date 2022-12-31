@@ -46,7 +46,10 @@ function Nav() {
     setAnchorElUser(null);
   };
 
-  const goToLogin = () => router.push("/login");
+  const goToLoginOrRegister = (pathname: string) => {
+    const page = pathname == "/login" ? "register" : "login";
+    return router.push(`/${page}`);
+  };
 
   function goToPage(page: string) {
     const safePage = page.replace(/\s/g, "-").toLocaleLowerCase();
@@ -166,7 +169,7 @@ function Nav() {
                     <SignOut />
                   ) : (
                     <IconButton
-                      onClick={goToLogin}
+                      onClick={() => goToLoginOrRegister(pathname)}
                       sx={{ my: 2, color: "white", display: "block" }}
                     >
                       <Typography variant="button" display="block" gutterBottom>

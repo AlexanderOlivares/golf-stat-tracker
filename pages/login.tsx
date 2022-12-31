@@ -110,6 +110,9 @@ export default function Login() {
 
   return (
     <Box component="form" onSubmit={submitForm} textAlign="center" noValidate autoComplete="off">
+      <Box mt={3}>
+        <Typography variant="h4">Login</Typography>
+      </Box>
       <Box
         mt={3}
         sx={{
