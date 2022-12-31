@@ -12,7 +12,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 });
 
 const appolloClient = new ApolloClient({
-  uri: `${process.env.DOMAIN}/api/graphql`,
+  uri: `/api/graphql`,
   cache: new InMemoryCache(),
 });
 
