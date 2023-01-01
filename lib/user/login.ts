@@ -7,13 +7,15 @@ import { errorMessage } from "../../utils/errorMessage";
 
 export default async function loginUser(email: string, password: string) {
   try {
-    const isValidEmailAddress = emailAddressValidator(email);
+    const lowerCasedEmail = email.toLowerCase();
+
+    const isValidEmailAddress = emailAddressValidator(lowerCasedEmail);
     const isValidPassword = usernameAndPasswordValidator(password);
     if (!isValidEmailAddress || !isValidPassword) {
       return errorMessage("Invalid form input");
     }
 
-    const user = await pool.query("SELECT * FROM user_login WHERE email = $1", [email]);
+    const user = await pool.query("SELECT * FROM user_login WHERE email = $1", [lowerCasedEmail]);
 
     if (!user.rowCount) return errorMessage("No account exists with that email");
 
@@ -25,11 +27,11 @@ export default async function loginUser(email: string, password: string) {
     const userid: string = user.rows[0].userid;
     const username: string = user.rows[0].username;
 
-    const token: string = await jwtGenerator(userid, username, email);
+    const token: string = await jwtGenerator(userid, username, lowerCasedEmail);
     const loggedInUser: IUser = {
       userid,
       username,
-      email,
+      email: lowerCasedEmail,
       token,
     };
 

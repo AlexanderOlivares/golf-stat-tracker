@@ -18,7 +18,9 @@ export const SALT: string = bcrypt.genSaltSync(SALT_ROUNDS);
 
 export default async function registerUser(username: string, email: string, password: string) {
   try {
-    const isValidEmailAddress = emailAddressValidator(email);
+    const lowerCasedEmail = email.toLowerCase();
+
+    const isValidEmailAddress = emailAddressValidator(lowerCasedEmail);
     const isValidUsername = usernameAndPasswordValidator(username);
     const isValidPassword = usernameAndPasswordValidator(password);
     if (!isValidUsername || !isValidEmailAddress || !isValidPassword) {
@@ -33,7 +35,7 @@ export default async function registerUser(username: string, email: string, pass
       return errorMessage("Username already exists");
     }
 
-    const emailExists = await pool.query("SELECT email FROM user_login WHERE email = $1", [email]);
+    const emailExists = await pool.query("SELECT email FROM user_login WHERE email = $1", [lowerCasedEmail]);
 
     if (emailExists.rowCount) {
       return errorMessage("Account with that email already exists");
@@ -44,16 +46,16 @@ export default async function registerUser(username: string, email: string, pass
 
     const userid: string = uuidv4();
 
-    const token: string = await jwtGenerator(userid, username, email);
+    const token: string = await jwtGenerator(userid, username, lowerCasedEmail);
 
     const newUser = await pool.query(
       "INSERT INTO user_login (userid, username, email, password) VALUES ($1, $2, $3, $4) RETURNING *",
-      [userid, username, email, bcryptPassword]
+      [userid, username, lowerCasedEmail, bcryptPassword]
     );
 
     const defaultUserSettings = await pool.query(
         "INSERT INTO user_settings (userid, username, email, using_default_clubs, clubs) VALUES ($1, $2, $3, $4, $5)",
-        [userid, username, email, true, defaultClubs.slice(0, 15)]
+        [userid, username, lowerCasedEmail, true, defaultClubs.slice(0, 15)]
     );
 
     if (!newUser.rowCount || !defaultUserSettings.rowCount) {
@@ -63,7 +65,7 @@ export default async function registerUser(username: string, email: string, pass
     const user: IUser = {
       userid,
       username,
-      email,
+      email: lowerCasedEmail,
       token,
     };
 

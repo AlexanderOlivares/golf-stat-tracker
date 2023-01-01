@@ -16,12 +16,14 @@ const transporter = nodemailer.createTransport({
 
 export default async function passwordResetEmailRequest(email: string) {
   try {
-    const isValidEmailAddress = emailAddressValidator(email);
+    const lowerCasedEmail = email.toLowerCase();
+
+    const isValidEmailAddress = emailAddressValidator(lowerCasedEmail);
     if (!isValidEmailAddress) {
-      return errorMessage("Invalid form input");
+      return errorMessage("Invalid email address format");
     }
 
-    const user = await pool.query("SELECT * FROM user_login WHERE email = $1", [email]);
+    const user = await pool.query("SELECT * FROM user_login WHERE email = $1", [lowerCasedEmail]);
 
     if (!user.rowCount) return errorMessage("No account exists with that email");
 
@@ -29,16 +31,16 @@ export default async function passwordResetEmailRequest(email: string) {
 
     const userid: string = user.rows[0].userid;
     const username: string = user.rows[0].username;
-    const token: string = await passwordResetJwtGenerator(userid, username, email, savedPassword);
+    const token: string = await passwordResetJwtGenerator(userid, username, lowerCasedEmail, savedPassword);
 
     const base64Encode = (strToEncode: string) => Buffer.from(strToEncode).toString("base64");
-    const encodedEmail = base64Encode(email);
+    const encodedEmail = base64Encode(lowerCasedEmail);
 
     const DOMAIN = process.env.DOMAIN;
     // send email here
     const mailOptions = {
       from: `Golf Logs <${process.env.EMAIL_USERNAME}>`,
-      to: email,
+      to: lowerCasedEmail,
       subject: "Reset Password",
       html: `
               <p>Use the link below to reset your password. Link expires in 10 minutes.</p>
@@ -61,7 +63,9 @@ export default async function passwordResetEmailRequest(email: string) {
 
 export async function resetPassword(email: string, password: string, resetToken: string) {
   try {
-    const user = await pool.query("SELECT * FROM user_login WHERE email = $1", [email]);
+    const lowerCasedEmail = email.toLowerCase();
+
+    const user = await pool.query("SELECT * FROM user_login WHERE email = $1", [lowerCasedEmail]);
 
     if (!user.rowCount) return errorMessage("No account exists with that email");
 
@@ -83,12 +87,12 @@ export async function resetPassword(email: string, password: string, resetToken:
       return errorMessage("Error resetting password. Please try again later");
     }
 
-    const accessToken: string = await jwtGenerator(userid, username, email);
+    const accessToken: string = await jwtGenerator(userid, username, lowerCasedEmail);
 
     const userObj: IUser = {
       userid,
       username,
-      email,
+      email: lowerCasedEmail,
       token: accessToken,
     };
 
