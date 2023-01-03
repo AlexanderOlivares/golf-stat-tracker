@@ -16,7 +16,7 @@ import { useMutation } from "@apollo/client";
 import { saveRound as saveRoundMutation } from "../pages/api/graphql/mutations/roundMutations";
 import { queryParamToString } from "../utils/queryParamFormatter";
 import { saveUnverifiedCourseParMutation } from "../pages/api/graphql/mutations/unverifiedCourseMutations";
-import Row from "./ScoreCardRow";
+import Row, { displayDistanceYardage } from "./ScoreCardRow";
 import { IScoreCardProps } from "../interfaces/scorecardInterface";
 import { useRouter } from "next/router";
 import { useAuthContext } from "../context/AuthContext";
@@ -44,6 +44,12 @@ export function getHoleIndexToUpdate(hole: string): number {
 export interface ICompleteScoreCard extends IHoleDetails {
   score: number | null;
   holeShotDetails: IShotDetail[];
+}
+
+function formatTotalYardageHeading(teeColor: string) {
+  if (!teeColor) return;
+  const capitalized = teeColor[0].toUpperCase() + teeColor.slice(1);
+  return `${capitalized} Tees`;
 }
 
 function formatParArray(holes: IHoleDetails[]) {
@@ -278,46 +284,66 @@ export default function ScoreCard(props: IScoreCardProps) {
 
   return (
     <>
-      <Box display="flex" alignItems="center" justifyContent="space-between">
-        <Box pl={2}>
-          <Typography variant="h6" component="h2">
-            Score
-          </Typography>
-          <Typography variant="h6" component="h2">
-            {roundContext.state.holeScores[20]}
-          </Typography>
+      <Box
+        sx={{
+          maxWidth: "lg",
+          m: "auto",
+        }}
+        pb={8}
+      >
+        <Box display="flex" alignItems="center" justifyContent="space-between">
+          <Box pl={2}>
+            <Typography variant="h6" component="h2">
+              Score
+            </Typography>
+            <Typography variant="h6" component="h2">
+              {roundContext.state.holeScores[20]}
+            </Typography>
+          </Box>
+          {!props.is_user_added_course && (
+            <>
+              <Box pl={2}>
+                <Typography variant="h6" component="h2">
+                  {formatTotalYardageHeading(props.tee_color)}
+                </Typography>
+                <Typography variant="h6" component="h2">
+                  {displayDistanceYardage(roundRows[20])}
+                </Typography>
+              </Box>
+              <Box pr={2} justifySelf="flex-end">
+                <Typography variant="h6" component="h2">
+                  Rating/Slope
+                </Typography>
+                <Typography variant="h6" component="h2">
+                  {rating}/{slope}
+                </Typography>
+              </Box>
+            </>
+          )}
         </Box>
-        <Box pr={2} justifySelf="flex-end">
-          <Typography variant="h6" component="h2">
-            Rating/Slope
-          </Typography>
-          <Typography variant="h6" component="h2">
-            {rating}/{slope}
-          </Typography>
-        </Box>
+        <TableContainer component={Paper}>
+          <Table aria-label="collapsible table">
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#ffcdd2" }}>
+                <TableCell>Hole</TableCell>
+                <TableCell align="right">Par</TableCell>
+                <TableCell align="right">Score</TableCell>
+                {!roundContext.state.isUserAddedCourse && (
+                  <>
+                    <TableCell align="right">Distance</TableCell>
+                    <TableCell align="right">Handicap</TableCell>
+                  </>
+                )}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {roundRows.map(row => (
+                <Row key={row.hole} row={row} />
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
       </Box>
-      <TableContainer component={Paper}>
-        <Table aria-label="collapsible table">
-          <TableHead>
-            <TableRow sx={{ backgroundColor: "#ffcdd2" }}>
-              <TableCell>Hole</TableCell>
-              <TableCell align="right">Par</TableCell>
-              <TableCell align="right">Score</TableCell>
-              {!roundContext.state.isUserAddedCourse && (
-                <>
-                  <TableCell align="right">Distance</TableCell>
-                  <TableCell align="right">Handicap</TableCell>
-                </>
-              )}
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {roundRows.map(row => (
-              <Row key={row.hole} row={row} />
-            ))}
-          </TableBody>
-        </Table>
-      </TableContainer>
     </>
   );
 }

@@ -237,21 +237,23 @@ export default function Round() {
                   ? roundDetails.course_name
                   : roundDetails.user_added_course_name}
               </Typography>
-              <Typography variant="subtitle2">
-                {courseDetails ? courseDetails.course_city : roundDetails.user_added_city},{" "}
-                {courseDetails ? courseDetails.course_state : roundDetails.user_added_state}{" "}
-              </Typography>
-              <Typography variant="subtitle2">{roundDetails.round_date.split(",")[0]}</Typography>
+              <Box>
+                <Box>
+                  <Typography variant="subtitle2">
+                    {courseDetails ? courseDetails.course_city : roundDetails.user_added_city},{" "}
+                    {courseDetails ? courseDetails.course_state : roundDetails.user_added_state}
+                  </Typography>
+                  <Typography variant="subtitle2"></Typography>
+                </Box>
+                <Typography variant="subtitle2">{roundDetails.round_date.split(",")[0]}</Typography>
+              </Box>
               <Box justifyContent="center" display="flex">
                 <Box pr={1} m={2}>
                   <Typography variant="h6">{roundDetails.weather_conditions} Conditions</Typography>
-                  <Typography variant="h6">{roundDetails.temperature + "\u00B0"} F</Typography>
-                  <Typography variant="h6">{teeColor} tees</Typography>
                 </Box>
-                {/* <Box pl={1} m={2}>
-                  <Typography variant="h6">{teeColor} tees</Typography>
-                  <Typography variant="h6">Total Yardage</Typography>
-                </Box> */}
+                <Box pl={1} m={2}>
+                  <Typography variant="h6">{roundDetails.temperature + "\u00B0"} F</Typography>
+                </Box>
               </Box>
             </Box>
             <Box mb={2} textAlign="center">

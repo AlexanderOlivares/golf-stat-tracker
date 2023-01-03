@@ -19,7 +19,8 @@ function showAltTableHeaders(holeNumber: string | undefined): boolean {
   return altHoleMatches.includes(holeNumber);
 }
 
-function displayDistanceYardage(row: ICompleteScoreCard) {
+export function displayDistanceYardage(row: ICompleteScoreCard) {
+  if (!row) return;
   if (row.frontTotalYardage) return row.frontTotalYardage;
   if (row.backTotalYardage) return row.backTotalYardage;
   if (row.totalYardage) return row.totalYardage;
