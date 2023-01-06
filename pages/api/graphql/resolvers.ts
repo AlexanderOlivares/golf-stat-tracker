@@ -15,6 +15,7 @@ import {
   IUpdateUserAddedParArgs,
   IUpdateRoundArgs,
   IPasswordResetMutationArgs,
+  IDeleteRoundArgs,
 } from "./resolverInterfaces";
 import { errorOccured } from "./graphqlUtils";
 import { createNewRound, getRound } from "../../../lib/round/createNewRound";
@@ -25,6 +26,7 @@ import { createUnverifiedCourse } from "../../../lib/course/createUnverifiedCour
 import { getUnverifiedCourse } from "../../../lib/course/getCourse";
 import { updateUnverifiedCoursePar } from "../../../lib/course/updateUnverifiedCoursePar";
 import passwordResetEmailRequest, { resetPassword } from "../../../lib/user/passwordReset";
+import { deleteExistingRound } from "../../../lib/round/deleteRound";
 
 export const resolvers = {
   Query: {
@@ -140,5 +142,13 @@ export const resolvers = {
           if (errorOccured(unverifiedCoursePar)) return new Error(unverifiedCoursePar.errorMessage)
           return unverifiedCoursePar;
       },
+    async deleteRound(_parent: undefined, args: IDeleteRoundArgs, context: IContext) {
+      if (errorOccured(context.token)) return new Error(context.token.errorMessage);
+        const { roundid, username } = args.input
+        if (username !== context.token.username) return new Error("Unauthorized"); 
+        const deletedRound = await deleteExistingRound(roundid, username);
+        if (errorOccured(deletedRound)) return new Error(deletedRound.errorMessage)
+        return deletedRound;
+    },
   },
 };

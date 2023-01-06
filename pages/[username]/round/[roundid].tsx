@@ -19,11 +19,16 @@ import { toast } from "react-toastify";
 import { parseErrorMessage } from "../../../utils/errorMessage";
 import SignalCellularConnectedNoInternet1BarRoundedIcon from "@mui/icons-material/SignalCellularConnectedNoInternet1BarRounded";
 import CellWifiRoundedIcon from "@mui/icons-material/CellWifiRounded";
+import DeleteRoundDialog from "../../../components/DeleteRoundDialog";
+import { useAuthContext } from "../../../context/AuthContext";
 
 export default function Round() {
   const router = useRouter();
   const networkContext = useNetworkContext();
-  const { roundid, courseId, unverifiedCourseId, teeColor, isUserAddedCourse } = router.query;
+  const { roundid, courseId, unverifiedCourseId, teeColor, isUserAddedCourse, username } =
+    router.query;
+  const authContext = useAuthContext();
+  const { isAuth, tokenPayload } = authContext.state;
 
   // save reference to hidden query params so they aren't lost on refresh
   if (courseId || unverifiedCourseId) {
@@ -237,46 +242,51 @@ export default function Round() {
                   ? roundDetails.course_name
                   : roundDetails.user_added_course_name}
               </Typography>
-              <Box>
+              <Box mt={1}>
                 <Box>
                   <Typography variant="subtitle2">
                     {courseDetails ? courseDetails.course_city : roundDetails.user_added_city},{" "}
                     {courseDetails ? courseDetails.course_state : roundDetails.user_added_state}
                   </Typography>
-                  <Typography variant="subtitle2"></Typography>
                 </Box>
                 <Typography variant="subtitle2">{roundDetails.round_date.split(",")[0]}</Typography>
-              </Box>
-              <Box justifyContent="center" display="flex">
-                <Box pr={1} m={2}>
-                  <Typography variant="h6">{roundDetails.weather_conditions} Conditions</Typography>
+                <Box>
+                  <Typography variant="subtitle2">
+                    {roundDetails.weather_conditions} Conditions
+                  </Typography>
                 </Box>
-                <Box pl={1} m={2}>
-                  <Typography variant="h6">{roundDetails.temperature + "\u00B0"} F</Typography>
+                <Box>
+                  <Typography variant="subtitle2">
+                    {roundDetails.temperature + "\u00B0"} F
+                  </Typography>
                 </Box>
               </Box>
+              <Box display="flex" justifyContent="space-around"></Box>
             </Box>
-            <Box mb={2} textAlign="center">
-              <Button
-                onClick={toggleOfflineMode}
-                type="submit"
-                size="medium"
-                variant="contained"
-                color="primary"
-              >
-                {networkContext.state.offlineModeEnabled ? (
-                  <SignalCellularConnectedNoInternet1BarRoundedIcon />
-                ) : (
-                  <CellWifiRoundedIcon />
-                )}
-              </Button>
-              <Box pt={1}>
-                <Typography textAlign="center" variant="caption">
-                  Bad signal? Go offline
-                </Typography>
+            {isAuth && (
+              <Box m={2} textAlign="center">
+                <Button
+                  onClick={toggleOfflineMode}
+                  type="submit"
+                  size="medium"
+                  variant="contained"
+                  color="primary"
+                >
+                  {networkContext.state.offlineModeEnabled ? (
+                    <SignalCellularConnectedNoInternet1BarRoundedIcon />
+                  ) : (
+                    <CellWifiRoundedIcon />
+                  )}
+                </Button>
+                <Box pt={1}>
+                  <Typography textAlign="center" variant="caption">
+                    Bad signal? Go offline
+                  </Typography>
+                </Box>
               </Box>
-            </Box>
-            {scoreCardProps && <ScoreCard {...scoreCardProps} />}
+            )}
+            <Box>{scoreCardProps && <ScoreCard {...scoreCardProps} />}</Box>
+            {isAuth && username == tokenPayload?.username && <DeleteRoundDialog />}
           </>
         )}
       </RoundContextProvider>

@@ -64,3 +64,11 @@ export const saveRound = gql`
     }
   }
 `;
+
+export const deleteRoundMutation = gql`
+  mutation DeleteRound($roundid: String, $username: String) {
+    deleteRound(input: { roundid: $roundid, username: $username }) {
+        roundid
+    }
+  }
+`;

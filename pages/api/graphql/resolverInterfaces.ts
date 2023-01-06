@@ -59,6 +59,13 @@ export interface IUpdateRoundArgs {
   };
 }
 
+export interface IDeleteRoundArgs {
+    input: {
+      roundid: string;
+      username: string;
+    };
+  }
+
 export interface IContext {
   req: Request;
   res: Response;

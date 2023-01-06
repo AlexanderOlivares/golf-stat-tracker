@@ -181,6 +181,15 @@ export const typeDefs = gql`
     token: String
   }
 
+  input DeleteRoundInput {
+    roundid: String
+    username: String
+  }
+
+  type DeletedRound {
+    roundid: String
+  }
+
   type Query {
     passwordResetEmailRequest(email: String!): String
     user(username: String!): User
@@ -201,5 +210,6 @@ export const typeDefs = gql`
     editClubs(input: UpdateClubsInput!): ClubList
     saveRound(input: RoundStats!): RoundStatsResponse
     saveUnverifiedCoursePar(input: UpdateUserAddedCourseParInput): UnverifiedCourse
+    deleteRound(input: DeleteRoundInput!): DeletedRound!
   }
 `;
