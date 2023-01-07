@@ -9,6 +9,7 @@ import { getRoundPreviewByUsernameQuery } from "../api/graphql/queries/roundQuer
 import { useNetworkContext } from "../../context/NetworkContext";
 import { useAuthContext } from "../../context/AuthContext";
 import LoadingSpinner from "../../components/LoadingSpinner";
+import AreaChart from "../../components/statCharts/AreaChart";
 
 export interface IRoundPreview {
   round_id: string;
@@ -24,6 +25,14 @@ export interface IRoundPreview {
   threePutts: number;
   totalPutts: number;
 }
+
+const statKeys: (keyof IRoundPreview)[] = [
+  "score",
+  "fairwaysHit",
+  "greensInReg",
+  "threePutts",
+  "totalPutts",
+];
 
 export default function Profile() {
   const router = useRouter();
@@ -77,10 +86,18 @@ export default function Profile() {
           m: "auto",
         }}
       >
-        <Typography variant="h6" component="h2">
-          {roundPreviewRows?.length ? "Latest Rounds" : "No Rounds Recorded Yet"}
-        </Typography>
-        <Box py={2}>{roundPreviewRows && <RoundPreviewGrid roundPreview={roundPreviewRows} />}</Box>
+        <>
+          {roundPreviewRows &&
+            statKeys.map((statKey: keyof IRoundPreview) => {
+              return <AreaChart key={statKey} roundPreview={roundPreviewRows} statKey={statKey} />;
+            })}
+          <Typography variant="h6" component="h2">
+            {roundPreviewRows?.length ? "Latest Rounds" : "No Rounds Recorded Yet"}
+          </Typography>
+          <Box py={2}>
+            {roundPreviewRows && <RoundPreviewGrid roundPreview={roundPreviewRows} />}
+          </Box>
+        </>
       </Box>
     </>
   );

@@ -72,12 +72,8 @@ export default function Row(props: { row: ICompleteScoreCard }) {
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
-                    <TableCell>
-                      {showAltTableHeaders(row.hole) ? "Fairways Hit" : "Shot #"}
-                    </TableCell>
-                    <TableCell>
-                      {showAltTableHeaders(row.hole) ? "GIR" : "Distance to Pin"}
-                    </TableCell>
+                    <TableCell>{showAltTableHeaders(row.hole) ? "Fairways Hit" : "Shot"}</TableCell>
+                    <TableCell>{showAltTableHeaders(row.hole) ? "GIR" : "Distance"}</TableCell>
                     <TableCell>{showAltTableHeaders(row.hole) ? "3-Putts" : "Club"}</TableCell>
                     <TableCell>
                       {showAltTableHeaders(row.hole) ? "Total Putts" : "Result"}
