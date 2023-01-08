@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,7 +12,9 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { IRoundPreview } from "../../pages/[username]/profile";
-import { getNumeratorOfFairwaysHit } from "../../utils/statChartHelpers";
+import { getNumeratorOfFairwaysHit, getStatAverage } from "../../utils/statChartHelpers";
+import { Typography } from "@mui/material";
+import { Box } from "@mui/system";
 
 ChartJS.register(
   CategoryScale,
@@ -49,22 +51,20 @@ const titleLookup: IChartTitleLookup = {
 type statKeyType = keyof typeof titleLookup;
 
 export default function AreaChart({ roundPreview, statKey }: IAreaChartProps) {
+  const [average, setAverage] = useState<number | null>(null);
   const roundPreviewSortedAsc = [...roundPreview].sort(
     (a: IRoundPreview, b: IRoundPreview) => Date.parse(a.round_date) - Date.parse(b.round_date)
   );
 
-  // maybe shorten this even more to mm/dd format
-  const labels = roundPreviewSortedAsc.map(round => round.round_date.split(",")[0]);
+  const labels = roundPreviewSortedAsc.map(round =>
+    round.round_date.split("/").slice(0, 2).join("/")
+  );
 
   const options = {
     responsive: true,
     plugins: {
       legend: {
-        position: "top" as const,
-      },
-      title: {
-        display: true,
-        text: titleLookup[statKey as statKeyType],
+        display: false,
       },
     },
   };
@@ -74,7 +74,6 @@ export default function AreaChart({ roundPreview, statKey }: IAreaChartProps) {
     datasets: [
       {
         fill: true,
-        label: "Dataset 2",
         data: roundPreviewSortedAsc.map(round => {
           if (statKey == "fairwaysHit") return getNumeratorOfFairwaysHit(round[statKey]);
           return round[statKey];
@@ -85,5 +84,24 @@ export default function AreaChart({ roundPreview, statKey }: IAreaChartProps) {
       },
     ],
   };
-  return <Line options={options} data={data} />;
+
+  useEffect(() => {
+    const statKeyDataOnly = roundPreview.map(round => {
+      if (statKey == "fairwaysHit") return getNumeratorOfFairwaysHit(round[statKey]);
+      return round[statKey];
+    });
+    const avg = getStatAverage(statKeyDataOnly as number[]);
+    setAverage(avg);
+  }, []);
+
+  return (
+    <>
+      <Box mb={2}>
+        <Typography variant="body1">
+          {`Avg ${titleLookup[statKey as statKeyType]} ${average}`}
+        </Typography>
+      </Box>
+      <Line options={options} data={data} />
+    </>
+  );
 }

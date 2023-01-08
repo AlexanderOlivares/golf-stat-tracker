@@ -87,13 +87,21 @@ export default function Profile() {
         }}
       >
         <>
-          {roundPreviewRows &&
-            statKeys.map((statKey: keyof IRoundPreview) => {
-              return <AreaChart key={statKey} roundPreview={roundPreviewRows} statKey={statKey} />;
-            })}
-          <Typography variant="h6" component="h2">
-            {roundPreviewRows?.length ? "Latest Rounds" : "No Rounds Recorded Yet"}
-          </Typography>
+          <Box display="flex" flexWrap="wrap" justifyContent="center" maxWidth="md" margin="auto">
+            {roundPreviewRows &&
+              statKeys.map((statKey: keyof IRoundPreview) => {
+                return (
+                  <Box key={statKey}>
+                    <AreaChart roundPreview={roundPreviewRows} statKey={statKey} />
+                  </Box>
+                );
+              })}
+          </Box>
+          <Box mt={4}>
+            <Typography variant="h5">
+              {roundPreviewRows?.length ? "Latest Rounds" : "No Rounds Recorded Yet"}
+            </Typography>
+          </Box>
           <Box py={2}>
             {roundPreviewRows && <RoundPreviewGrid roundPreview={roundPreviewRows} />}
           </Box>

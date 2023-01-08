@@ -5,7 +5,7 @@ import { IRoundPreview } from "../pages/[username]/profile";
 import { useRouter } from "next/router";
 import useMediaQuery from "./useMediaQuery";
 
-interface IRoundPreviewProps {
+export interface IRoundPreviewProps {
   roundPreview: IRoundPreview[];
 }
 
