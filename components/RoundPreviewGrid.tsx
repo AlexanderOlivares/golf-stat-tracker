@@ -1,6 +1,12 @@
 import React from "react";
 import Box from "@mui/material/Box";
-import { DataGrid, GridColDef, GridValueGetterParams, GridSortModel } from "@mui/x-data-grid";
+import {
+  DataGrid,
+  GridColDef,
+  GridValueGetterParams,
+  GridSortModel,
+  GridValueFormatterParams,
+} from "@mui/x-data-grid";
 import { IRoundPreview } from "../pages/[username]/profile";
 import { useRouter } from "next/router";
 import useMediaQuery from "./useMediaQuery";
@@ -80,8 +86,9 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
       editable: false,
       headerAlign: "left",
       align: "left",
-      valueGetter: (params: GridValueGetterParams) =>
-        `${params.row.round_date.split(",")[0] || ""}`,
+      valueGetter: (params: GridValueGetterParams) => new Date(params.row.round_date),
+      valueFormatter: (params: GridValueFormatterParams) =>
+        params.value.toLocaleString("en-US").split(",")[0],
     },
   ];
 
