@@ -21,6 +21,7 @@ import {
   calculateTotalPutts,
   getNonParThreeIndices,
   sliceSum,
+  getScoreCountByName,
 } from "../utils/holeDetailsFormatter";
 import { useMutation } from "@apollo/client";
 import { saveRound as saveRoundMutation } from "../pages/api/graphql/mutations/roundMutations";
@@ -157,6 +158,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     }
   };
 
+  // this can be extracted to other module
   const updatedHoleScoresContext = (prevState: IRoundState) => {
     const updatedScores = prevState.holeScores.map((existingScore: number, i: number) => {
       if (NON_HOLE_ROWS[i] == "out") {
@@ -248,6 +250,10 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   async function saveScorecard() {
     try {
       const updatedHoleScores = updatedHoleScoresContext(roundContext.state);
+      //func that returns scoreCount object to save to state/db
+      const { holeShotDetails, par, holeScores } = roundContext.state;
+      const updatedScoreCount = getScoreCountByName(holeScores, par);
+      console.log(updatedScoreCount);
 
       const updatedHoleShotDetails = roundContext.state.holeShotDetails.map(
         (holeDetail: IShotDetail[], index: number) => {

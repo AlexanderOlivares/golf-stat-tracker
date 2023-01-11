@@ -3,6 +3,18 @@ import type { ReactNode } from "react";
 import { defaultClubs } from "../lib/selectOptions";
 import { createHoleDetailsJson, IShotDetail } from "../utils/roundFormatter";
 
+export interface IScoreCountByName {
+  ace: number;
+  albatross: number;
+  eagle: number;
+  birdie: number;
+  parCount: number;
+  bogey: number;
+  doubleBogey: number;
+  tripleBogey: number;
+  quadBogeyOrWorse: number;
+}
+
 export interface IRoundState {
   clubs: string[];
   holeScores: number[];
@@ -10,6 +22,7 @@ export interface IRoundState {
   holeShotDetails: IShotDetail[][];
   par: string[];
   lastSaveTimestamp: number;
+  scoreCount: IScoreCountByName;
 }
 
 const defualtState: IRoundState = {
@@ -19,6 +32,17 @@ const defualtState: IRoundState = {
   holeShotDetails: createHoleDetailsJson(),
   par: [],
   lastSaveTimestamp: Date.now(),
+  scoreCount: {
+    ace: 0,
+    albatross: 0,
+    eagle: 0,
+    birdie: 0,
+    parCount: 0,
+    bogey: 0,
+    doubleBogey: 0,
+    tripleBogey: 0,
+    quadBogeyOrWorse: 0,
+  },
 };
 
 export type Action = {
