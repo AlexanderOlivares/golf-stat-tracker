@@ -57,8 +57,8 @@ function networkContextReducer(state: INetworkState, action: NetworkAction): any
 
 export function NetworkContextProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(networkContextReducer, defaultNetworkState);
-  console.log("NETWORK CONTEXT");
-  console.log(state);
+  //   console.log("NETWORK CONTEXT");
+  //   console.log(state);
 
   return <NetworkContext.Provider value={{ state, dispatch }}>{children}</NetworkContext.Provider>;
 }

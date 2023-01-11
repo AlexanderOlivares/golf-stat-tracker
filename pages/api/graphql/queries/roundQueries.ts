@@ -41,6 +41,15 @@ export const getRoundPreviewByUsernameQuery = gql`
       greensInReg
       threePutts
       totalPutts
+      ace
+      albatross
+      eagle
+      birdie
+      par
+      bogey
+      double_bogey
+      triple_bogey
+      quadruple_bogey_or_worse
     }
   }
 `;

@@ -6,7 +6,6 @@ import { Box, Button } from "@mui/material";
 import RoundPreviewGrid from "../../components/RoundPreviewGrid";
 import Typography from "@mui/material/Typography";
 import { getRoundPreviewByUsernameQuery } from "../api/graphql/queries/roundQueries";
-import { useNetworkContext } from "../../context/NetworkContext";
 import { useAuthContext } from "../../context/AuthContext";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import AreaChart from "../../components/statCharts/AreaChart";
@@ -24,6 +23,15 @@ export interface IRoundPreview {
   greensInReg: number;
   threePutts: number;
   totalPutts: number;
+  ace: number | null;
+  albatross: number | null;
+  eagle: number | null;
+  birdie: number | null;
+  par: number | null;
+  bogey: number | null;
+  double_bogey: number | null;
+  triple_bogey: number | null;
+  quadruple_bogey_or_worse: number | null;
 }
 
 const statKeys: (keyof IRoundPreview)[] = [
@@ -36,7 +44,6 @@ const statKeys: (keyof IRoundPreview)[] = [
 
 export default function Profile() {
   const router = useRouter();
-  const networkContext = useNetworkContext();
   const authContext = useAuthContext();
   const { isAuth } = authContext.state;
 
@@ -70,13 +77,20 @@ export default function Profile() {
     <>
       <Box textAlign="center" my={3}>
         <Typography variant="h3">Golfer Profile</Typography>
-        <h3>{data.user.username}</h3>
         {isAuth && (
           <Box m={2}>
             <Button onClick={startNewRound} size="large" variant="contained" color="primary">
               new round
             </Button>
           </Box>
+        )}
+        {roundPreviewRows?.length && (
+          <>
+            <Typography variant="h6">Stat Dashboard - {data.user.username}</Typography>
+            <Typography variant="caption">
+              Showing Stats for Latest {roundPreviewRows?.length} rounds
+            </Typography>
+          </>
         )}
       </Box>
       <Box

@@ -3,5 +3,6 @@ export function getNumeratorOfFairwaysHit(fairwaysHit: string){
 }
 
 export function getStatAverage(array: number[]){
-    return array.reduce((a:number,c)=> a + Number(c), 0) / array.length
+    const rawAvg = array.reduce((a:number,c)=> a + Number(c), 0) / array.length
+    return Number(rawAvg.toFixed(2));
 }

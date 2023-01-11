@@ -18,6 +18,15 @@ export function formatRoundPreviewGrid(roundPreivewDbResponse: IRoundPreviewDbRe
             greensInReg: greensInReg || 0,
             threePutts: threePutts || 0,
             totalPutts: totalPutts || 0,
+            ace: round.ace,
+            albatross: round.albatross,
+            eagle: round.eagle,
+            birdie: round.birdie,
+            par: round.par,
+            bogey: round.bogey,
+            double_bogey: round.double_bogey,
+            triple_bogey: round.triple_bogey,
+            quadruple_bogey_or_worse: round.quadruple_bogey_or_worse
         }
         return formattedRound;
     })

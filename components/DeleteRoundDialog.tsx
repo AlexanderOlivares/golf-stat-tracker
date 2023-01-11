@@ -10,7 +10,6 @@ import { useMutation } from "@apollo/client";
 import { deleteRoundMutation } from "../pages/api/graphql/mutations/roundMutations";
 import { useRouter } from "next/router";
 import { toast } from "react-toastify";
-import LoadingSpinner from "./LoadingSpinner";
 import { parseErrorMessage } from "../utils/errorMessage";
 import { queryParamToString } from "../utils/queryParamFormatter";
 
@@ -27,7 +26,6 @@ function ConfirmationDialogRaw(props: ConfirmationDialogRawProps) {
   const [deleteRound] = useMutation(deleteRoundMutation);
   const router = useRouter();
   const { username, roundid } = router.query;
-  console.log(username, roundid);
 
   const handleCancel = () => {
     onClose();

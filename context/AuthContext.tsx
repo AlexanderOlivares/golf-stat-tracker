@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useReducer } from "react";
+import { createContext, useContext, useReducer } from "react";
 import type { ReactNode } from "react";
 
 interface ITokenPayload {
@@ -47,8 +47,8 @@ function authContextReducer(state: IAuthState, action: AuthAction): any {
 
 export function AuthContextProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(authContextReducer, defualtState);
-  console.log("in auth context provier");
-  console.log(state);
+  //   console.log("in auth context provier");
+  //   console.log(state);
 
   return <AuthContext.Provider value={{ state, dispatch }}>{children}</AuthContext.Provider>;
 }

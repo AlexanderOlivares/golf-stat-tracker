@@ -163,6 +163,15 @@ export const typeDefs = gql`
     greensInReg: Int
     threePutts: Int
     totalPutts: Int
+    ace: Int
+    albatross: Int
+    eagle: Int
+    birdie: Int
+    par: Int
+    bogey: Int
+    double_bogey: Int
+    triple_bogey: Int
+    quadruple_bogey_or_worse: Int
   }
 
   type UnverifiedCourse {
