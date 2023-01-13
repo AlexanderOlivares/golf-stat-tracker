@@ -11,8 +11,9 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError) console.log(`[Network error]: ${networkError}`);
 });
 
+const absolutePath = `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/graphql`;
 const apolloClient = new ApolloClient({
-  uri: `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/graphql`,
+  uri: process.env.NODE_ENV == "production" ? `/api/graphql` : absolutePath,
   cache: new InMemoryCache(),
 });
 
