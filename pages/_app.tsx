@@ -1,7 +1,7 @@
 import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { ApolloProvider } from "@apollo/client";
-import appolloClient from "../apollo-client";
+import apolloClient from "../apollo-client";
 import { onError } from "@apollo/client/link/error";
 import Head from "next/head";
 import { NetworkContextProvider } from "../context/NetworkContext";
@@ -29,7 +29,7 @@ function MyApp({ Component, pageProps }: AppProps) {
         <link rel="icon" href="/favicon.ico" />
         <link rel="manifest" href="/manifest.json" />
       </Head>
-      <ApolloProvider client={appolloClient}>
+      <ApolloProvider client={apolloClient}>
         <AuthContextProvider>
           <NetworkContextProvider>
             <Nav />

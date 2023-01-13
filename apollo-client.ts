@@ -11,9 +11,9 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (networkError) console.log(`[Network error]: ${networkError}`);
 });
 
-const appolloClient = new ApolloClient({
-  uri: `/api/graphql`,
+const apolloClient = new ApolloClient({
+  uri: `${process.env.NEXT_PUBLIC_VERCEL_URL}/api/graphql`,
   cache: new InMemoryCache(),
 });
 
-export default appolloClient;
+export default apolloClient;

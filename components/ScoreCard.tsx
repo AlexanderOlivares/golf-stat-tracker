@@ -127,36 +127,6 @@ export default function ScoreCard(props: IScoreCardProps) {
         id: roundid,
         ...roundContext.state,
       });
-
-      const roundTransaction = db.transaction("roundBuildProps", "readwrite");
-      const roundStore = roundTransaction.objectStore("roundBuildProps");
-      const existingRoundQuery = roundStore.get(roundid);
-      existingRoundQuery.onsuccess = () => {
-        if (existingRoundQuery.result) {
-          const copy = { ...existingRoundQuery.result };
-          copy.hole_scores = roundContext.state.holeScores;
-          copy.hole_shot_details = roundContext.state.holeShotDetails;
-          roundStore.put({
-            ...copy,
-          });
-        }
-      };
-
-      if (props.unverified_course_id) {
-        const courseTransaction = db.transaction("courseBuildProps", "readwrite");
-        const courseStore = courseTransaction.objectStore("courseBuildProps");
-        const unverifiedCourseKey = queryParamToString(props.unverified_course_id);
-        const unverifiedCourseQuery = courseStore.get(unverifiedCourseKey);
-        unverifiedCourseQuery.onsuccess = () => {
-          if (unverifiedCourseQuery.result) {
-            const copy = { ...unverifiedCourseQuery.result };
-            copy.user_added_par = roundContext.state.par;
-            courseStore.put({
-              ...copy,
-            });
-          }
-        };
-      }
     };
   }, [roundContext.state]);
 
@@ -259,6 +229,13 @@ export default function ScoreCard(props: IScoreCardProps) {
           if (hasNetworkConnection && roundContextIsHydrated) {
             saveScoreCard();
             if (roundContext.state.isUserAddedCourse) saveUnverifiedPar();
+            networkContext.dispatch({
+              type: "update offline mode enabled",
+              payload: {
+                ...networkContext.state,
+                offlineModeEnabled: false,
+              },
+            });
             return;
           }
           return;

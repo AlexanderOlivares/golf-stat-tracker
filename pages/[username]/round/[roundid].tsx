@@ -1,11 +1,10 @@
 import React from "react";
 import { useRouter } from "next/router";
-import { useLazyQuery } from "@apollo/client";
 import ScoreCard from "../../../components/ScoreCard";
 import { getCourseForRound } from "../../api/graphql/queries/courseQueries";
 import { useEffect, useState } from "react";
 import { getRoundByIdQuery } from "../../api/graphql/queries/roundQueries";
-import { queryParamToString, queryParamToBoolean } from "../../../utils/queryParamFormatter";
+import { queryParamToString } from "../../../utils/queryParamFormatter";
 import { RoundContextProvider } from "../../../context/RoundContext";
 import { getUnverifiedCourseForRound } from "../../api/graphql/queries/unverifiedCourseQueries";
 import { useNetworkContext } from "../../../context/NetworkContext";
@@ -16,81 +15,42 @@ import { ICourseDetails } from "../../../interfaces/course";
 import { IRoundDetails } from "../../../interfaces/round";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import { toast } from "react-toastify";
-import { parseErrorMessage } from "../../../utils/errorMessage";
 import SignalCellularConnectedNoInternet1BarRoundedIcon from "@mui/icons-material/SignalCellularConnectedNoInternet1BarRounded";
 import CellWifiRoundedIcon from "@mui/icons-material/CellWifiRounded";
 import DeleteRoundDialog from "../../../components/DeleteRoundDialog";
 import { useAuthContext } from "../../../context/AuthContext";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import apolloClient from "../../../apollo-client";
+import { setCookie } from "../../../utils/authCookieGenerator";
 
-export default function Round() {
+const removeDashes = (str: string) => str.replace(/-/g, "");
+
+export default function Round({
+  data,
+  courseData,
+}: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const networkContext = useNetworkContext();
-  const { roundid, courseId, unverifiedCourseId, teeColor, isUserAddedCourse, username } =
-    router.query;
+  const { roundid, courseId, unverifiedCourseId, username } = router.query;
   const authContext = useAuthContext();
   const { isAuth, tokenPayload } = authContext.state;
 
   // save reference to hidden query params so they aren't lost on refresh
   if (courseId || unverifiedCourseId) {
-    localStorage.setItem(queryParamToString(roundid), JSON.stringify(router.query));
+    const roundIdAsCookieKey = removeDashes(queryParamToString(roundid));
+    setCookie(roundIdAsCookieKey, JSON.stringify(router.query));
   }
 
-  const [queryParams, setQueryParams] = useState({
-    roundid,
-    courseId,
-    unverifiedCourseId,
-    teeColor,
-    isUserAddedCourse,
-  });
-
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [scoreCardProps, setScoreCardProps] = useState<IScoreCardProps | null>(null);
   const [courseDetails, setCourseDetails] = useState<ICourseDetails | null>(null);
   const [roundDetails, setRoundDetails] = useState<IRoundDetails | null>(null);
-
-  // only make these network calls if networkContext is online/good connection
-  function onNetwork() {
-    const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
-    if (!hasNetworkConnection || offlineModeEnabled) {
-      return false;
-    }
-  }
-
-  const [getRound, { loading, error, data }] = useLazyQuery(getRoundByIdQuery);
-  const [getVerifiedCourse, { loading: courseLoading, error: courseError, data: courseData }] =
-    useLazyQuery(getCourseForRound);
-  const [
-    getUnverifiedCourse,
-    { loading: unverifiedCourseLoading, error: unverifiedCourseError, data: unverifiedCourseData },
-  ] = useLazyQuery(getUnverifiedCourseForRound);
-
-  useEffect(() => {
-    if (router.isReady) {
-      if (!courseId || !unverifiedCourseId) {
-        const key = queryParamToString(roundid);
-        const savedParams = localStorage.getItem(key);
-        if (savedParams) setQueryParams(JSON.parse(savedParams));
-      } else {
-        setQueryParams({
-          ...queryParams,
-          roundid,
-        });
-      }
-    }
-  }, [router.isReady]);
 
   useEffect(() => {
     const indexedDB = window.indexedDB;
     const request = indexedDB.open("GolfStatDb", 1);
     request.onupgradeneeded = () => {
       const db = request.result;
-      const roundBuildPropsStore = db.createObjectStore("roundBuildProps", { keyPath: "id" });
-      roundBuildPropsStore.createIndex("roundBuildProps", ["hole_scores", "hole_shot_details"], {
-        unique: false,
-      });
-      const courseBuildPropsStore = db.createObjectStore("courseBuildProps", { keyPath: "id" });
-      courseBuildPropsStore.createIndex("courseBuildProps", ["courseBuildProps"], {
-        unique: false,
-      });
       const roundStore = db.createObjectStore("round", { keyPath: "id" });
       roundStore.createIndex(
         "roundDetails",
@@ -98,117 +58,28 @@ export default function Round() {
         { unique: false }
       );
     };
-    request.onsuccess = async () => {
-      const db = request.result;
-      const roundidKey = queryParamToString(roundid);
-
-      const transaction = db.transaction("roundBuildProps", "readwrite");
-      const roundStore = transaction.objectStore("roundBuildProps");
-      const existingRoundQuery = roundStore.get(roundidKey); // will be undefined if new round
-      existingRoundQuery.onsuccess = () => {
-        if (existingRoundQuery.result) {
-          setRoundDetails(existingRoundQuery.result);
-        }
-        if (!existingRoundQuery.result && roundid) {
-          getRound({ variables: { roundid } });
-        }
-        if (!existingRoundQuery.result && data) {
-          roundStore.put({
-            id: roundid,
-            ...data.round,
-          });
-        }
-      };
-
-      const courseTransaction = db.transaction("courseBuildProps", "readwrite");
-      const courseStore = courseTransaction.objectStore("courseBuildProps");
-
-      const verifiedCourseKey = queryParamToString(queryParams.courseId);
-      const verifiedCourseQuery = courseStore.get(verifiedCourseKey);
-      verifiedCourseQuery.onsuccess = () => {
-        if (verifiedCourseQuery.result) {
-          setCourseDetails(verifiedCourseQuery.result);
-        }
-        if (!verifiedCourseQuery.result && !queryParams.unverifiedCourseId) {
-          getVerifiedCourse({
-            variables: {
-              courseId: queryParamToString(queryParams.courseId),
-              isUserAddedCourse: queryParamToBoolean(queryParams.isUserAddedCourse),
-            },
-          });
-        }
-        if (!verifiedCourseQuery.result && courseData) {
-          courseStore.put({
-            id: queryParams.courseId,
-            ...courseData.course[0],
-          });
-        }
-      };
-
-      const unverifiedCourseKey = queryParamToString(queryParams.unverifiedCourseId);
-      const unverifiedCourseQuery = courseStore.get(unverifiedCourseKey);
-      unverifiedCourseQuery.onsuccess = () => {
-        // could possibly be pumping in outdated pars for unverified courses
-        const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
-
-        if (hasNetworkConnection && !offlineModeEnabled) {
-          if (!unverifiedCourseQuery.result && queryParams.unverifiedCourseId) {
-            getUnverifiedCourse({
-              variables: {
-                unverifiedCourseId: queryParamToString(queryParams.unverifiedCourseId),
-              },
-            });
-          }
-        }
-
-        if (unverifiedCourseQuery.result) {
-          setCourseDetails(unverifiedCourseQuery.result);
-        }
-
-        if (!unverifiedCourseQuery.result && unverifiedCourseData) {
-          courseStore.put({
-            id: queryParams.unverifiedCourseId,
-            ...unverifiedCourseData.unverifiedCourse[0],
-          });
-        }
-      };
-    };
-  }, [data, queryParams, courseData, unverifiedCourseData]);
+  }, []);
 
   useEffect(() => {
-    if (router.isReady && data) {
+    if (data) {
       setRoundDetails(data.round);
     }
-    if (queryParams.courseId && courseData) {
-      setCourseDetails(courseData.course[0]);
+    if (courseData) {
+      if (courseData?.course) setCourseDetails(courseData.course[0]);
+      if (courseData?.unverifiedCourse) setCourseDetails(courseData.unverifiedCourse[0]);
     }
-    if (queryParams.unverifiedCourseId && unverifiedCourseData) {
-      setCourseDetails(unverifiedCourseData.unverifiedCourse[0]);
-    }
-    if (courseDetails && roundDetails) {
+    if (data && courseData) {
       const builtProps = buildProps(roundDetails, courseDetails);
       setScoreCardProps(builtProps);
+      setIsLoading(false);
     }
-  }, [getRound, router.isReady, courseData, roundDetails, courseDetails]);
+  }, [data, courseData, roundDetails, courseDetails]);
 
   useEffect(() => {
     if (networkContext.state.offlineModeEnabled) {
       toast.warn("You're in offline mode");
     }
   }, [networkContext.state.offlineModeEnabled]);
-
-  if (
-    loading ||
-    (queryParams.isUserAddedCourse && unverifiedCourseLoading) ||
-    (!queryParams.isUserAddedCourse && courseLoading)
-  ) {
-    return <LoadingSpinner />;
-  }
-
-  if (error) {
-    toast.error(parseErrorMessage(error));
-    router.push("/login");
-  }
 
   function buildProps(roundProps: any, courseProps?: any): IScoreCardProps {
     if (courseProps) {
@@ -233,63 +104,119 @@ export default function Round() {
 
   return (
     <>
-      <RoundContextProvider>
-        {roundDetails && (
-          <>
-            <Box textAlign="center" mt={2}>
-              <Typography variant="h5">
-                {roundDetails.course_name
-                  ? roundDetails.course_name
-                  : roundDetails.user_added_course_name}
-              </Typography>
-              <Box mt={1}>
-                <Box>
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : (
+        <RoundContextProvider>
+          {roundDetails && (
+            <>
+              <Box textAlign="center" mt={2}>
+                <Typography variant="h5">
+                  {roundDetails.course_name
+                    ? roundDetails.course_name
+                    : roundDetails.user_added_course_name}
+                </Typography>
+                <Box mt={1}>
+                  <Box>
+                    <Typography variant="subtitle2">
+                      {courseDetails ? courseDetails.course_city : roundDetails.user_added_city},{" "}
+                      {courseDetails ? courseDetails.course_state : roundDetails.user_added_state}
+                    </Typography>
+                  </Box>
                   <Typography variant="subtitle2">
-                    {courseDetails ? courseDetails.course_city : roundDetails.user_added_city},{" "}
-                    {courseDetails ? courseDetails.course_state : roundDetails.user_added_state}
+                    {roundDetails.round_date.split(",")[0]}
                   </Typography>
+                  <Box>
+                    <Typography variant="subtitle2">
+                      {roundDetails.weather_conditions} Conditions
+                    </Typography>
+                  </Box>
+                  <Box>
+                    <Typography variant="subtitle2">
+                      {roundDetails.temperature + "\u00B0"} F
+                    </Typography>
+                  </Box>
                 </Box>
-                <Typography variant="subtitle2">{roundDetails.round_date.split(",")[0]}</Typography>
-                <Box>
-                  <Typography variant="subtitle2">
-                    {roundDetails.weather_conditions} Conditions
-                  </Typography>
-                </Box>
-                <Box>
-                  <Typography variant="subtitle2">
-                    {roundDetails.temperature + "\u00B0"} F
-                  </Typography>
-                </Box>
+                <Box display="flex" justifyContent="space-around"></Box>
               </Box>
-              <Box display="flex" justifyContent="space-around"></Box>
-            </Box>
-            {isAuth && (
-              <Box m={2} textAlign="center">
-                <Button
-                  onClick={toggleOfflineMode}
-                  type="submit"
-                  size="medium"
-                  variant="contained"
-                  color="primary"
-                >
-                  {networkContext.state.offlineModeEnabled ? (
-                    <SignalCellularConnectedNoInternet1BarRoundedIcon />
-                  ) : (
-                    <CellWifiRoundedIcon />
-                  )}
-                </Button>
-                <Box pt={1}>
-                  <Typography textAlign="center" variant="caption">
-                    Bad signal? Go offline
-                  </Typography>
+              {isAuth && (
+                <Box m={2} textAlign="center">
+                  <Button
+                    onClick={toggleOfflineMode}
+                    type="submit"
+                    size="medium"
+                    variant="contained"
+                    color="primary"
+                  >
+                    {networkContext.state.offlineModeEnabled ? (
+                      <SignalCellularConnectedNoInternet1BarRoundedIcon />
+                    ) : (
+                      <CellWifiRoundedIcon />
+                    )}
+                  </Button>
+                  <Box pt={1}>
+                    <Typography textAlign="center" variant="caption">
+                      Bad signal? Go offline
+                    </Typography>
+                  </Box>
                 </Box>
-              </Box>
-            )}
-            <Box>{scoreCardProps && <ScoreCard {...scoreCardProps} />}</Box>
-            {isAuth && username == tokenPayload?.username && <DeleteRoundDialog />}
-          </>
-        )}
-      </RoundContextProvider>
+              )}
+              <Box>{scoreCardProps && <ScoreCard {...scoreCardProps} />}</Box>
+              {isAuth && username == tokenPayload?.username && <DeleteRoundDialog />}
+            </>
+          )}
+        </RoundContextProvider>
+      )}
     </>
   );
 }
+
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+  let { roundid, courseId, unverifiedCourseId } = context.query;
+
+  // hidden query params are stored in cookie for reference on page refresh
+  const roundIdAsCookieKey = removeDashes(queryParamToString(roundid));
+  const roundQueryParamsFromCookie = context.req.cookies[roundIdAsCookieKey];
+
+  if (!courseId && roundQueryParamsFromCookie) {
+    const { courseId: courseIdQueryParam } = JSON.parse(roundQueryParamsFromCookie);
+    courseId = courseIdQueryParam;
+  }
+
+  if (!unverifiedCourseId && roundQueryParamsFromCookie) {
+    const { unverifiedCourseId: unverifiedCourseIdQueryParam } = JSON.parse(
+      roundQueryParamsFromCookie
+    );
+    unverifiedCourseId = unverifiedCourseIdQueryParam;
+  }
+
+  const { data } = await apolloClient.query({
+    query: getRoundByIdQuery,
+    variables: { roundid },
+    fetchPolicy: "network-only",
+  });
+
+  let courseData;
+
+  if (courseId) {
+    const { data } = await apolloClient.query({
+      query: getCourseForRound,
+      variables: { courseId },
+    });
+    courseData = data;
+  } else {
+    const { data } = await apolloClient.query({
+      query: getUnverifiedCourseForRound,
+      variables: { unverifiedCourseId },
+      fetchPolicy: "network-only",
+    });
+    courseData = data;
+  }
+
+  return {
+    props: {
+      data,
+      courseData,
+    },
+  };
+};

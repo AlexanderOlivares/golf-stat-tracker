@@ -6,7 +6,7 @@ export function setCookie(key: string, val: string){
 
 export function getCookie(key: string | undefined){
     if (!key) return null
-    const authCookie = Cookies.get(key)
+    const authCookie = Cookies.get(key);
     if (authCookie) return JSON.parse(authCookie);
     return null;
 }
