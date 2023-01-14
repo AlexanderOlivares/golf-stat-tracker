@@ -36,7 +36,8 @@ export default async function passwordResetEmailRequest(email: string) {
     const base64Encode = (strToEncode: string) => Buffer.from(strToEncode).toString("base64");
     const encodedEmail = base64Encode(lowerCasedEmail);
 
-    const DOMAIN =  process.env.NEXT_PUBLIC_VERCEL_URL;
+    const DOMAIN =  process.env.DOMAIN;
+    const PROTOCOL = process.env.NODE_ENV == "production" ? "https" : "http";
     // send email here
     const mailOptions = {
       from: `Golf Logs <${process.env.EMAIL_USERNAME}>`,
@@ -45,7 +46,7 @@ export default async function passwordResetEmailRequest(email: string) {
       html: `
               <p>Use the link below to reset your password. Link expires in 10 minutes.</p>
               <div>
-                  <a href="${DOMAIN}/password-reset?email=${encodedEmail}&token=${token}">Click here to reset golfer account password</a>
+                  <a href="${PROTOCOL}://${DOMAIN}/password-reset?email=${encodedEmail}&token=${token}">Click here to reset golfer account password</a>
               </div>
               <br>
               <small>Please do not reply to this email.</small>
