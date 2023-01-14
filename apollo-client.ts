@@ -13,7 +13,7 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 
 const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
 const apolloClient = new ApolloClient({
-  uri: `${protocol}://${process.env.DOMAIN}/api/graphql`,
+  uri: `${protocol}://${process.env.NEXT_PUBLIC_DOMAIN}/api/graphql`,
   cache: new InMemoryCache(),
 });
 

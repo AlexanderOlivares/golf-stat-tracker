@@ -36,7 +36,7 @@ export default async function passwordResetEmailRequest(email: string) {
     const base64Encode = (strToEncode: string) => Buffer.from(strToEncode).toString("base64");
     const encodedEmail = base64Encode(lowerCasedEmail);
 
-    const DOMAIN =  process.env.DOMAIN;
+    const DOMAIN =  process.env.NEXT_PUBLIC_DOMAIN;
     const PROTOCOL = process.env.NODE_ENV == "production" ? "https" : "http";
     // send email here
     const mailOptions = {
