@@ -1,4 +1,5 @@
 export function getNumeratorOfFairwaysHit(fairwaysHit: string){
+    if (fairwaysHit == "--") return 0;
     return Number(fairwaysHit.split("/")[0]);
 }
 

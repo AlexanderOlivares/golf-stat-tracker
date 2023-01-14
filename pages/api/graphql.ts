@@ -10,6 +10,7 @@ import { JWTPayload } from "jose";
 const apolloServer = new ApolloServer({
   typeDefs,
   resolvers,
+  cache: 'bounded',
   context: async ({ req, res }) => {
     const token: JWTPayload| IErrorMessage= await validateAuthCookie(req);
     console.log(token);
