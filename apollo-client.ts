@@ -1,5 +1,6 @@
-import { ApolloClient, InMemoryCache } from "@apollo/client";
+import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 import { onError } from "@apollo/client/link/error";
+import fetch from 'cross-fetch';
 
 const errorLink = onError(({ graphQLErrors, networkError }) => {
   if (graphQLErrors)
@@ -13,7 +14,11 @@ const errorLink = onError(({ graphQLErrors, networkError }) => {
 
 const protocol = process.env.NODE_ENV == "production" ? "https" : "http";
 const apolloClient = new ApolloClient({
+  link: new HttpLink({
   uri: `${protocol}://${process.env.NEXT_PUBLIC_DOMAIN}/api/graphql`,
+  fetch,
+  }),
+//   uri: `${protocol}://${process.env.NEXT_PUBLIC_DOMAIN}/api/graphql`,
   cache: new InMemoryCache(),
 });
 

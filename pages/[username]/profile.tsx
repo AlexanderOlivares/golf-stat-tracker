@@ -1,7 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useQuery } from "@apollo/client";
 import { useRouter } from "next/router";
-import { getUserQuery } from "../api/graphql/queries/userQueries";
 import { Box, Button } from "@mui/material";
 import RoundPreviewGrid from "../../components/RoundPreviewGrid";
 import Typography from "@mui/material/Typography";
@@ -9,6 +7,10 @@ import { getRoundPreviewByUsernameQuery } from "../api/graphql/queries/roundQuer
 import { useAuthContext } from "../../context/AuthContext";
 import LoadingSpinner from "../../components/LoadingSpinner";
 import AreaChart from "../../components/statCharts/AreaChart";
+import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
+import apolloClient from "../../apollo-client";
+import { queryParamToString } from "../../utils/queryParamFormatter";
+import PieChart from "../../components/statCharts/PieChart";
 
 export interface IRoundPreview {
   round_id: string;
@@ -34,7 +36,7 @@ export interface IRoundPreview {
   quadruple_bogey_or_worse: number | null;
 }
 
-const statKeys: (keyof IRoundPreview)[] = [
+const trendStatKeys: (keyof IRoundPreview)[] = [
   "score",
   "fairwaysHit",
   "greensInReg",
@@ -42,7 +44,19 @@ const statKeys: (keyof IRoundPreview)[] = [
   "totalPutts",
 ];
 
-export default function Profile() {
+export const pieStatKeys: (keyof IRoundPreview)[] = [
+  "ace",
+  "albatross",
+  "eagle",
+  "birdie",
+  "par",
+  "bogey",
+  "double_bogey",
+  "triple_bogey",
+  "quadruple_bogey_or_worse",
+];
+
+export default function Profile({ data }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const authContext = useAuthContext();
   const { isAuth } = authContext.state;
@@ -50,26 +64,12 @@ export default function Profile() {
   const username = router.query.username;
   const [roundPreviewRows, setRoundPrviewRows] = useState<IRoundPreview[] | null>(null);
 
-  const { loading, error, data } = useQuery(getUserQuery, {
-    variables: { username },
-  });
-
-  const roundPreviews = useQuery(getRoundPreviewByUsernameQuery, {
-    variables: {
-      username,
-    },
-    fetchPolicy: "network-only",
-  });
-
   useEffect(() => {
-    if (roundPreviews?.data?.roundPreview) {
-      const roundPreviewArray: IRoundPreview[] = roundPreviews.data.roundPreview;
+    if (data?.roundPreview) {
+      const roundPreviewArray: IRoundPreview[] = data.roundPreview;
       setRoundPrviewRows(roundPreviewArray);
     }
-  }, [roundPreviews]);
-
-  if (loading || roundPreviews.loading) return <LoadingSpinner />;
-  if (error) return `Error! ${error.message}`;
+  }, []);
 
   const startNewRound = () => router.push(`/${username}/round/new-round`);
 
@@ -86,7 +86,7 @@ export default function Profile() {
         )}
         {roundPreviewRows?.length && (
           <>
-            <Typography variant="h6">Stat Dashboard - {data.user.username}</Typography>
+            <Typography variant="h6">Stat Dashboard - {queryParamToString(username)}</Typography>
             <Typography variant="caption">
               Showing Stats for Latest {roundPreviewRows?.length} rounds
             </Typography>
@@ -102,8 +102,15 @@ export default function Profile() {
       >
         <>
           <Box display="flex" flexWrap="wrap" justifyContent="center" maxWidth="md" margin="auto">
+            {roundPreviewRows && (
+              <Box>
+                <PieChart roundPreview={roundPreviewRows} labels={pieStatKeys} />
+              </Box>
+            )}
+          </Box>
+          <Box display="flex" flexWrap="wrap" justifyContent="center" maxWidth="md" margin="auto">
             {roundPreviewRows &&
-              statKeys.map((statKey: keyof IRoundPreview) => {
+              trendStatKeys.map((statKey: keyof IRoundPreview) => {
                 return (
                   <Box key={statKey}>
                     <AreaChart roundPreview={roundPreviewRows} statKey={statKey} />
@@ -124,3 +131,18 @@ export default function Profile() {
     </>
   );
 }
+
+export const getServerSideProps = async (context: GetServerSidePropsContext) => {
+  const { username } = context.query;
+
+  const { data } = await apolloClient.query({
+    query: getRoundPreviewByUsernameQuery,
+    variables: { username },
+  });
+
+  return {
+    props: {
+      data,
+    },
+  };
+};

@@ -75,7 +75,9 @@ export default function AreaChart({ roundPreview, statKey }: IAreaChartProps) {
       {
         fill: true,
         data: roundPreviewSortedAsc.map(round => {
-          if (statKey == "fairwaysHit") return getNumeratorOfFairwaysHit(round[statKey]);
+          if (statKey == "fairwaysHit") {
+            return getNumeratorOfFairwaysHit(round[statKey]);
+          }
           return round[statKey];
         }),
 

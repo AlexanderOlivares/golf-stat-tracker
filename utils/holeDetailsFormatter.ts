@@ -49,7 +49,7 @@ export function sliceSum(arr: number[], start: number, end: number) {
   return arr.slice(start, end).reduce((a, c) => a + c, 0);
 }
 
-export function getScoreCountByName(holeScores: number[], parArray: string[]) {
+export function getScoreCountByName(holeScores: (number | null)[], parArray: string[]) {
     const scoreCount: IScoreCountByName = {
         ace: 0,
         albatross: 0,
@@ -61,8 +61,8 @@ export function getScoreCountByName(holeScores: number[], parArray: string[]) {
         tripleBogey: 0,
         quadBogeyOrWorse: 0,
     }
-    holeScores.forEach((score: number, i: number)=> {
-        if (i in NON_HOLE_ROWS) return;
+    holeScores.forEach((score: number | null, i: number)=> {
+        if (!score || i in NON_HOLE_ROWS) return;
         const par = Number(parArray[i]);
         // par minus score is the amount of strokes away from par 
         const parMinusScore = par - score;

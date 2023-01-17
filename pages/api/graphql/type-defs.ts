@@ -136,9 +136,22 @@ export const typeDefs = gql`
     clubs: [String]
   }
 
+  input ScoreCountByName {
+    ace: Int!
+    albatross: Int!
+    eagle: Int!
+    birdie: Int!
+    parCount: Int!
+    bogey: Int!
+    doubleBogey: Int!
+    tripleBogey: Int!
+    quadBogeyOrWorse: Int!
+  }
+
   input RoundStats {
     holeScores: [Int]
     holeShotDetails: JSON
+    scoreCountByName: ScoreCountByName
     roundid: String
     username: String
   }

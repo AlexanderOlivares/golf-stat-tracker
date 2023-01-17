@@ -128,9 +128,9 @@ export const resolvers = {
     },
     async saveRound(_parent: undefined, args: IUpdateRoundArgs, context: IContext) {
       if (errorOccured(context.token)) return new Error(context.token.errorMessage);
-        const { holeScores, holeShotDetails, roundid, username } = args.input
+        const { holeScores, holeShotDetails, roundid, username, scoreCountByName } = args.input
         if (username !== context.token.username) return new Error("Unauthorized"); 
-        const savedRoundStats = await saveRoundDetails(holeScores, holeShotDetails, roundid); 
+        const savedRoundStats = await saveRoundDetails(holeScores, holeShotDetails, scoreCountByName, roundid); 
         if (errorOccured(savedRoundStats)) return new Error(savedRoundStats.errorMessage)
         return savedRoundStats;
     },

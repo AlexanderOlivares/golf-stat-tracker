@@ -132,11 +132,12 @@ export default function ScoreCard(props: IScoreCardProps) {
 
   async function saveScoreCard() {
     try {
-      const { holeScores, holeShotDetails } = roundContext.state;
+      const { holeScores, holeShotDetails, scoreCount } = roundContext.state;
       const { data } = await saveRound({
         variables: {
           holeScores,
           holeShotDetails,
+          scoreCountByName: scoreCount,
           roundid: queryParamToString(roundid),
           username,
         },
@@ -174,10 +175,11 @@ export default function ScoreCard(props: IScoreCardProps) {
   }
 
   function roundContextHydrationCheck() {
-    const { holeScores, par, holeShotDetails } = roundContext.state;
+    const { holeScores, par, holeShotDetails, scoreCount } = roundContext.state;
     if (holeScores.length != 25 || holeShotDetails.length != 25 || !par.length) {
       return false;
     }
+    if (Object.values(scoreCount).every((scoreCount: number) => scoreCount == 0)) return false;
     return true;
   }
 

@@ -1,5 +1,6 @@
 import { JWTPayload } from "jose";
 import { Pool } from "pg";
+import { IScoreCountByName } from "../../../context/RoundContext";
 import { IErrorMessage } from "../../../utils/errorMessage";
 import { IShotDetail } from "../../../utils/roundFormatter";
 import { IRoundRequestBody } from "../../[username]/round/new-round";
@@ -54,6 +55,7 @@ export interface IUpdateRoundArgs {
   input: {
     holeScores: (number | null)[];
     holeShotDetails: IShotDetail[][];
+    scoreCountByName: IScoreCountByName;
     roundid: string;
     username: string;
   };

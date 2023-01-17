@@ -74,6 +74,7 @@ function roundContextReducer(state: IRoundState, action: Action): any {
         isUserAddedCourse: payload.isUserAddedCourse,
         holeShotDetails: payload.holeShotDetails,
         par: payload.par,
+        scoreCount: payload.scoreCount,
       };
     case "update hole score":
       return {

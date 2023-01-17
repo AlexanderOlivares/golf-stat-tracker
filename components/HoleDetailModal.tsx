@@ -252,8 +252,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
       const updatedHoleScores = updatedHoleScoresContext(roundContext.state);
       //func that returns scoreCount object to save to state/db
       const { holeShotDetails, par, holeScores } = roundContext.state;
-      const updatedScoreCount = getScoreCountByName(holeScores, par);
-      console.log(updatedScoreCount);
+      const updatedScoreCountByName = getScoreCountByName(holeScores, par);
 
       const updatedHoleShotDetails = roundContext.state.holeShotDetails.map(
         (holeDetail: IShotDetail[], index: number) => {
@@ -299,6 +298,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
           variables: {
             holeScores: updatedHoleScores,
             holeShotDetails: updatedHoleShotDetails,
+            scoreCountByName: updatedScoreCountByName,
             roundid: queryParamToString(roundid),
             username: queryParamToString(username),
           },
@@ -316,6 +316,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
             lastSaveTimestamp: Date.now(),
             holeScores: dbHoleScores,
             holeShotDetails: dbHoleShotDetails,
+            scoreCount: updatedScoreCountByName,
           },
         });
         console.log("++++++++++ SAVED TO POSTGRES ++++++++++");
@@ -327,6 +328,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
               ...roundContext.state,
               holeScores: updatedHoleScores,
               holeShotDetails: updatedHoleShotDetails,
+              scoreCount: updatedScoreCountByName,
             },
           });
           console.log("---------- SAVED TO INDEXEDB ----------");

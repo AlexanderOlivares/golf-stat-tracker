@@ -42,7 +42,7 @@ export default function ConnectionListener() {
           },
         });
       }
-    }, 10000);
+    }, 30000);
     return () => clearInterval(connectionPing);
   }, [networkContext.state.hasNetworkConnection]);
 
