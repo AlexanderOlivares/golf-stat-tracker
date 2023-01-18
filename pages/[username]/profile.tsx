@@ -12,6 +12,7 @@ import apolloClient from "../../apollo-client";
 import { queryParamToString } from "../../utils/queryParamFormatter";
 import PieChart from "../../components/statCharts/PieChart";
 import { scoreCountByNameArray } from "../../utils/statChartHelpers";
+import { scoreByNamePieSliceHexArr } from "../../components/statCharts/PieSliceHexLists";
 
 export interface IRoundPreview {
   round_id: string;
@@ -103,24 +104,25 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
       >
         <>
           <Box display="flex" flexWrap="wrap" justifyContent="center" maxWidth="md" margin="auto">
-            {roundPreviewRows && (
-              <Box>
-                <PieChart
-                  data={scoreCountByNameArray(roundPreviewRows, scoreByNamePieChartKeys)}
-                  labels={scoreByNamePieChartKeys}
-                />
-              </Box>
-            )}
-          </Box>
-          <Box display="flex" flexWrap="wrap" justifyContent="center" maxWidth="md" margin="auto">
             {roundPreviewRows &&
               trendStatKeys.map((statKey: keyof IRoundPreview) => {
                 return (
-                  <Box key={statKey}>
+                  <Box pb={2} key={statKey}>
                     <AreaChart roundPreview={roundPreviewRows} statKey={statKey} />
                   </Box>
                 );
               })}
+          </Box>
+          <Box display="flex" flexWrap="wrap" justifyContent="center" maxWidth="md" margin="auto">
+            {roundPreviewRows && (
+              <Box pt={2}>
+                <PieChart
+                  data={scoreCountByNameArray(roundPreviewRows, scoreByNamePieChartKeys)}
+                  labels={scoreByNamePieChartKeys}
+                  pieSliceHexArr={scoreByNamePieSliceHexArr}
+                />
+              </Box>
+            )}
           </Box>
           <Box mt={4}>
             <Typography variant="h5">

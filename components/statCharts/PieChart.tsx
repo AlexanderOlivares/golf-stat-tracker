@@ -10,17 +10,18 @@ import {
 } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import { IRoundPreview } from "../../pages/[username]/profile";
-import { scoreCountByNameArray } from "../../utils/statChartHelpers";
 
 export interface IPieChartProps {
   data: (IRoundPreview | number)[];
   labels: (keyof IRoundPreview)[];
+  pieSliceHexArr: string[];
 }
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function PieChart({ data, labels }: IPieChartProps) {
-  const showPieChart = !data.every(e => e && e != 0);
+export default function PieChart({ data, labels, pieSliceHexArr }: IPieChartProps) {
+  // don't show if all stats are zero
+  const showPieChart = !data.every(stat => stat == 0);
 
   const chartData = {
     labels: labels.map((label: string) => label.replace(/_/g, " ")),
@@ -28,17 +29,7 @@ export default function PieChart({ data, labels }: IPieChartProps) {
       {
         label: "Count",
         data,
-        backgroundColor: [
-          "#212121",
-          "#b0bec5",
-          "#b39ddb",
-          "#64b5f6",
-          "#a5d6a7",
-          "#fdd835",
-          "#ff9800",
-          "#ff5252",
-          "#e53935",
-        ],
+        backgroundColor: pieSliceHexArr,
         borderWidth: 1,
       },
     ],
@@ -46,6 +37,7 @@ export default function PieChart({ data, labels }: IPieChartProps) {
 
   const options: ChartOptions = {
     responsive: true,
+    maintainAspectRatio: false,
     plugins: {
       legend: {
         labels: {
@@ -58,5 +50,5 @@ export default function PieChart({ data, labels }: IPieChartProps) {
     },
   };
 
-  return <>{showPieChart && <Pie data={chartData} options={options} />}</>;
+  return <>{showPieChart && <Pie width={250} height={250} data={chartData} options={options} />}</>;
 }

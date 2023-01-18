@@ -24,6 +24,8 @@ import { parseErrorMessage } from "../utils/errorMessage";
 import { toast } from "react-toastify";
 import PieChart from "./statCharts/PieChart";
 import { scoreByNamePieChartKeys } from "../pages/[username]/profile";
+import { getScoreCountByName } from "../utils/holeDetailsFormatter";
+import { scoreByNamePieSliceHexArr } from "./statCharts/PieSliceHexLists";
 
 export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
@@ -263,6 +265,18 @@ export default function ScoreCard(props: IScoreCardProps) {
     }
   }, [offlineModeEnabled, hasNetworkConnection]);
 
+  useEffect(() => {
+    const { par, holeScores } = roundContext.state;
+    const updatedScoreCountByName = getScoreCountByName(holeScores, par);
+    roundContext.dispatch({
+      type: "update score count by name",
+      payload: {
+        ...roundContext.state,
+        scoreCount: updatedScoreCountByName,
+      },
+    });
+  }, [roundContext.state.holeScores]);
+
   return (
     <>
       <Box
@@ -276,6 +290,7 @@ export default function ScoreCard(props: IScoreCardProps) {
           <PieChart
             data={Object.values(roundContext.state.scoreCount)}
             labels={scoreByNamePieChartKeys}
+            pieSliceHexArr={scoreByNamePieSliceHexArr}
           />
         </Box>
         <Box display="flex" alignItems="center" justifyContent="space-between">

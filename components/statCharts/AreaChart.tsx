@@ -52,6 +52,7 @@ type statKeyType = keyof typeof titleLookup;
 
 export default function AreaChart({ roundPreview, statKey }: IAreaChartProps) {
   const [average, setAverage] = useState<number | null>(null);
+  const [showAreaChart, setShowAreaChart] = useState<boolean>(false);
   const roundPreviewSortedAsc = [...roundPreview].sort(
     (a: IRoundPreview, b: IRoundPreview) => Date.parse(a.round_date) - Date.parse(b.round_date)
   );
@@ -93,17 +94,24 @@ export default function AreaChart({ roundPreview, statKey }: IAreaChartProps) {
       return round[statKey];
     });
     const avg = getStatAverage(statKeyDataOnly as number[]);
-    setAverage(avg);
+    if (avg && avg > 0) {
+      setAverage(avg);
+      setShowAreaChart(true);
+    }
   }, []);
 
   return (
     <>
-      <Box mb={2}>
-        <Typography variant="body1">
-          {`Avg ${titleLookup[statKey as statKeyType]} ${average}`}
-        </Typography>
-      </Box>
-      <Line options={options} data={data} />
+      {showAreaChart && (
+        <Box>
+          <Box>
+            <Typography variant="body1">
+              {`Avg ${titleLookup[statKey as statKeyType]} ${average}`}
+            </Typography>
+          </Box>
+          <Line options={options} data={data} />
+        </Box>
+      )}
     </>
   );
 }

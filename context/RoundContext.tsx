@@ -96,6 +96,11 @@ function roundContextReducer(state: IRoundState, action: Action): any {
         ...state,
         lastSaveTimestamp: payload.lastSaveTimestamp,
       };
+    case "update score count by name":
+      return {
+        ...state,
+        scoreCount: payload.scoreCount,
+      };
     default:
       return state;
   }
