@@ -22,6 +22,8 @@ import { useRouter } from "next/router";
 import { useAuthContext } from "../context/AuthContext";
 import { parseErrorMessage } from "../utils/errorMessage";
 import { toast } from "react-toastify";
+import PieChart from "./statCharts/PieChart";
+import { scoreByNamePieChartKeys } from "../pages/[username]/profile";
 
 export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
@@ -270,6 +272,12 @@ export default function ScoreCard(props: IScoreCardProps) {
         }}
         pb={8}
       >
+        <Box>
+          <PieChart
+            data={Object.values(roundContext.state.scoreCount)}
+            labels={scoreByNamePieChartKeys}
+          />
+        </Box>
         <Box display="flex" alignItems="center" justifyContent="space-between">
           <Box pl={2}>
             <Typography variant="h6" component="h2">

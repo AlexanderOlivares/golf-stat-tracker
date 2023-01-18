@@ -11,6 +11,7 @@ import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import apolloClient from "../../apollo-client";
 import { queryParamToString } from "../../utils/queryParamFormatter";
 import PieChart from "../../components/statCharts/PieChart";
+import { scoreCountByNameArray } from "../../utils/statChartHelpers";
 
 export interface IRoundPreview {
   round_id: string;
@@ -44,7 +45,7 @@ const trendStatKeys: (keyof IRoundPreview)[] = [
   "totalPutts",
 ];
 
-export const pieStatKeys: (keyof IRoundPreview)[] = [
+export const scoreByNamePieChartKeys: (keyof IRoundPreview)[] = [
   "ace",
   "albatross",
   "eagle",
@@ -104,7 +105,10 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
           <Box display="flex" flexWrap="wrap" justifyContent="center" maxWidth="md" margin="auto">
             {roundPreviewRows && (
               <Box>
-                <PieChart roundPreview={roundPreviewRows} labels={pieStatKeys} />
+                <PieChart
+                  data={scoreCountByNameArray(roundPreviewRows, scoreByNamePieChartKeys)}
+                  labels={scoreByNamePieChartKeys}
+                />
               </Box>
             )}
           </Box>

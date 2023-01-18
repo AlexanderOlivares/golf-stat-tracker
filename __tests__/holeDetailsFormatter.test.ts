@@ -1,4 +1,4 @@
-import { IRoundPreview, pieStatKeys } from "../pages/[username]/profile";
+import { IRoundPreview, scoreByNamePieChartKeys } from "../pages/[username]/profile";
 import { getScoreCountByName } from "../utils/holeDetailsFormatter";
 import { scoreCountByNameArray } from "../utils/statChartHelpers";
 
@@ -266,21 +266,31 @@ test("Should return count of scores by name like par, birdie etc.", () => {
 });
 
 test("Should return an array of length 9 with each index corresponding to the count of a golf score by name. For use in pie chart", () => {
+  // Indexes map to scores like so:
+  //   "ace": 0
+  //   "albatross": 1
+  //   "eagle": 2
+  //   "birdie": 3
+  //   "par": 4
+  //   "bogey": 5
+  //   "double_bogey": 6
+  //   "triple_bogey": 7
+  //   "quadruple_bogey_or_worse": 8
   const roundPreviews: IRoundPreview[] = [
     {
-      ace: 0,
-      albatross: 0,
+      ace: null,
+      albatross: null,
       birdie: 2,
       bogey: 3,
       course_id: "f242206c-d215-4024-83d9-aba6d533050c",
       course_name: "Hancock Austin Mun Golf Club (Front 9)",
-      double_bogey: 0,
-      eagle: 0,
+      double_bogey: null,
+      eagle: null,
       fairwaysHit: "0/14",
       greensInReg: 0,
       is_user_added_course: false,
       par: 8,
-      quadruple_bogey_or_worse: 0,
+      quadruple_bogey_or_worse: null,
       round_date: "1/15/2023, 10:53:56 AM",
       round_id: "048ea2e8-1a8d-4b27-9c22-c31dca8299b6",
       score: 58,
@@ -291,12 +301,116 @@ test("Should return an array of length 9 with each index corresponding to the co
       unverified_course_id: "",
     },
   ];
-  const case1 = scoreCountByNameArray(roundPreviews, pieStatKeys);
-  expect(Array.isArray(case1)).toEqual(true);
-  expect(case1.length).toEqual(9);
+  const case1 = scoreCountByNameArray(roundPreviews, scoreByNamePieChartKeys);
   expect(case1).toEqual([0, 0, 0, 2, 8, 3, 0, 1, 0]);
-  // TODO add more tests here
-//   expect(scoreCountByNameArray(roundPreviews, pieStatKeys)).toEqual([0, 0, 0, 2, 8, 3, 0, 1, 0]);
+
+  const roundPreviews1: IRoundPreview[] = [
+    {
+      ace: 0,
+      albatross: 0,
+      birdie: 0,
+      bogey: 3,
+      course_id: "f242206c-d215-4024-83d9-aba6d533050c",
+      course_name: "Hancock Austin Mun Golf Club (Front 9)",
+      double_bogey: 3,
+      eagle: 1,
+      fairwaysHit: "0/14",
+      greensInReg: 0,
+      is_user_added_course: false,
+      par: 8,
+      quadruple_bogey_or_worse: 1,
+      round_date: "1/15/2023, 10:53:56 AM",
+      round_id: "048ea2e8-1a8d-4b27-9c22-c31dca8299b6",
+      score: 58,
+      tee_color: "blue",
+      threePutts: 0,
+      totalPutts: 0,
+      triple_bogey: 1,
+      unverified_course_id: "",
+    },
+    {
+      ace: 0,
+      albatross: 0,
+      birdie: 1,
+      bogey: 5,
+      course_id: "f242206c-d215-4024-83d9-aba6d533050c",
+      course_name: "Hancock Austin Mun Golf Club (Front 9)",
+      double_bogey: 8,
+      eagle: 0,
+      fairwaysHit: "0/14",
+      greensInReg: 0,
+      is_user_added_course: false,
+      par: 2,
+      quadruple_bogey_or_worse: 0,
+      round_date: "1/15/2023, 10:53:56 AM",
+      round_id: "048ea2e8-1a8d-4b27-9c22-c31dca8299b6",
+      score: 58,
+      tee_color: "blue",
+      threePutts: 0,
+      totalPutts: 0,
+      triple_bogey: 2,
+      unverified_course_id: "",
+    },
+    {
+      ace: 1,
+      albatross: 1,
+      birdie: 0,
+      bogey: 9,
+      course_id: "f242206c-d215-4024-83d9-aba6d533050c",
+      course_name: "Hancock Austin Mun Golf Club (Front 9)",
+      double_bogey: 3,
+      eagle: 1,
+      fairwaysHit: "0/14",
+      greensInReg: 0,
+      is_user_added_course: false,
+      par: 1,
+      quadruple_bogey_or_worse: 1,
+      round_date: "1/15/2023, 10:53:56 AM",
+      round_id: "048ea2e8-1a8d-4b27-9c22-c31dca8299b6",
+      score: 58,
+      tee_color: "blue",
+      threePutts: 0,
+      totalPutts: 0,
+      triple_bogey: 1,
+      unverified_course_id: "",
+    },
+  ];
+  const case2 = scoreCountByNameArray(roundPreviews1, scoreByNamePieChartKeys);
+
+  expect(case2).toEqual([1, 1, 2, 1, 11, 17, 14, 4, 2]);
+  const roundPreviews2: IRoundPreview[] = [
+    {
+      ace: null,
+      albatross: null,
+      birdie: null,
+      bogey: null,
+      course_id: "f242206c-d215-4024-83d9-aba6d533050c",
+      course_name: "Hancock Austin Mun Golf Club (Front 9)",
+      double_bogey: null,
+      eagle: null,
+      fairwaysHit: "0/14",
+      greensInReg: 0,
+      is_user_added_course: false,
+      par: null,
+      quadruple_bogey_or_worse: null,
+      round_date: "1/15/2023, 10:53:56 AM",
+      round_id: "048ea2e8-1a8d-4b27-9c22-c31dca8299b6",
+      score: 58,
+      tee_color: "blue",
+      threePutts: 0,
+      totalPutts: 0,
+      triple_bogey: null,
+      unverified_course_id: "",
+    },
+  ];
+  const case3 = scoreCountByNameArray(roundPreviews2, scoreByNamePieChartKeys);
+  expect(case3).toEqual([0, 0, 0, 0, 0, 0, 0, 0, 0]);
+
+  for (let i of [case1, case2, case3]) {
+    expect(Array.isArray(i)).toEqual(true);
+    expect(i.every((score: number) => score >= 0)).toEqual(true);
+    expect(i.length).toEqual(9);
+  }
 });
 
 //   const holeShotDetails: IShotDetail[][] = [

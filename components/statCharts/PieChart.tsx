@@ -1,45 +1,62 @@
 import React from "react";
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from "chart.js";
+import {
+  Chart as ChartJS,
+  ArcElement,
+  Tooltip,
+  Legend,
+  ChartData,
+  ChartOptions,
+  LegendItem,
+} from "chart.js";
 import { Pie } from "react-chartjs-2";
 import { IRoundPreview } from "../../pages/[username]/profile";
 import { scoreCountByNameArray } from "../../utils/statChartHelpers";
 
 export interface IPieChartProps {
-  roundPreview: IRoundPreview[];
+  data: (IRoundPreview | number)[];
   labels: (keyof IRoundPreview)[];
 }
 
 ChartJS.register(ArcElement, Tooltip, Legend);
 
-export default function PieChart({ roundPreview, labels }: IPieChartProps) {
-  const dataArray = scoreCountByNameArray(roundPreview, labels);
+export default function PieChart({ data, labels }: IPieChartProps) {
+  const showPieChart = !data.every(e => e && e != 0);
 
-  const data = {
-    labels,
+  const chartData = {
+    labels: labels.map((label: string) => label.replace(/_/g, " ")),
     datasets: [
       {
         label: "Count",
-        data: dataArray,
+        data,
         backgroundColor: [
-          "rgba(255, 99, 132, 0.2)",
-          "rgba(54, 162, 235, 0.2)",
-          "rgba(255, 206, 86, 0.2)",
-          "rgba(75, 192, 192, 0.2)",
-          "rgba(153, 102, 255, 0.2)",
-          "rgba(255, 159, 64, 0.2)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-          "rgba(75, 192, 192, 1)",
-          "rgba(153, 102, 255, 1)",
-          "rgba(255, 159, 64, 1)",
+          "#212121",
+          "#b0bec5",
+          "#b39ddb",
+          "#64b5f6",
+          "#a5d6a7",
+          "#fdd835",
+          "#ff9800",
+          "#ff5252",
+          "#e53935",
         ],
         borderWidth: 1,
       },
     ],
   };
 
-  return <Pie data={data} />;
+  const options: ChartOptions = {
+    responsive: true,
+    plugins: {
+      legend: {
+        labels: {
+          filter: (legendItem: LegendItem, data: ChartData) => {
+            const index = legendItem.index;
+            return index ? data.datasets[0].data[index] != 0 : false;
+          },
+        },
+      },
+    },
+  };
+
+  return <>{showPieChart && <Pie data={chartData} options={options} />}</>;
 }
