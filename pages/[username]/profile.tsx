@@ -144,6 +144,7 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
   const { data } = await apolloClient.query({
     query: getRoundPreviewByUsernameQuery,
     variables: { username },
+    fetchPolicy: "network-only",
   });
 
   return {
