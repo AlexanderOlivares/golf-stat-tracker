@@ -23,10 +23,9 @@ const settings = ["login"];
 
 function Nav() {
   const authContext = useAuthContext();
-  const { isAuth } = authContext.state;
+  const { isAuth, tokenPayload } = authContext.state;
   const router = useRouter();
   const { pathname } = router;
-  const { username } = router.query;
   const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
   const [anchorElUser, setAnchorElUser] = React.useState<null | HTMLElement>(null);
 
@@ -52,7 +51,7 @@ function Nav() {
 
   function goToPage(page: string) {
     const safePage = page.replace(/\s/g, "-").toLocaleLowerCase();
-    const safeUsername = queryParamToString(username);
+    const safeUsername = tokenPayload?.username;
     handleCloseNavMenu();
     if (!safeUsername) {
       toast.error("Please login to create a new round");

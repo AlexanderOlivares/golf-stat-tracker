@@ -2,7 +2,6 @@ import "../styles/globals.css";
 import type { AppProps } from "next/app";
 import { ApolloProvider } from "@apollo/client";
 import apolloClient from "../apollo-client";
-import { onError } from "@apollo/client/link/error";
 import Head from "next/head";
 import { NetworkContextProvider } from "../context/NetworkContext";
 import { AuthContextProvider } from "../context/AuthContext";
@@ -11,14 +10,6 @@ import Nav from "../components/Nav";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import AuthPersist from "../components/AuthPersist";
-
-const errorLink = onError(({ graphQLErrors, networkError }) => {
-  if (graphQLErrors)
-    graphQLErrors.forEach(({ message, locations, path }) =>
-      console.log(`[GraphQL error]: Message: ${message}, Location: ${locations}, Path: ${path}`)
-    );
-  if (networkError) console.log(`[Network error]: ${networkError}`);
-});
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
