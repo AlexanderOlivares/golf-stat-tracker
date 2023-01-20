@@ -18,6 +18,7 @@ import { defaultClubs } from "../lib/selectOptions";
 import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
 import LoadingSpinner from "./LoadingSpinner";
+import * as Sentry from "@sentry/nextjs";
 
 const ITEM_HEIGHT = 48;
 const ITEM_PADDING_TOP = 8;
@@ -81,12 +82,13 @@ export default function MultipleSelectChip() {
       if (clubs) setClubsInBag(clubs);
       toast.success("Clubs saved");
     } catch (error) {
-      console.log(error);
+      Sentry.captureException(error);
       toast.error(parseErrorMessage(error));
     }
   }
 
   if (error) {
+    Sentry.captureException(error);
     toast.error(parseErrorMessage(error));
     router.push("/login");
   }

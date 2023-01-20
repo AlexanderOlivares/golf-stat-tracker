@@ -9,6 +9,7 @@ import Link from "next/link";
 import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
 import { setCookie } from "../utils/authCookieGenerator";
+import * as Sentry from "@sentry/nextjs";
 
 export interface IRegistrationCreds {
   username: string;
@@ -85,7 +86,7 @@ export default function Register() {
       toast.success(`Welcome ${username}! Start by selecting your clubs`);
       router.push(`/${username}/my-clubs`);
     } catch (error) {
-      console.log(error);
+      Sentry.captureException(error);
       toast.error(parseErrorMessage(error));
     }
   };

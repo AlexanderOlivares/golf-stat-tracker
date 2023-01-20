@@ -10,6 +10,7 @@ import { setCookie } from "../utils/authCookieGenerator";
 import { useAuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
+import * as Sentry from "@sentry/nextjs";
 
 interface IResetPasswordCreds {
   email: string;
@@ -83,6 +84,7 @@ export default function ResetPassword() {
       toast.success(`Password was reset. Welcome back ${username}`);
       router.push(`/${username}/profile`);
     } catch (error) {
+      Sentry.captureException(error);
       toast.error(parseErrorMessage(error));
     }
   };

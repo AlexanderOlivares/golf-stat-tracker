@@ -10,6 +10,7 @@ import Link from "next/link";
 import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
 import { removeCookie, setCookie } from "../utils/authCookieGenerator";
+import * as Sentry from "@sentry/nextjs";
 
 interface ILoginCreds {
   email: string;
@@ -81,6 +82,7 @@ export default function Login() {
       toast.success(`Welcome back ${username}`);
       router.push(`/${username}/profile`);
     } catch (error) {
+      Sentry.captureException(error);
       toast.error(parseErrorMessage(error));
     }
   };

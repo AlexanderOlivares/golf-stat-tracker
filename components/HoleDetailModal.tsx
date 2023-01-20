@@ -32,6 +32,7 @@ import { useNetworkContext } from "../context/NetworkContext";
 import { useAuthContext } from "../context/AuthContext";
 import { parseErrorMessage } from "../utils/errorMessage";
 import { toast } from "react-toastify";
+import * as Sentry from "@sentry/nextjs";
 
 function valuetext(value: number) {
   return `${value}`;
@@ -335,6 +336,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
         }
       }
     } catch (error) {
+      Sentry.captureException(error);
       toast.error(parseErrorMessage(error));
       return router.push("/login");
     }
@@ -379,6 +381,7 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
         }
       }
     } catch (error) {
+      Sentry.captureException(error);
       toast.error(parseErrorMessage(error));
       return router.push("/login");
     }

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Typography, Box, TextField, Button } from "@mui/material";
 import { emailAddressValidator } from "../utils/formValidator";
 import Link from "next/link";
@@ -6,6 +6,7 @@ import { getUserByEmail } from "./api/graphql/queries/emailQuery";
 import { useLazyQuery } from "@apollo/client";
 import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
+import * as Sentry from "@sentry/nextjs";
 
 export default function RequestPasswordReset() {
   const [email, setEmail] = useState<string>("");
@@ -49,6 +50,7 @@ export default function RequestPasswordReset() {
 
       setEmailWasSent(true);
     } catch (error) {
+      Sentry.captureException(error);
       toast.error(parseErrorMessage(error));
     }
   };

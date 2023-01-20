@@ -26,6 +26,7 @@ import PieChart from "./statCharts/PieChart";
 import { scoreByNamePieChartKeys } from "../pages/[username]/profile";
 import { getScoreCountByName } from "../utils/holeDetailsFormatter";
 import { scoreByNamePieSliceHexArr } from "./statCharts/PieSliceHexLists";
+import * as Sentry from "@sentry/nextjs";
 
 export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
@@ -157,6 +158,7 @@ export default function ScoreCard(props: IScoreCardProps) {
         });
       }
     } catch (error) {
+      Sentry.captureException(error);
       toast.error(parseErrorMessage(error));
       return router.push("/login");
     }
@@ -173,6 +175,7 @@ export default function ScoreCard(props: IScoreCardProps) {
       });
       if (data) console.log("+++ saved unverified par to postgres +++");
     } catch (error) {
+      Sentry.captureException(error);
       toast.error(parseErrorMessage(error));
       return router.push("/login");
     }

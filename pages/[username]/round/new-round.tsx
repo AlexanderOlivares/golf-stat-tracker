@@ -25,6 +25,7 @@ import { useNetworkContext } from "../../../context/NetworkContext";
 import { parseErrorMessage } from "../../../utils/errorMessage";
 import { toast } from "react-toastify";
 import LoadingSpinner from "../../../components/LoadingSpinner";
+import * as Sentry from "@sentry/nextjs";
 
 const label = { inputProps: { "aria-label": "Add New Course With Round" } };
 
@@ -87,7 +88,8 @@ export default function NewRound() {
   const router = useRouter();
   const { username } = router.query;
   const networkContext = useNetworkContext();
-  const [newRound] = useMutation(createNewRound);
+  const [newRound, { data: newRoundData, loading: newRoundLoading, error: newRoundError }] =
+    useMutation(createNewRound);
   const { loading, error, data } = useQuery(getCourses);
   const [holeCount, setHoleCount] = useState(18);
   const [frontOrBackNine, setFrontOrBackNine] = useState("front 9");
@@ -122,7 +124,10 @@ export default function NewRound() {
   }, []);
 
   if (loading) return <LoadingSpinner />;
-  if (error) return `Error! ${error}`;
+  if (error || newRoundError) {
+    Sentry.captureException(error);
+    toast.error(parseErrorMessage(error));
+  }
 
   function getCourseId() {
     if (data) {
@@ -242,7 +247,7 @@ export default function NewRound() {
         `/${username}/round/${roundid}`
       );
     } catch (error) {
-      console.log(error);
+      Sentry.captureException(error);
       toast.error(parseErrorMessage(error));
     }
   }
