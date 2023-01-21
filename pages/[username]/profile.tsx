@@ -13,6 +13,7 @@ import { queryParamToString } from "../../utils/queryParamFormatter";
 import PieChart from "../../components/statCharts/PieChart";
 import { scoreCountByNameArray } from "../../utils/statChartHelpers";
 import { scoreByNamePieSliceHexArr } from "../../components/statCharts/PieSliceHexLists";
+import KeyValueCard from "../../components/KeyValueCard";
 
 export interface IRoundPreview {
   round_id: string;
@@ -58,6 +59,24 @@ export const scoreByNamePieChartKeys: (keyof IRoundPreview)[] = [
   "quadruple_bogey_or_worse",
 ];
 
+interface IChartTitleLookup {
+  score: string;
+  fairwaysHit: string;
+  greensInReg: string;
+  threePutts: string;
+  totalPutts: string;
+}
+
+const titleLookup: IChartTitleLookup = {
+  score: "Score",
+  fairwaysHit: "Fairways Hit",
+  greensInReg: "Greens In Regulation",
+  threePutts: "3-Putts Or Worse",
+  totalPutts: "Total Putts",
+};
+
+type statKeyType = keyof typeof titleLookup;
+
 export default function Profile({ data }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const authContext = useAuthContext();
@@ -78,21 +97,21 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
   return (
     <>
       <Box textAlign="center" my={3}>
-        <Typography variant="h3">Golfer Profile</Typography>
-        {isAuth && (
+        <Typography variant="h3">{queryParamToString(username)}</Typography>
+        {/* {isAuth && (
           <Box m={2}>
             <Button onClick={startNewRound} size="large" variant="contained" color="primary">
               new round
             </Button>
           </Box>
-        )}
+        )} */}
         {roundPreviewRows?.length && (
-          <>
-            <Typography variant="h6">Stat Dashboard - {queryParamToString(username)}</Typography>
+          <Box my={2}>
+            <Typography variant="h4">Stats</Typography>
             <Typography variant="caption">
-              Showing Stats for Latest {roundPreviewRows?.length} rounds
+              Showing Trends From Last {roundPreviewRows?.length} Rounds
             </Typography>
-          </>
+          </Box>
         )}
       </Box>
       <Box
@@ -108,24 +127,31 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
               trendStatKeys.map((statKey: keyof IRoundPreview) => {
                 return (
                   <Box pb={2} key={statKey}>
-                    <AreaChart roundPreview={roundPreviewRows} statKey={statKey} />
+                    <KeyValueCard
+                      label={titleLookup[statKey as statKeyType]}
+                      value={<AreaChart roundPreview={roundPreviewRows} statKey={statKey} />}
+                    />
                   </Box>
                 );
               })}
           </Box>
-          <Box display="flex" flexWrap="wrap" justifyContent="center" maxWidth="md" margin="auto">
+          <Box sx={{ maxWidth: "sm", margin: "auto", my: 4 }}>
             {roundPreviewRows && (
-              <Box pt={2}>
-                <PieChart
-                  data={scoreCountByNameArray(roundPreviewRows, scoreByNamePieChartKeys)}
-                  labels={scoreByNamePieChartKeys}
-                  pieSliceHexArr={scoreByNamePieSliceHexArr}
-                />
-              </Box>
+              <KeyValueCard
+                label={"Scoring Breakdown"}
+                value={
+                  <PieChart
+                    data={scoreCountByNameArray(roundPreviewRows, scoreByNamePieChartKeys)}
+                    labels={scoreByNamePieChartKeys}
+                    pieSliceHexArr={scoreByNamePieSliceHexArr}
+                  />
+                }
+              />
             )}
           </Box>
           <Box mt={4}>
-            <Typography variant="h5">
+            <Typography variant="h4">
+              {/* TODO add loading condition before rendering this */}
               {roundPreviewRows?.length ? "Latest Rounds" : "No Rounds Recorded Yet"}
             </Typography>
           </Box>

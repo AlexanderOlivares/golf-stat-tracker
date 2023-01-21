@@ -22,6 +22,7 @@ import { useAuthContext } from "../../../context/AuthContext";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import apolloClient from "../../../apollo-client";
 import { setCookie } from "../../../utils/authCookieGenerator";
+import KeyValueCard from "../../../components/KeyValueCard";
 
 const removeDashes = (str: string) => str.replace(/-/g, "");
 
@@ -116,28 +117,24 @@ export default function Round({
                     ? roundDetails.course_name
                     : roundDetails.user_added_course_name}
                 </Typography>
-                <Box mt={1}>
-                  <Box>
-                    <Typography variant="subtitle2">
-                      {courseDetails ? courseDetails.course_city : roundDetails.user_added_city},{" "}
-                      {courseDetails ? courseDetails.course_state : roundDetails.user_added_state}
-                    </Typography>
-                  </Box>
+                <Box>
                   <Typography variant="subtitle2">
-                    {roundDetails.round_date.split(",")[0]}
+                    {courseDetails ? courseDetails.course_city : roundDetails.user_added_city},{" "}
+                    {courseDetails ? courseDetails.course_state : roundDetails.user_added_state}
                   </Typography>
+                </Box>
+                <Box display="flex" flexWrap="wrap" justifyContent="center" mt={1}>
+                  <KeyValueCard label={"Date"} value={roundDetails.round_date.split(",")[0]} />
                   <Box>
-                    <Typography variant="subtitle2">
-                      {roundDetails.weather_conditions} Conditions
-                    </Typography>
+                    <KeyValueCard label={"Conditions"} value={roundDetails.weather_conditions} />
                   </Box>
                   <Box>
-                    <Typography variant="subtitle2">
-                      {roundDetails.temperature + "\u00B0"} F
-                    </Typography>
+                    <KeyValueCard
+                      label={"Temperature"}
+                      value={roundDetails.temperature + "\u00B0"}
+                    />
                   </Box>
                 </Box>
-                <Box display="flex" justifyContent="space-around"></Box>
               </Box>
               {isAuth && (
                 <Box m={2} textAlign="center">
@@ -156,12 +153,14 @@ export default function Round({
                   </Button>
                   <Box pt={1}>
                     <Typography textAlign="center" variant="caption">
-                      Bad signal? Go offline
+                      {networkContext.state.offlineModeEnabled
+                        ? "You are offline"
+                        : "Bad signal? Go offline"}
                     </Typography>
                   </Box>
                 </Box>
               )}
-              <Box>{scoreCardProps && <ScoreCard {...scoreCardProps} />}</Box>
+              <Box textAlign="center">{scoreCardProps && <ScoreCard {...scoreCardProps} />}</Box>
               {isAuth && username == tokenPayload?.username && <DeleteRoundDialog />}
             </>
           )}

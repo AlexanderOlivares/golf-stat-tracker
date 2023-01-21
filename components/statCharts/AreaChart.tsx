@@ -32,24 +32,6 @@ export interface IAreaChartProps {
   statKey: keyof IRoundPreview;
 }
 
-interface IChartTitleLookup {
-  score: string;
-  fairwaysHit: string;
-  greensInReg: string;
-  threePutts: string;
-  totalPutts: string;
-}
-
-const titleLookup: IChartTitleLookup = {
-  score: "Score",
-  fairwaysHit: "FW Hit",
-  greensInReg: "GIR",
-  threePutts: "3-Putts",
-  totalPutts: "Putts",
-};
-
-type statKeyType = keyof typeof titleLookup;
-
 export default function AreaChart({ roundPreview, statKey }: IAreaChartProps) {
   const [average, setAverage] = useState<number | null>(null);
   const [showAreaChart, setShowAreaChart] = useState<boolean>(false);
@@ -105,9 +87,7 @@ export default function AreaChart({ roundPreview, statKey }: IAreaChartProps) {
       {showAreaChart && (
         <Box>
           <Box>
-            <Typography variant="body1">
-              {`Avg ${titleLookup[statKey as statKeyType]} ${average}`}
-            </Typography>
+            <Typography variant="h3">{average}</Typography>
           </Box>
           <Line options={options} data={data} />
         </Box>

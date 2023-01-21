@@ -27,6 +27,8 @@ import { scoreByNamePieChartKeys } from "../pages/[username]/profile";
 import { getScoreCountByName } from "../utils/holeDetailsFormatter";
 import { scoreByNamePieSliceHexArr } from "./statCharts/PieSliceHexLists";
 import * as Sentry from "@sentry/nextjs";
+import KeyValueCard from "./KeyValueCard";
+import useMediaQuery from "./useMediaQuery";
 
 export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
@@ -54,7 +56,7 @@ export interface ICompleteScoreCard extends IHoleDetails {
 function formatTotalYardageHeading(teeColor: string) {
   if (!teeColor) return;
   const capitalized = teeColor[0].toUpperCase() + teeColor.slice(1);
-  return `${capitalized} Tees`;
+  return `${capitalized}`;
 }
 
 function formatParArray(holes: IHoleDetails[]) {
@@ -62,6 +64,7 @@ function formatParArray(holes: IHoleDetails[]) {
 }
 
 export default function ScoreCard(props: IScoreCardProps) {
+  const mobileViewPort = useMediaQuery(600);
   const router = useRouter();
   const roundContext = useRoundContext();
   const networkContext = useNetworkContext();
@@ -282,6 +285,28 @@ export default function ScoreCard(props: IScoreCardProps) {
 
   return (
     <>
+      <Box py={2}>
+        <Typography variant="h3">Score</Typography>
+        <Typography variant="h3">{roundContext.state.holeScores[20]}</Typography>
+      </Box>
+      <Box
+        sx={{
+          maxWidth: "sm",
+          m: "auto",
+        }}
+        pb={2}
+      >
+        <KeyValueCard
+          label={"Score Breakdown"}
+          value={
+            <PieChart
+              data={Object.values(roundContext.state.scoreCount)}
+              labels={scoreByNamePieChartKeys}
+              pieSliceHexArr={scoreByNamePieSliceHexArr}
+            />
+          }
+        />
+      </Box>
       <Box
         sx={{
           maxWidth: "lg",
@@ -289,41 +314,25 @@ export default function ScoreCard(props: IScoreCardProps) {
         }}
         pb={8}
       >
-        <Box>
-          <PieChart
-            data={Object.values(roundContext.state.scoreCount)}
-            labels={scoreByNamePieChartKeys}
-            pieSliceHexArr={scoreByNamePieSliceHexArr}
-          />
-        </Box>
-        <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Box pl={2}>
-            <Typography variant="h6" component="h2">
-              Score
-            </Typography>
-            <Typography variant="h6" component="h2">
-              {roundContext.state.holeScores[20]}
-            </Typography>
-          </Box>
+        <Box
+          mb={2}
+          display="flex"
+          flexWrap="wrap"
+          alignItems="center"
+          justifyContent="space-between"
+        >
           {!props.is_user_added_course && (
-            <>
-              <Box pl={2}>
-                <Typography variant="h6" component="h2">
-                  {formatTotalYardageHeading(props.tee_color)}
-                </Typography>
-                <Typography variant="h6" component="h2">
-                  {displayDistanceYardage(roundRows[20])}
-                </Typography>
-              </Box>
-              <Box pr={2} justifySelf="flex-end">
-                <Typography variant="h6" component="h2">
-                  Rating/Slope
-                </Typography>
-                <Typography variant="h6" component="h2">
-                  {rating}/{slope}
-                </Typography>
-              </Box>
-            </>
+            <Box display="flex" justifySelf="flex-end">
+              <KeyValueCard
+                label={"Tees"}
+                value={formatTotalYardageHeading(props.tee_color) || "--"}
+              />
+              <KeyValueCard
+                label={"Distance"}
+                value={displayDistanceYardage(roundRows[20]) || "--"}
+              />
+              <KeyValueCard label={"Rating/Slope"} value={`${rating}/${slope}`} />
+            </Box>
           )}
         </Box>
         <TableContainer component={Paper}>
