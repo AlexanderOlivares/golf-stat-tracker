@@ -254,7 +254,6 @@ export default function ScoreCard(props: IScoreCardProps) {
         }
       }
       router.events.emit("routeChangeError");
-      throw "routeChange aborted.";
     };
 
     if (usernameIsAuthorized) {
