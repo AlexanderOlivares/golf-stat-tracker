@@ -10,6 +10,7 @@ import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
 import { setCookie } from "../utils/authCookieGenerator";
 import * as Sentry from "@sentry/nextjs";
+import LoadingBackdrop from "../components/LoadingBackdrop";
 
 export interface IRegistrationCreds {
   username: string;
@@ -24,6 +25,7 @@ export default function Register() {
   const [usernameError, setUsernameError] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [registrationCreds, setRegistrationCreds] = useState<IRegistrationCreds>({
     username: "",
     email: "",
@@ -50,6 +52,7 @@ export default function Register() {
 
   const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     try {
+      setIsLoading(true);
       event.preventDefault();
 
       const isValdidEmail = validateEmail(registrationCreds);
@@ -87,6 +90,7 @@ export default function Register() {
       router.push(`/${username}/my-clubs`);
     } catch (error) {
       Sentry.captureException(error);
+      setIsLoading(false);
       toast.error(parseErrorMessage(error));
     }
   };
@@ -106,79 +110,82 @@ export default function Register() {
   };
 
   return (
-    <Box component="form" textAlign="center" onSubmit={submitForm} noValidate autoComplete="off">
-      <Box mt={3}>
-        <Typography variant="h4">Register</Typography>
+    <>
+      {isLoading && <LoadingBackdrop showBackdrop={isLoading} />}
+      <Box component="form" textAlign="center" onSubmit={submitForm} noValidate autoComplete="off">
+        <Box mt={3}>
+          <Typography variant="h4">Register</Typography>
+        </Box>
+        <Box
+          mt={3}
+          sx={{
+            "& > :not(style)": { mx: 1, width: "25ch" },
+          }}
+        >
+          <TextField
+            onChange={handleFormInput}
+            margin="dense"
+            name="username"
+            id="outlined-basic"
+            label="username"
+            variant="filled"
+            error={usernameError}
+            helperText={usernameError ? "must be at least 8 characters" : ""}
+            required
+          />
+        </Box>
+        <Box
+          sx={{
+            "& > :not(style)": { mx: 1, width: "25ch" },
+          }}
+        >
+          <TextField
+            onChange={handleFormInput}
+            margin="dense"
+            name="email"
+            id="filled-basic"
+            label="email"
+            variant="filled"
+            type="email"
+            error={emailError}
+            helperText={emailError ? "invalid email address" : ""}
+            required
+          />
+        </Box>
+        <Box
+          sx={{
+            "& > :not(style)": { mx: 1, width: "25ch" },
+          }}
+        >
+          <TextField
+            onChange={handleFormInput}
+            margin="dense"
+            name="password"
+            id="standard-basic"
+            label="password"
+            variant="filled"
+            type="password"
+            error={passwordError}
+            helperText={passwordError ? "must be at least 8 characters" : ""}
+            required
+          />
+        </Box>
+        <Box mt={3}>
+          <Button type="submit" size="medium" variant="contained" color="primary">
+            create golfer account
+          </Button>
+        </Box>
+        <Box pt={3}>
+          <Link href="/login">
+            <a>
+              <Typography variant="subtitle2">
+                Already have an account?&nbsp;
+                <u>Login</u>
+              </Typography>
+            </a>
+          </Link>
+        </Box>
       </Box>
-      <Box
-        mt={3}
-        sx={{
-          "& > :not(style)": { mx: 1, width: "25ch" },
-        }}
-      >
-        <TextField
-          onChange={handleFormInput}
-          margin="dense"
-          name="username"
-          id="outlined-basic"
-          label="username"
-          variant="filled"
-          error={usernameError}
-          helperText={usernameError ? "must be at least 8 characters" : ""}
-          required
-        />
-      </Box>
-      <Box
-        sx={{
-          "& > :not(style)": { mx: 1, width: "25ch" },
-        }}
-      >
-        <TextField
-          onChange={handleFormInput}
-          margin="dense"
-          name="email"
-          id="filled-basic"
-          label="email"
-          variant="filled"
-          type="email"
-          error={emailError}
-          helperText={emailError ? "invalid email address" : ""}
-          required
-        />
-      </Box>
-      <Box
-        sx={{
-          "& > :not(style)": { mx: 1, width: "25ch" },
-        }}
-      >
-        <TextField
-          onChange={handleFormInput}
-          margin="dense"
-          name="password"
-          id="standard-basic"
-          label="password"
-          variant="filled"
-          type="password"
-          error={passwordError}
-          helperText={passwordError ? "must be at least 8 characters" : ""}
-          required
-        />
-      </Box>
-      <Box mt={3}>
-        <Button type="submit" size="medium" variant="contained" color="primary">
-          create golfer account
-        </Button>
-      </Box>
-      <Box pt={3}>
-        <Link href="/login">
-          <a>
-            <Typography variant="subtitle2">
-              Already have an account?&nbsp;
-              <u>Login</u>
-            </Typography>
-          </a>
-        </Link>
-      </Box>
-    </Box>
+    </>
   );
 }

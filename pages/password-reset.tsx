@@ -11,6 +11,7 @@ import { useAuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
 import * as Sentry from "@sentry/nextjs";
+import LoadingBackdrop from "../components/LoadingBackdrop";
 
 interface IResetPasswordCreds {
   email: string;
@@ -26,6 +27,7 @@ export default function ResetPassword() {
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
   const [passwordConfirmationError, setPasswordConfirmationError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [resetPasswordCreds, setResetPasswordCreds] = useState<IResetPasswordCreds>({
     email: "",
     password: "",
@@ -52,6 +54,7 @@ export default function ResetPassword() {
 
   const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     try {
+      setIsLoading(true);
       event.preventDefault();
       const validPasswordFields = validatePasswords(resetPasswordCreds);
       if (!validPasswordFields) return;
@@ -85,6 +88,7 @@ export default function ResetPassword() {
       router.push(`/${username}/profile`);
     } catch (error) {
       Sentry.captureException(error);
+      setIsLoading(false);
       toast.error(parseErrorMessage(error));
     }
   };
@@ -116,6 +120,7 @@ export default function ResetPassword() {
 
   return (
     <>
+      {isLoading && <LoadingBackdrop showBackdrop={isLoading} />}
       <Typography variant="h5" mt={2} textAlign="center">
         {resetPasswordCreds.email} Password Reset
       </Typography>

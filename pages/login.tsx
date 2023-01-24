@@ -11,6 +11,7 @@ import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
 import { removeCookie, setCookie } from "../utils/authCookieGenerator";
 import * as Sentry from "@sentry/nextjs";
+import LoadingBackdrop from "../components/LoadingBackdrop";
 
 interface ILoginCreds {
   email: string;
@@ -24,6 +25,7 @@ export default function Login() {
   const { redirected } = router.query;
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loginCreds, setLoginCreds] = useState<ILoginCreds>({
     email: "",
     password: "",
@@ -48,6 +50,7 @@ export default function Login() {
 
   const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     try {
+      setIsLoading(true);
       event.preventDefault();
 
       const isValdidEmail = validateEmail(loginCreds);
@@ -84,6 +87,7 @@ export default function Login() {
       router.push(`/${username}/profile`);
     } catch (error) {
       Sentry.captureException(error);
+      setIsLoading(false);
       toast.error(parseErrorMessage(error));
     }
   };
@@ -91,6 +95,7 @@ export default function Login() {
   useEffect(() => {
     if (redirected) {
       toast.error("An error occurred. Please login");
+      setIsLoading(false);
     }
     removeCookie("authToken");
     authContext.dispatch({
@@ -115,80 +120,83 @@ export default function Login() {
   };
 
   return (
-    <Box component="form" onSubmit={submitForm} textAlign="center" noValidate autoComplete="off">
-      <Box mt={3}>
-        <Typography variant="h4">Login</Typography>
+    <>
+      {isLoading && <LoadingBackdrop showBackdrop={isLoading} />}
+      <Box component="form" onSubmit={submitForm} textAlign="center" noValidate autoComplete="off">
+        <Box mt={3}>
+          <Typography variant="h4">Login</Typography>
+        </Box>
+        <Box
+          mt={3}
+          sx={{
+            "& > :not(style)": { mx: 1, width: "25ch" },
+          }}
+        >
+          <TextField
+            onChange={handleFormInput}
+            margin="dense"
+            name="email"
+            id="filled-basic"
+            label="email"
+            variant="filled"
+            type="email"
+            error={emailError}
+            helperText={emailError ? "invalid email address" : ""}
+            required
+          />
+        </Box>
+        <Box
+          m={2}
+          sx={{
+            "& > :not(style)": { mx: 1, width: "25ch" },
+          }}
+        >
+          <TextField
+            onChange={handleFormInput}
+            margin="dense"
+            name="password"
+            id="standard-basic"
+            label="password"
+            variant="filled"
+            type="password"
+            error={passwordError}
+            helperText={passwordError ? "must be at least 8 characters" : ""}
+            required
+          />
+        </Box>
+        <Box
+          pt={2}
+          sx={{
+            "& > :not(style)": { mx: 1, width: "25ch" },
+          }}
+        >
+          <Button type="submit" size="large" variant="contained" color="primary">
+            login
+          </Button>
+        </Box>
+        <Box pt={3}>
+          <Link href="/request-password-reset">
+            <a>
+              <Typography variant="subtitle2">
+                <u>Forgot password?</u>
+              </Typography>
+            </a>
+          </Link>
+        </Box>
+        <Box pt={3}>
+          <Link href="/register">
+            <a>
+              <Typography variant="subtitle2">
+                Not registered?&nbsp;
+                <u>Create golfer account</u>
+              </Typography>
+            </a>
+          </Link>
+        </Box>
+        <Box m={3}>
+          <SignOut />
+        </Box>
       </Box>
-      <Box
-        mt={3}
-        sx={{
-          "& > :not(style)": { mx: 1, width: "25ch" },
-        }}
-      >
-        <TextField
-          onChange={handleFormInput}
-          margin="dense"
-          name="email"
-          id="filled-basic"
-          label="email"
-          variant="filled"
-          type="email"
-          error={emailError}
-          helperText={emailError ? "invalid email address" : ""}
-          required
-        />
-      </Box>
-      <Box
-        m={2}
-        sx={{
-          "& > :not(style)": { mx: 1, width: "25ch" },
-        }}
-      >
-        <TextField
-          onChange={handleFormInput}
-          margin="dense"
-          name="password"
-          id="standard-basic"
-          label="password"
-          variant="filled"
-          type="password"
-          error={passwordError}
-          helperText={passwordError ? "must be at least 8 characters" : ""}
-          required
-        />
-      </Box>
-      <Box
-        pt={2}
-        sx={{
-          "& > :not(style)": { mx: 1, width: "25ch" },
-        }}
-      >
-        <Button type="submit" size="large" variant="contained" color="primary">
-          login
-        </Button>
-      </Box>
-      <Box pt={3}>
-        <Link href="/request-password-reset">
-          <a>
-            <Typography variant="subtitle2">
-              <u>Forgot password?</u>
-            </Typography>
-          </a>
-        </Link>
-      </Box>
-      <Box pt={3}>
-        <Link href="/register">
-          <a>
-            <Typography variant="subtitle2">
-              Not registered?&nbsp;
-              <u>Create golfer account</u>
-            </Typography>
-          </a>
-        </Link>
-      </Box>
-      <Box m={3}>
-        <SignOut />
-      </Box>
-    </Box>
+    </>
   );
 }

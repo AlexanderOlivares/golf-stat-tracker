@@ -7,11 +7,13 @@ import { useLazyQuery } from "@apollo/client";
 import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
 import * as Sentry from "@sentry/nextjs";
+import LoadingBackdrop from "../components/LoadingBackdrop";
 
 export default function RequestPasswordReset() {
   const [email, setEmail] = useState<string>("");
   const [emailError, setEmailError] = useState<boolean>(false);
   const [emailWasSent, setEmailWasSent] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [verifyEmail] = useLazyQuery(getUserByEmail);
 
   function handleFormInput(event: React.ChangeEvent<HTMLInputElement>) {
@@ -31,6 +33,7 @@ export default function RequestPasswordReset() {
 
   const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     try {
+      setIsLoading(true);
       event.preventDefault();
       const emailFormattedCorrectly = validateEmail(email);
       if (!emailFormattedCorrectly) {
@@ -49,8 +52,10 @@ export default function RequestPasswordReset() {
       }
 
       setEmailWasSent(true);
+      setIsLoading(false);
     } catch (error) {
       Sentry.captureException(error);
+      setIsLoading(false);
       toast.error(parseErrorMessage(error));
     }
   };
@@ -60,6 +65,7 @@ export default function RequestPasswordReset() {
       <Typography mt={2} variant="h5" textAlign="center">
         Reset Password
       </Typography>
+      {isLoading && <LoadingBackdrop showBackdrop={isLoading} />}
       {emailWasSent ? (
         <Box>
           <Typography mt={2} variant="h6" textAlign="center">
