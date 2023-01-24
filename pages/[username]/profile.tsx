@@ -14,6 +14,7 @@ import PieChart from "../../components/statCharts/PieChart";
 import { scoreCountByNameArray } from "../../utils/statChartHelpers";
 import { scoreByNamePieSliceHexArr } from "../../components/statCharts/PieSliceHexLists";
 import KeyValueCard from "../../components/KeyValueCard";
+import * as Sentry from "@sentry/nextjs";
 
 export interface IRoundPreview {
   round_id: string;
@@ -165,17 +166,27 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
 }
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-  const { username } = context.query;
+  try {
+    const { username } = context.query;
 
-  const { data } = await apolloClient.query({
-    query: getRoundPreviewByUsernameQuery,
-    variables: { username },
-    fetchPolicy: "network-only",
-  });
+    const { data } = await apolloClient.query({
+      query: getRoundPreviewByUsernameQuery,
+      variables: { username },
+      fetchPolicy: "network-only",
+    });
 
-  return {
-    props: {
-      data,
-    },
-  };
+    return {
+      props: {
+        data,
+      },
+    };
+  } catch (error) {
+    Sentry.captureException(error);
+    return {
+      redirect: {
+        destination: "/login?redirected=true",
+        permanent: false,
+      },
+    };
+  }
 };

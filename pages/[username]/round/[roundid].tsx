@@ -23,6 +23,7 @@ import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import apolloClient from "../../../apollo-client";
 import { setCookie } from "../../../utils/authCookieGenerator";
 import KeyValueCard from "../../../components/KeyValueCard";
+import * as Sentry from "@sentry/nextjs";
 
 const removeDashes = (str: string) => str.replace(/-/g, "");
 
@@ -171,51 +172,61 @@ export default function Round({
 }
 
 export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-  let { roundid, courseId, unverifiedCourseId } = context.query;
+  try {
+    let { roundid, courseId, unverifiedCourseId } = context.query;
 
-  // hidden query params are stored in cookie for reference on page refresh
-  const roundIdAsCookieKey = removeDashes(queryParamToString(roundid));
-  const roundQueryParamsFromCookie = context.req.cookies[roundIdAsCookieKey];
+    // hidden query params are stored in cookie for reference on page refresh
+    const roundIdAsCookieKey = removeDashes(queryParamToString(roundid));
+    const roundQueryParamsFromCookie = context.req.cookies[roundIdAsCookieKey];
 
-  if (!courseId && roundQueryParamsFromCookie) {
-    const { courseId: courseIdQueryParam } = JSON.parse(roundQueryParamsFromCookie);
-    courseId = courseIdQueryParam;
-  }
+    if (!courseId && roundQueryParamsFromCookie) {
+      const { courseId: courseIdQueryParam } = JSON.parse(roundQueryParamsFromCookie);
+      courseId = courseIdQueryParam;
+    }
 
-  if (!unverifiedCourseId && roundQueryParamsFromCookie) {
-    const { unverifiedCourseId: unverifiedCourseIdQueryParam } = JSON.parse(
-      roundQueryParamsFromCookie
-    );
-    unverifiedCourseId = unverifiedCourseIdQueryParam;
-  }
+    if (!unverifiedCourseId && roundQueryParamsFromCookie) {
+      const { unverifiedCourseId: unverifiedCourseIdQueryParam } = JSON.parse(
+        roundQueryParamsFromCookie
+      );
+      unverifiedCourseId = unverifiedCourseIdQueryParam;
+    }
 
-  const { data } = await apolloClient.query({
-    query: getRoundByIdQuery,
-    variables: { roundid },
-    fetchPolicy: "network-only",
-  });
-
-  let courseData;
-
-  if (courseId) {
     const { data } = await apolloClient.query({
-      query: getCourseForRound,
-      variables: { courseId },
-    });
-    courseData = data;
-  } else {
-    const { data } = await apolloClient.query({
-      query: getUnverifiedCourseForRound,
-      variables: { unverifiedCourseId },
+      query: getRoundByIdQuery,
+      variables: { roundid },
       fetchPolicy: "network-only",
     });
-    courseData = data;
-  }
 
-  return {
-    props: {
-      data,
-      courseData,
-    },
-  };
+    let courseData;
+
+    if (courseId) {
+      const { data } = await apolloClient.query({
+        query: getCourseForRound,
+        variables: { courseId },
+      });
+      courseData = data;
+    } else {
+      const { data } = await apolloClient.query({
+        query: getUnverifiedCourseForRound,
+        variables: { unverifiedCourseId },
+        fetchPolicy: "network-only",
+      });
+      courseData = data;
+    }
+
+    return {
+      props: {
+        data,
+        courseData,
+      },
+    };
+  } catch (error) {
+    Sentry.captureException(error);
+    return {
+      redirect: {
+        destination: "/login?redirected=true",
+        permanent: false,
+      },
+    };
+  }
 };

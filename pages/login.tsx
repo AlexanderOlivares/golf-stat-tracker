@@ -21,6 +21,7 @@ export default function Login() {
   const authContext = useAuthContext();
   const [login] = useMutation(loginMutation);
   const router = useRouter();
+  const { redirected } = router.query;
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
   const [loginCreds, setLoginCreds] = useState<ILoginCreds>({
@@ -88,6 +89,9 @@ export default function Login() {
   };
 
   useEffect(() => {
+    if (redirected) {
+      toast.error("An error occurred. Please login");
+    }
     removeCookie("authToken");
     authContext.dispatch({
       type: "update auth status",
@@ -96,7 +100,7 @@ export default function Login() {
         isAuth: false,
       },
     });
-  }, []);
+  }, [redirected]);
 
   const validateUserNameAndPassword = ({ password }: ILoginCreds) => {
     const validPassword = usernameAndPasswordValidator(password);
