@@ -72,7 +72,7 @@ export default function Row(props: { row: ICompleteScoreCard }) {
               <Table size="small" aria-label="purchases">
                 <TableHead>
                   <TableRow>
-                    <TableCell>{showAltTableHeaders(row.hole) ? "Fairways Hit" : "Shot"}</TableCell>
+                    <TableCell>{showAltTableHeaders(row.hole) ? "FW Hit" : "Shot"}</TableCell>
                     <TableCell>{showAltTableHeaders(row.hole) ? "GIR" : "Distance"}</TableCell>
                     <TableCell>{showAltTableHeaders(row.hole) ? "3-Putts" : "Club"}</TableCell>
                     <TableCell>
@@ -83,7 +83,7 @@ export default function Row(props: { row: ICompleteScoreCard }) {
                 <TableBody>
                   {state.holeShotDetails[holeIndex].map((detail: IShotDetail, i: number) => (
                     // make a better key here
-                    <TableRow key={i}>
+                    <TableRow sx={{ backgroundColor: "#ffcdd2" }} key={i}>
                       <TableCell>{detail.shotNumber || detail.fairwaysHit}</TableCell>
                       <TableCell>{detail.distanceToPin || detail.greensInReg}</TableCell>
                       <TableCell component="th" scope="row">

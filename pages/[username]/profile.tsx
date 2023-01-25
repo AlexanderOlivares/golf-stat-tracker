@@ -168,22 +168,25 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
                 );
               }
             })}
-            <LoadingSkeleton />
           </Box>
-          {/* <Box sx={{ maxWidth: "sm", margin: "auto", my: 4 }}>
-            {roundPreviewRows && (
-              <KeyValueCard
-                label={"Scoring Breakdown"}
-                value={
-                  <PieChart
-                    data={scoreCountByNameArray(roundPreviewRows, scoreByNamePieChartKeys)}
-                    labels={scoreByNamePieChartKeys}
-                    pieSliceHexArr={scoreByNamePieSliceHexArr}
-                  />
-                }
-              />
+          <Box sx={{ maxWidth: "sm", margin: "auto", my: 4 }}>
+            {isLoading ? (
+              <Skeleton />
+            ) : (
+              roundPreviewRows && (
+                <KeyValueCard
+                  label={"Scoring Breakdown"}
+                  value={
+                    <PieChart
+                      data={scoreCountByNameArray(roundPreviewRows, scoreByNamePieChartKeys)}
+                      labels={scoreByNamePieChartKeys}
+                      pieSliceHexArr={scoreByNamePieSliceHexArr}
+                    />
+                  }
+                />
+              )
             )}
-          </Box> */}
+          </Box>
           <Box mt={4}>
             <Typography variant="h4">
               {isLoading ? (

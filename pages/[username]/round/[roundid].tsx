@@ -110,6 +110,30 @@ export default function Round({
         <LoadingSpinner />
       ) : (
         <RoundContextProvider>
+          {isAuth && (
+            <Box m={2} textAlign="center">
+              <Button
+                onClick={toggleOfflineMode}
+                type="submit"
+                size="medium"
+                variant="contained"
+                color="primary"
+              >
+                {networkContext.state.offlineModeEnabled ? (
+                  <SignalCellularConnectedNoInternet1BarRoundedIcon />
+                ) : (
+                  <CellWifiRoundedIcon />
+                )}
+              </Button>
+              <Box pt={1}>
+                <Typography textAlign="center" variant="caption">
+                  {networkContext.state.offlineModeEnabled
+                    ? "You are offline"
+                    : "Bad signal? Go offline"}
+                </Typography>
+              </Box>
+            </Box>
+          )}
           {roundDetails && (
             <>
               <Box textAlign="center" mt={2}>
@@ -124,43 +148,29 @@ export default function Round({
                     {courseDetails ? courseDetails.course_state : roundDetails.user_added_state}
                   </Typography>
                 </Box>
-                <Box display="flex" flexWrap="wrap" justifyContent="center" mt={1}>
-                  <KeyValueCard label={"Date"} value={roundDetails.round_date.split(",")[0]} />
-                  <Box>
-                    <KeyValueCard label={"Conditions"} value={roundDetails.weather_conditions} />
-                  </Box>
+                <Box
+                  display="flex"
+                  maxWidth={1}
+                  flexGrow={1}
+                  flexWrap="wrap"
+                  justifyContent="center"
+                  mt={1}
+                >
+                  <KeyValueCard
+                    label={"Date"}
+                    value={roundDetails?.round_date ? roundDetails.round_date.split(",")[0] : "--"}
+                  />
                   <Box>
                     <KeyValueCard
-                      label={"Temperature"}
-                      value={roundDetails.temperature + "\u00B0"}
+                      label={"Conditions"}
+                      value={roundDetails?.weather_conditions || "--"}
                     />
+                  </Box>
+                  <Box>
+                    <KeyValueCard label={"Temp F"} value={roundDetails.temperature + "\u00B0"} />
                   </Box>
                 </Box>
               </Box>
-              {isAuth && (
-                <Box m={2} textAlign="center">
-                  <Button
-                    onClick={toggleOfflineMode}
-                    type="submit"
-                    size="medium"
-                    variant="contained"
-                    color="primary"
-                  >
-                    {networkContext.state.offlineModeEnabled ? (
-                      <SignalCellularConnectedNoInternet1BarRoundedIcon />
-                    ) : (
-                      <CellWifiRoundedIcon />
-                    )}
-                  </Button>
-                  <Box pt={1}>
-                    <Typography textAlign="center" variant="caption">
-                      {networkContext.state.offlineModeEnabled
-                        ? "You are offline"
-                        : "Bad signal? Go offline"}
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
               <Box textAlign="center">{scoreCardProps && <ScoreCard {...scoreCardProps} />}</Box>
               {isAuth && username == tokenPayload?.username && <DeleteRoundDialog />}
             </>

@@ -284,6 +284,18 @@ export default function ScoreCard(props: IScoreCardProps) {
 
   return (
     <>
+      <Box display="flex" flexGrow={1} justifyContent="center" mt={1}>
+        <KeyValueCard label={"Tees"} value={formatTotalYardageHeading(props.tee_color) || "--"} />
+        <Box>
+          <KeyValueCard label={"Distance"} value={displayDistanceYardage(roundRows[20]) || "--"} />
+        </Box>
+        <Box>
+          <KeyValueCard
+            label={"Rating/Slope"}
+            value={rating && slope ? `${rating}/${slope}` : "--"}
+          />
+        </Box>
+      </Box>
       <Box py={2}>
         <Typography variant="h3">Score</Typography>
         <Typography variant="h3">{roundContext.state.holeScores[20]}</Typography>
@@ -313,27 +325,6 @@ export default function ScoreCard(props: IScoreCardProps) {
         }}
         pb={8}
       >
-        <Box
-          mb={2}
-          display="flex"
-          flexWrap="wrap"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          {!props.is_user_added_course && (
-            <Box display="flex" justifySelf="flex-end">
-              <KeyValueCard
-                label={"Tees"}
-                value={formatTotalYardageHeading(props.tee_color) || "--"}
-              />
-              <KeyValueCard
-                label={"Distance"}
-                value={displayDistanceYardage(roundRows[20]) || "--"}
-              />
-              <KeyValueCard label={"Rating/Slope"} value={`${rating}/${slope}`} />
-            </Box>
-          )}
-        </Box>
         <TableContainer component={Paper}>
           <Table aria-label="collapsible table">
             <TableHead>
