@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Skeleton } from "@mui/material";
 import RoundPreviewGrid from "../../components/RoundPreviewGrid";
 import Typography from "@mui/material/Typography";
 import { getRoundPreviewByUsernameQuery } from "../api/graphql/queries/roundQueries";
@@ -11,10 +11,16 @@ import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import apolloClient from "../../apollo-client";
 import { queryParamToString } from "../../utils/queryParamFormatter";
 import PieChart from "../../components/statCharts/PieChart";
-import { scoreCountByNameArray } from "../../utils/statChartHelpers";
+import {
+  getNumeratorOfFairwaysHit,
+  getStatAverage,
+  scoreCountByNameArray,
+} from "../../utils/statChartHelpers";
 import { scoreByNamePieSliceHexArr } from "../../components/statCharts/PieSliceHexLists";
 import KeyValueCard from "../../components/KeyValueCard";
 import * as Sentry from "@sentry/nextjs";
+import LoadingSkeleton from "../../components/LoadingSkeleton";
+import useMediaQuery from "../../components/useMediaQuery";
 
 export interface IRoundPreview {
   round_id: string;
@@ -81,7 +87,9 @@ type statKeyType = keyof typeof titleLookup;
 export default function Profile({ data }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const authContext = useAuthContext();
+  const mobileViewPort = useMediaQuery(600);
   const { isAuth } = authContext.state;
+  const [isLoading, setIsloading] = useState(true);
 
   const username = router.query.username;
   const [roundPreviewRows, setRoundPrviewRows] = useState<IRoundPreview[] | null>(null);
@@ -90,30 +98,40 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
     if (data?.roundPreview) {
       const roundPreviewArray: IRoundPreview[] = data.roundPreview;
       setRoundPrviewRows(roundPreviewArray);
+      setIsloading(false);
     }
   }, []);
+
+  useEffect(() => {
+    if (roundPreviewRows) {
+      setIsloading(false);
+    }
+  }, [roundPreviewRows]);
 
   const startNewRound = () => router.push(`/${username}/round/new-round`);
 
   return (
     <>
       <Box textAlign="center" my={3}>
-        <Typography variant="h3">{queryParamToString(username)}</Typography>
-        {/* {isAuth && (
-          <Box m={2}>
-            <Button onClick={startNewRound} size="large" variant="contained" color="primary">
-              new round
-            </Button>
-          </Box>
-        )} */}
-        {roundPreviewRows?.length && (
-          <Box my={2}>
-            <Typography variant="h4">Stats</Typography>
-            <Typography variant="caption">
-              Showing Trends From Last {roundPreviewRows?.length} Rounds
-            </Typography>
-          </Box>
-        )}
+        <Typography variant="h3">
+          {isLoading ? (
+            <Skeleton width={mobileViewPort ? 250 : 380} sx={{ margin: "auto" }} />
+          ) : (
+            queryParamToString(username)
+          )}
+        </Typography>
+        <Box my={2}>
+          <Typography variant="h4">
+            {isLoading ? <Skeleton width={100} sx={{ margin: "auto" }} /> : "Stats"}
+          </Typography>
+          <Typography variant="caption">
+            {isLoading ? (
+              <Skeleton width={300} sx={{ margin: "auto" }} />
+            ) : (
+              `Averages & Trends From Last ${roundPreviewRows?.length} Rounds`
+            )}
+          </Typography>
+        </Box>
       </Box>
       <Box
         textAlign="center"
@@ -124,19 +142,35 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
       >
         <>
           <Box display="flex" flexWrap="wrap" justifyContent="center" maxWidth="md" margin="auto">
-            {roundPreviewRows &&
-              trendStatKeys.map((statKey: keyof IRoundPreview) => {
+            {trendStatKeys.map((statKey: keyof IRoundPreview) => {
+              if (isLoading) {
+                return <LoadingSkeleton key={statKey} />;
+              }
+              if (roundPreviewRows) {
+                const statKeyDataOnly = roundPreviewRows.map(round => {
+                  if (statKey == "fairwaysHit") return getNumeratorOfFairwaysHit(round[statKey]);
+                  return round[statKey];
+                });
+                const avg: number = getStatAverage(statKeyDataOnly as number[]);
                 return (
-                  <Box pb={2} key={statKey}>
+                  <Box key={statKey}>
                     <KeyValueCard
                       label={titleLookup[statKey as statKeyType]}
-                      value={<AreaChart roundPreview={roundPreviewRows} statKey={statKey} />}
+                      value={
+                        <AreaChart
+                          roundPreview={roundPreviewRows}
+                          statKey={statKey}
+                          avg={avg || 0}
+                        />
+                      }
                     />
                   </Box>
                 );
-              })}
+              }
+            })}
+            <LoadingSkeleton />
           </Box>
-          <Box sx={{ maxWidth: "sm", margin: "auto", my: 4 }}>
+          {/* <Box sx={{ maxWidth: "sm", margin: "auto", my: 4 }}>
             {roundPreviewRows && (
               <KeyValueCard
                 label={"Scoring Breakdown"}
@@ -149,12 +183,24 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
                 }
               />
             )}
-          </Box>
+          </Box> */}
           <Box mt={4}>
             <Typography variant="h4">
-              {/* TODO add loading condition before rendering this */}
-              {roundPreviewRows?.length ? "Latest Rounds" : "No Rounds Recorded Yet"}
+              {isLoading ? (
+                <Skeleton width={350} sx={{ margin: "auto", pt: 4 }} />
+              ) : roundPreviewRows?.length ? (
+                "Latest Rounds"
+              ) : (
+                "No Rounds Recorded"
+              )}
             </Typography>
+            {isAuth && (
+              <Box m={2}>
+                <Button onClick={startNewRound} size="large" variant="contained" color="primary">
+                  new round
+                </Button>
+              </Box>
+            )}
           </Box>
           <Box py={2}>
             {roundPreviewRows && <RoundPreviewGrid roundPreview={roundPreviewRows} />}

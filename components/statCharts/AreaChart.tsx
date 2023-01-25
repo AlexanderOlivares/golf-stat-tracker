@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -12,7 +12,7 @@ import {
 } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { IRoundPreview } from "../../pages/[username]/profile";
-import { getNumeratorOfFairwaysHit, getStatAverage } from "../../utils/statChartHelpers";
+import { getNumeratorOfFairwaysHit } from "../../utils/statChartHelpers";
 import { Typography } from "@mui/material";
 import { Box } from "@mui/system";
 
@@ -30,11 +30,10 @@ ChartJS.register(
 export interface IAreaChartProps {
   roundPreview: IRoundPreview[];
   statKey: keyof IRoundPreview;
+  avg: number;
 }
 
-export default function AreaChart({ roundPreview, statKey }: IAreaChartProps) {
-  const [average, setAverage] = useState<number | null>(null);
-  const [showAreaChart, setShowAreaChart] = useState<boolean>(false);
+export default function AreaChart({ roundPreview, statKey, avg }: IAreaChartProps) {
   const roundPreviewSortedAsc = [...roundPreview].sort(
     (a: IRoundPreview, b: IRoundPreview) => Date.parse(a.round_date) - Date.parse(b.round_date)
   );
@@ -70,28 +69,14 @@ export default function AreaChart({ roundPreview, statKey }: IAreaChartProps) {
     ],
   };
 
-  useEffect(() => {
-    const statKeyDataOnly = roundPreview.map(round => {
-      if (statKey == "fairwaysHit") return getNumeratorOfFairwaysHit(round[statKey]);
-      return round[statKey];
-    });
-    const avg = getStatAverage(statKeyDataOnly as number[]);
-    if (avg && avg > 0) {
-      setAverage(avg);
-      setShowAreaChart(true);
-    }
-  }, []);
-
   return (
     <>
-      {showAreaChart && (
+      <Box>
         <Box>
-          <Box>
-            <Typography variant="h3">{average}</Typography>
-          </Box>
-          <Line options={options} data={data} />
+          <Typography variant="h3">{avg}</Typography>
         </Box>
-      )}
+        <Line options={options} data={data} />
+      </Box>
     </>
   );
 }

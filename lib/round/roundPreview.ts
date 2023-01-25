@@ -35,7 +35,7 @@ export async function getRoundPreview(username: string): Promise<IRoundPreview[]
     );
 
     if (!userRounds.rowCount) {
-      return errorMessage("Error loading saved round previews");
+      return [];
     }
  
     const unparsedRoundPreivews: IRoundPreviewDbResponse[] = userRounds.rows.map(row => {

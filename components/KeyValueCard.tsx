@@ -12,15 +12,19 @@ interface IKeyValueCardProps {
 
 export default function KeyValueCard({ label, value }: IKeyValueCardProps) {
   return (
-    <Card sx={{ maxWidth: "sm", m: 1 }}>
-      <CardContent>
-        <>
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            {label}
-          </Typography>
-          <Box>{value}</Box>
-        </>
-      </CardContent>
-    </Card>
+    <>
+      {value && (
+        <Card sx={{ maxWidth: "sm", m: 1 }}>
+          <CardContent>
+            <>
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                {label}
+              </Typography>
+              <Box>{value}</Box>
+            </>
+          </CardContent>
+        </Card>
+      )}
+    </>
   );
 }
