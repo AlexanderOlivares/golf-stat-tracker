@@ -26,6 +26,7 @@ import { parseErrorMessage } from "../../../utils/errorMessage";
 import { toast } from "react-toastify";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import * as Sentry from "@sentry/nextjs";
+import { stateNameOptions, weatherConditionsOptions } from "../../../lib/selectOptions";
 
 const label = { inputProps: { "aria-label": "Add New Course With Round" } };
 
@@ -100,7 +101,7 @@ export default function NewRound() {
   const [courseId, setCourseId] = useState<string | null>(null);
   const [teeColor, setTeeColor] = useState<string>("white");
   const [isUserAddedCourse, setIsUserAddedCourse] = useState<boolean>(false);
-  const [weatherConditions, setWeatherConditions] = useState<string>("");
+  const [weatherConditions, setWeatherConditions] = useState<string>("Clear");
   const [temperature, setTemperature] = useState<number>(70);
   const [userAddedCourseDetails, setuserAddedCourseDetails] = useState<IUserAddedCourse>({
     userAddedCourseName: "",
@@ -170,6 +171,15 @@ export default function NewRound() {
     setWeatherConditions(event.target.value);
   };
 
+  const handleUserAddedCourseState = (event: SelectChangeEvent): void => {
+    setuserAddedCourseDetails(prev => {
+      return {
+        ...prev,
+        userAddedState: event.target.value,
+      };
+    });
+  };
+
   const handleTemperatureChange = (_: Event, newValue: number | number[]) => {
     setTemperature(newValue as number);
   };
@@ -187,13 +197,14 @@ export default function NewRound() {
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     try {
       event.preventDefault();
+      if (!date) throw new Error("Select a date to proceed");
 
       const username = queryParamToString(router.query.username);
 
       const roundid = uuidv4();
       const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone;
       const roundDate =
-        date?.toLocaleString("en-US", {
+        date.toLocaleString("en-US", {
           timeZone,
         }) || null;
 
@@ -326,13 +337,22 @@ export default function NewRound() {
                       />
                     </Box>
                     <Box my={1}>
-                      <TextField
-                        onChange={handleUserAddedCourseDetails}
-                        id="user-added-course"
-                        label="state"
-                        name="userAddedState"
-                        variant="outlined"
-                      />
+                      <Select
+                        labelId="user-added-course-state"
+                        id="course-state"
+                        value={userAddedCourseDetails.userAddedState || "Texas"}
+                        onChange={handleUserAddedCourseState}
+                        sx={{ height: 56, width: 194 }}
+                        MenuProps={{ sx: { maxHeight: 300 } }}
+                      >
+                        {stateNameOptions.map(state => {
+                          return (
+                            <MenuItem key={state} value={state}>
+                              {state}
+                            </MenuItem>
+                          );
+                        })}
+                      </Select>
                     </Box>
                   </>
                 )}
@@ -403,11 +423,13 @@ export default function NewRound() {
                 value={weatherConditions}
                 onChange={handleWeatherConditionsChange}
               >
-                <MenuItem value={"Clear"}>Clear</MenuItem>
-                <MenuItem value={"Windy"}>Windy</MenuItem>
-                <MenuItem value={"Rainy"}>Rainy</MenuItem>
-                <MenuItem value={"Wet"}>Wet</MenuItem>
-                <MenuItem value={"Foggy"}>Foggy</MenuItem>
+                {weatherConditionsOptions.map(condition => {
+                  return (
+                    <MenuItem key={condition} value={condition}>
+                      {condition}
+                    </MenuItem>
+                  );
+                })}
               </Select>
               <Box mt={3}>
                 <Typography variant="h6" my={2}>

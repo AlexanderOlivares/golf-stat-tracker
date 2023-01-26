@@ -144,8 +144,8 @@ export default function Round({
                 </Typography>
                 <Box>
                   <Typography variant="subtitle2">
-                    {courseDetails ? courseDetails.course_city : roundDetails.user_added_city},{" "}
-                    {courseDetails ? courseDetails.course_state : roundDetails.user_added_state}
+                    {courseDetails?.course_city || roundDetails.user_added_city},{" "}
+                    {courseDetails?.course_state || roundDetails.user_added_state}
                   </Typography>
                 </Box>
                 <Box
