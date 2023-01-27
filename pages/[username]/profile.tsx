@@ -5,7 +5,6 @@ import RoundPreviewGrid from "../../components/RoundPreviewGrid";
 import Typography from "@mui/material/Typography";
 import { getRoundPreviewByUsernameQuery } from "../api/graphql/queries/roundQueries";
 import { useAuthContext } from "../../context/AuthContext";
-import LoadingSpinner from "../../components/LoadingSpinner";
 import AreaChart from "../../components/statCharts/AreaChart";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import apolloClient from "../../apollo-client";
@@ -20,7 +19,6 @@ import { scoreByNamePieSliceHexArr } from "../../components/statCharts/PieSliceH
 import KeyValueCard from "../../components/KeyValueCard";
 import * as Sentry from "@sentry/nextjs";
 import LoadingSkeleton from "../../components/LoadingSkeleton";
-import useMediaQuery from "../../components/useMediaQuery";
 
 export interface IRoundPreview {
   round_id: string;
@@ -87,7 +85,6 @@ type statKeyType = keyof typeof titleLookup;
 export default function Profile({ data }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const authContext = useAuthContext();
-  const mobileViewPort = useMediaQuery(600);
   const { isAuth } = authContext.state;
   const [isLoading, setIsloading] = useState(true);
 
@@ -115,7 +112,7 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
       <Box textAlign="center" my={3}>
         <Typography variant="h3">
           {isLoading ? (
-            <Skeleton width={mobileViewPort ? 250 : 380} sx={{ margin: "auto" }} />
+            <Skeleton width={300} sx={{ margin: "auto" }} />
           ) : (
             queryParamToString(username)
           )}
@@ -171,17 +168,21 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
           </Box>
           <Box sx={{ maxWidth: "sm", margin: "auto", my: 4 }}>
             {isLoading ? (
-              <Skeleton />
+              <Skeleton variant="rectangular" height={584} width={588} />
             ) : (
               roundPreviewRows && (
                 <KeyValueCard
                   label={"Scoring Breakdown"}
                   value={
-                    <PieChart
-                      data={scoreCountByNameArray(roundPreviewRows, scoreByNamePieChartKeys)}
-                      labels={scoreByNamePieChartKeys}
-                      pieSliceHexArr={scoreByNamePieSliceHexArr}
-                    />
+                    roundPreviewRows.length ? (
+                      <PieChart
+                        data={scoreCountByNameArray(roundPreviewRows, scoreByNamePieChartKeys)}
+                        labels={scoreByNamePieChartKeys}
+                        pieSliceHexArr={scoreByNamePieSliceHexArr}
+                      />
+                    ) : (
+                      <Typography variant="h5">Add round scores to see breakdown</Typography>
+                    )
                   }
                 />
               )
