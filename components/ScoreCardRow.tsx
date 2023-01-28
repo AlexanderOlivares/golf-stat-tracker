@@ -83,7 +83,7 @@ export default function Row(props: { row: ICompleteScoreCard }) {
                 <TableBody>
                   {state.holeShotDetails[holeIndex].map((detail: IShotDetail, i: number) => (
                     // make a better key here
-                    <TableRow sx={{ backgroundColor: "#ffcdd2" }} key={i}>
+                    <TableRow sx={{ backgroundColor: "white" }} key={i}>
                       <TableCell>{detail.shotNumber || detail.fairwaysHit}</TableCell>
                       <TableCell>{detail.distanceToPin || detail.greensInReg}</TableCell>
                       <TableCell component="th" scope="row">

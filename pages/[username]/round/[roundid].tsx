@@ -24,6 +24,8 @@ import apolloClient from "../../../apollo-client";
 import { setCookie } from "../../../utils/authCookieGenerator";
 import KeyValueCard from "../../../components/KeyValueCard";
 import * as Sentry from "@sentry/nextjs";
+import Grid from "@mui/material/Unstable_Grid2";
+import useMediaQuery from "../../../components/useMediaQuery";
 
 const removeDashes = (str: string) => str.replace(/-/g, "");
 
@@ -33,6 +35,7 @@ export default function Round({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const networkContext = useNetworkContext();
+  const isMobile = useMediaQuery(600);
   const { roundid, courseId, unverifiedCourseId, username } = router.query;
   const authContext = useAuthContext();
   const { isAuth, tokenPayload } = authContext.state;
@@ -148,29 +151,32 @@ export default function Round({
                     {courseDetails?.course_state || roundDetails.user_added_state}
                   </Typography>
                 </Box>
-                <Box
-                  display="flex"
-                  maxWidth={1}
-                  flexGrow={1}
-                  flexWrap="wrap"
-                  justifyContent="center"
-                  mt={1}
-                >
+              </Box>
+              <Grid
+                container
+                spacing={{ xs: 1, md: 2 }}
+                justifyContent="center"
+                alignItems="center"
+                direction="row"
+                sx={{ maxWidth: "sm", margin: "auto" }}
+                textAlign="center"
+              >
+                <Grid xs={4} md={4}>
                   <KeyValueCard
                     label={"Date"}
                     value={roundDetails?.round_date ? roundDetails.round_date.split(",")[0] : "--"}
                   />
-                  <Box>
-                    <KeyValueCard
-                      label={"Conditions"}
-                      value={roundDetails?.weather_conditions || "--"}
-                    />
-                  </Box>
-                  <Box>
-                    <KeyValueCard label={"Temp F"} value={roundDetails.temperature + "\u00B0"} />
-                  </Box>
-                </Box>
-              </Box>
+                </Grid>
+                <Grid xs={4} md={4}>
+                  <KeyValueCard
+                    label={isMobile ? "Cond." : "Conditions"}
+                    value={roundDetails?.weather_conditions || "--"}
+                  />
+                </Grid>
+                <Grid xs={4} md={4}>
+                  <KeyValueCard label={"Temp F"} value={roundDetails.temperature + "\u00B0"} />
+                </Grid>
+              </Grid>
               <Box textAlign="center">{scoreCardProps && <ScoreCard {...scoreCardProps} />}</Box>
               {isAuth && username == tokenPayload?.username && <DeleteRoundDialog />}
             </>

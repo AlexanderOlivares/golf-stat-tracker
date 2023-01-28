@@ -22,3 +22,11 @@ export interface IScoreCardProps extends ICourseDetails {
   hole_scores: number[];
   hole_shot_details: IShotDetail[][];
 }
+
+export interface IAdhocStatCounter {
+    "penalties": number;
+    "mishits": number;
+    "upAndDowns": number;
+    "potentialScore": number;
+    "scrambleHoleIndexes": number[],
+}

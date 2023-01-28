@@ -1,4 +1,5 @@
-import { IScoreCardProps } from "../interfaces/scorecardInterface";
+import { IAdhocStatCounter, IScoreCardProps } from "../interfaces/scorecardInterface";
+import { IShotDetail } from "./roundFormatter";
 
 export interface IHoleDetails {
   hole: string;
@@ -257,3 +258,41 @@ export function formatScoreCard(props: IScoreCardProps) {
 
   return hydratedScoreCardRows;
 }
+
+export function adhocStatCounter(shotDetails: IShotDetail[][]){
+    let statCounter: IAdhocStatCounter = {
+        "penalties": 0,
+        "mishits": 0,
+        "upAndDowns": 0,
+        "potentialScore": 0,
+        "scrambleHoleIndexes": [], // list of indexes of holes eligible for scramble (will need to compare against par)
+    }
+    shotDetails.forEach((hole: IShotDetail[], index: number)=> {
+        for (let i = 0; i < hole.length; i++){
+            const shotResult = hole[i].result;
+            const shotNumber = hole[i].shotNumber;
+            if (shotResult == "Penalty Stroke") {
+                statCounter.penalties++;
+                statCounter.potentialScore--;
+            }
+            if (shotResult == "Mishit"){
+                statCounter.mishits++;
+                statCounter.potentialScore--;
+            } 
+            if (shotResult == "In Hole"){
+                if (shotNumber){
+                    const prevShot = hole.find((shot: IShotDetail)=> shot.shotNumber == shotNumber - 1)
+                    if (prevShot){
+                        if (prevShot.result == "Hit Green"){
+                            statCounter.upAndDowns++;
+                            statCounter.scrambleHoleIndexes.push(index);
+                        }
+                    }
+                }
+            }
+        }
+    })
+    return statCounter;
+}
+
+

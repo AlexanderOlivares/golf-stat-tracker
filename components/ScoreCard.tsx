@@ -8,7 +8,12 @@ import TableContainer from "@mui/material/TableContainer";
 import TableHead from "@mui/material/TableHead";
 import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
-import { formatScoreCard, IHoleDetails, NON_HOLE_ROWS } from "../utils/scoreCardFormatter";
+import {
+  adhocStatCounter,
+  formatScoreCard,
+  IHoleDetails,
+  NON_HOLE_ROWS,
+} from "../utils/scoreCardFormatter";
 import { IShotDetail } from "../utils/roundFormatter";
 import { useRoundContext } from "../context/RoundContext";
 import { useNetworkContext } from "../context/NetworkContext";
@@ -29,6 +34,8 @@ import { scoreByNamePieSliceHexArr } from "./statCharts/PieSliceHexLists";
 import * as Sentry from "@sentry/nextjs";
 import KeyValueCard from "./KeyValueCard";
 import useMediaQuery from "./useMediaQuery";
+import Grid from "@mui/material/Unstable_Grid2";
+import { Skeleton } from "@mui/material";
 
 export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
@@ -64,7 +71,7 @@ function formatParArray(holes: IHoleDetails[]) {
 }
 
 export default function ScoreCard(props: IScoreCardProps) {
-  const mobileViewPort = useMediaQuery(600);
+  const isMobile = useMediaQuery(600);
   const router = useRouter();
   const roundContext = useRoundContext();
   const networkContext = useNetworkContext();
@@ -284,21 +291,30 @@ export default function ScoreCard(props: IScoreCardProps) {
 
   return (
     <>
-      <Box display="flex" flexGrow={1} justifyContent="center" mt={1}>
-        <KeyValueCard label={"Tees"} value={formatTotalYardageHeading(props.tee_color) || "--"} />
-        <Box>
+      <Grid
+        container
+        spacing={{ xs: 1, md: 2 }}
+        justifyContent="center"
+        alignItems="center"
+        direction="row"
+        sx={{ maxWidth: "sm", margin: "auto" }}
+      >
+        <Grid xs={4} md={4}>
+          <KeyValueCard label={"Tees"} value={formatTotalYardageHeading(props.tee_color) || "--"} />
+        </Grid>
+        <Grid xs={4} md={4}>
           <KeyValueCard label={"Distance"} value={displayDistanceYardage(roundRows[20]) || "--"} />
-        </Box>
-        <Box>
+        </Grid>
+        <Grid xs={4} md={4}>
           <KeyValueCard
-            label={"Rating/Slope"}
+            label={isMobile ? "Rat/Slp" : "Rating/Slope"}
             value={rating && slope ? `${rating}/${slope}` : "--"}
           />
-        </Box>
-      </Box>
+        </Grid>
+      </Grid>
       <Box py={2}>
         <Typography variant="h3">Score</Typography>
-        <Typography variant="h3">{roundContext.state.holeScores[20]}</Typography>
+        <Typography variant="h3">{roundContext.state.holeScores[20] || 0}</Typography>
       </Box>
       <Box
         sx={{
@@ -307,17 +323,111 @@ export default function ScoreCard(props: IScoreCardProps) {
         }}
         pb={2}
       >
-        <KeyValueCard
-          label={"Score Breakdown"}
-          value={
-            <PieChart
-              data={Object.values(roundContext.state.scoreCount)}
-              labels={scoreByNamePieChartKeys}
-              pieSliceHexArr={scoreByNamePieSliceHexArr}
-            />
-          }
-        />
+        {roundContext.state.holeScores[20] ? (
+          <KeyValueCard
+            label={"Breakdown"}
+            value={
+              <PieChart
+                data={Object.values(roundContext.state.scoreCount)}
+                labels={scoreByNamePieChartKeys}
+                pieSliceHexArr={scoreByNamePieSliceHexArr}
+              />
+            }
+          />
+        ) : (
+          <KeyValueCard
+            label={"Add Scores to see breakdown"}
+            value={
+              <>
+                <Skeleton
+                  animation={false}
+                  variant="text"
+                  width={300}
+                  sx={{ maxWidth: "sm", margin: "auto" }}
+                />
+                <Skeleton
+                  animation={false}
+                  variant="text"
+                  width={300}
+                  sx={{ maxWidth: "sm", margin: "auto" }}
+                />
+                <Skeleton
+                  animation={false}
+                  variant="circular"
+                  width={isMobile ? 300 : 450}
+                  height={isMobile ? 300 : 450}
+                  sx={{ maxWidth: "sm", margin: "auto", mt: 5 }}
+                />
+              </>
+            }
+          />
+        )}
       </Box>
+      <Grid
+        container
+        spacing={{ xs: 1, md: 2 }}
+        justifyContent="center"
+        alignItems="center"
+        direction="row"
+        sx={{ maxWidth: "sm", margin: "auto" }}
+      >
+        <Grid xs={4} md={4}>
+          <KeyValueCard
+            label={"FW Hit"}
+            value={roundContext.state.holeShotDetails[20][0]["fairwaysHit"] || "--"}
+          />
+        </Grid>
+        <Grid xs={4} md={4}>
+          <KeyValueCard
+            label={"GIR"}
+            value={roundContext.state.holeShotDetails[20][0]["greensInReg"] || "--"}
+          />
+        </Grid>
+        <Grid xs={4} md={4}>
+          <KeyValueCard
+            label={"Putts"}
+            value={roundContext.state.holeShotDetails[20][0]["totalPutts"] || "--"}
+          />
+        </Grid>
+        <Grid xs={4} md={4}>
+          <KeyValueCard
+            label={"3-Putts"}
+            value={roundContext.state.holeShotDetails[20][0]["threePutts"] || "--"}
+          />
+        </Grid>
+        <Grid xs={4} md={4}>
+          <KeyValueCard
+            label={"Penalty"}
+            value={adhocStatCounter(roundContext.state.holeShotDetails).penalties || "--"}
+          />
+        </Grid>
+        <Grid xs={4} md={4}>
+          <KeyValueCard
+            label={"Mishits"}
+            value={adhocStatCounter(roundContext.state.holeShotDetails).mishits || "--"}
+          />
+        </Grid>
+        <Grid xs={4} md={4}>
+          <KeyValueCard
+            label={"Up and Downs"}
+            value={adhocStatCounter(roundContext.state.holeShotDetails).upAndDowns || "--"}
+          />
+        </Grid>
+        <Grid xs={4} md={4}>
+          <KeyValueCard
+            label={"Potential Score"}
+            value={
+              roundContext.state.holeScores[20] +
+                adhocStatCounter(roundContext.state.holeShotDetails).potentialScore || "--"
+              // add 3-putts to this and clean it up in a function
+            }
+          />
+        </Grid>
+        {/* <Grid xs={4} md={4}>
+        TODO
+          <KeyValueCard label={"Scramble"} value={rating && slope ? `${rating}/${slope}` : "--"} />
+        </Grid> */}
+      </Grid>
       <Box
         sx={{
           maxWidth: "lg",

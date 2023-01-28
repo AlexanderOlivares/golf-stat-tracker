@@ -1,4 +1,5 @@
-import { IScoreCardProps } from "../pages/[username]/round/[roundid]";
+import { notDeepEqual } from "assert";
+import { IScoreCardProps } from "../interfaces/scorecardInterface";
 import { createHoleDetailsJson } from "../utils/roundFormatter";
 import {
   buildScoreCardRowsArray,
@@ -6,10 +7,12 @@ import {
   checkKeysForTeeColorMatch,
   teeColorPrefixMatch,
   formatScoreCard,
+  adhocStatCounter,
 } from "../utils/scoreCardFormatter";
 
 test("build score card rows array", () => {
   const testArray = buildScoreCardRowsArray();
+
 
   expect(Array.isArray(testArray)).toEqual(true);
   expect(testArray.length).toEqual(25);
@@ -681,3 +684,607 @@ test("score card formatter populates front 9 holes again when on 9 hole course",
       { hole: "NET", par: "" },
   ]);
 });
+
+
+const holeShotDetailsWithValidAdhocStats = 
+[
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 308,
+        "club": "8 iron",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 130,
+        "club": "9 iron",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 26,
+        "club": "Putter",
+        "result": "Miss Left"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 8,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 491,
+        "club": "Driver",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 5,
+        "distanceToPin": 491,
+        "club": null,
+        "result": null
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 55,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 265,
+        "club": "4 hybrid",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 9,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 393,
+        "club": "7 iron",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 165,
+        "club": "8 iron",
+        "result": "Miss Right"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 65,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 7,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 155,
+        "club": "8 iron",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 12,
+        "club": "Putter",
+        "result": "Miss Short"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 4,
+        "club": "Putter",
+        "result": "Miss Right"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 1,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 335,
+        "club": "8 iron",
+        "result": "OB"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 335,
+        "club": null,
+        "result": "Penalty Stroke"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 175,
+        "club": "Pitching Wedge",
+        "result": "Miss Left"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 35,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 5,
+        "distanceToPin": 16,
+        "club": "Putter",
+        "result": "Miss Left"
+      },
+      {
+        "shotNumber": 6,
+        "distanceToPin": 3,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 357,
+        "club": "8 iron",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 95,
+        "club": "56 degree",
+        "result": "Mishit"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 60,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 23,
+        "club": "Putter",
+        "result": "Miss Right"
+      },
+      {
+        "shotNumber": 5,
+        "distanceToPin": 5,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 156,
+        "club": "8 iron",
+        "result": "Miss Left"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 15,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 3,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 463,
+        "club": "Driver",
+        "result": "Miss Left"
+      },
+      {
+        "shotNumber": 5,
+        "distanceToPin": 2,
+        "club": "Putter",
+        "result": "In Hole"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 220,
+        "club": "4 hybrid",
+        "result": "Miss Right"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 70,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 14,
+        "club": "Putter",
+        "result": "Miss Long"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 284,
+        "club": "7 iron",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 130,
+        "club": "9 iron",
+        "result": "Miss Short"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 25,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 11,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "fairwaysHit": "5/7",
+        "greensInReg": 4,
+        "threePutts": 1,
+        "totalPutts": 15
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 284,
+        "club": "9 iron",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 75,
+        "club": "56 degree",
+        "result": "Miss Left"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 15,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 15,
+        "club": "Putter",
+        "result": "Miss Left"
+      },
+      {
+        "shotNumber": 5,
+        "distanceToPin": 4,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 330,
+        "club": "Driver",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 75,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 11,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 463,
+        "club": "Driver",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 225,
+        "club": "8 iron",
+        "result": "Mishit"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 160,
+        "club": "8 iron",
+        "result": "Miss Left"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 160,
+        "club": null,
+        "result": "Penalty Stroke"
+      },
+      {
+        "shotNumber": 5,
+        "distanceToPin": 25,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 6,
+        "distanceToPin": 10,
+        "club": "Putter",
+        "result": "Miss Right"
+      },
+      {
+        "shotNumber": 7,
+        "distanceToPin": 5,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 143,
+        "club": "Pitching Wedge",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 25,
+        "club": "Putter",
+        "result": "Miss Left"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 6,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 513,
+        "club": "Driver",
+        "result": "Miss Left"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 513,
+        "club": null,
+        "result": "Penalty Stroke"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 250,
+        "club": "4 hybrid",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 80,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 5,
+        "distanceToPin": 14,
+        "club": "Putter",
+        "result": "Miss Right"
+      },
+      {
+        "shotNumber": 6,
+        "distanceToPin": 4,
+        "club": "Putter",
+        "result": "Miss Right"
+      },
+      {
+        "shotNumber": 7,
+        "distanceToPin": 1,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 121,
+        "club": "Pitching Wedge",
+        "result": "Miss Short"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 15,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 5,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 390,
+        "club": "9 iron",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 195,
+        "club": "Pitching Wedge",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 75,
+        "club": "Pitching Wedge",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 35,
+        "club": "Putter",
+        "result": "Miss Right"
+      },
+      {
+        "shotNumber": 5,
+        "distanceToPin": 5,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 191,
+        "club": "6 iron",
+        "result": "OB"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 191,
+        "club": null,
+        "result": "Penalty Stroke"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 191,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 4,
+        "distanceToPin": 31,
+        "club": "Putter",
+        "result": "Miss Short"
+      },
+      {
+        "shotNumber": 5,
+        "distanceToPin": 5,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": 309,
+        "club": "Driver",
+        "result": "Hit Fairway"
+      },
+      {
+        "shotNumber": 2,
+        "distanceToPin": 20,
+        "club": "56 degree",
+        "result": "Hit Green"
+      },
+      {
+        "shotNumber": 3,
+        "distanceToPin": 6,
+        "club": "Putter",
+        "result": "In Hole"
+      }
+    ],
+    [
+      {
+        "fairwaysHit": "5/6",
+        "greensInReg": 3,
+        "threePutts": 1,
+        "totalPutts": 16
+      }
+    ],
+    [
+      {
+        "fairwaysHit": "10/13",
+        "greensInReg": 7,
+        "threePutts": 2,
+        "totalPutts": 31
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": null,
+        "club": null,
+        "result": null
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": null,
+        "club": null,
+        "result": null
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": null,
+        "club": null,
+        "result": null
+      }
+    ],
+    [
+      {
+        "shotNumber": 1,
+        "distanceToPin": null,
+        "club": null,
+        "result": null
+      }
+    ]
+  ]
+
+  test("should tally up shots labled as 'penalty strokes' in a single round ", () => {
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).penalties).toEqual(4)
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).penalties).not.toBe(0)
+  })
+  test("should tally up shots labled 'mishit' in a single round", () => {
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).mishits).toEqual(2)
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).mishits).not.toBe(0)
+  })
+  test("should be the negative value of mishits plus penalty strokes. Meant to be less than or equal to zero so it can be subtracted from the total score", () => {
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).potentialScore).toEqual(-6)
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).potentialScore).not.toBe(0)
+  })
+  test("should count of times a shot labeled 'hit green' was followed up by a shot labeld 'in hole'", () => {
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).upAndDowns).toEqual(7)
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).upAndDowns).not.toBe(0)
+  })
+  test("should build an array of indexes of the holes that may have a potential scramble opportunity. Will use this array to compare against par and hole score to determin if scramble", () => {
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).scrambleHoleIndexes).toEqual([1, 2, 6, 8, 11, 15, 18])
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).scrambleHoleIndexes).not.toBe([])
+  })

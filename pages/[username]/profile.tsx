@@ -19,6 +19,7 @@ import { scoreByNamePieSliceHexArr } from "../../components/statCharts/PieSliceH
 import KeyValueCard from "../../components/KeyValueCard";
 import * as Sentry from "@sentry/nextjs";
 import LoadingSkeleton from "../../components/LoadingSkeleton";
+import useMediaQuery from "../../components/useMediaQuery";
 
 export interface IRoundPreview {
   round_id: string;
@@ -85,6 +86,7 @@ type statKeyType = keyof typeof titleLookup;
 export default function Profile({ data }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const authContext = useAuthContext();
+  const isMobile = useMediaQuery(600);
   const { isAuth } = authContext.state;
   const [isLoading, setIsloading] = useState(true);
 
@@ -181,7 +183,28 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
                         pieSliceHexArr={scoreByNamePieSliceHexArr}
                       />
                     ) : (
-                      <Typography variant="h5">Add round scores to see breakdown</Typography>
+                      <>
+                        <Typography variant="caption">Add a new round to see breakdown</Typography>
+                        <Skeleton
+                          animation={false}
+                          variant="text"
+                          width={300}
+                          sx={{ maxWidth: "sm", margin: "auto" }}
+                        />
+                        <Skeleton
+                          animation={false}
+                          variant="text"
+                          width={300}
+                          sx={{ maxWidth: "sm", margin: "auto" }}
+                        />
+                        <Skeleton
+                          animation={false}
+                          variant="circular"
+                          width={isMobile ? 300 : 450}
+                          height={isMobile ? 300 : 450}
+                          sx={{ maxWidth: "sm", margin: "auto", mt: 5 }}
+                        />
+                      </>
                     )
                   }
                 />
@@ -192,10 +215,8 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
             <Typography variant="h4">
               {isLoading ? (
                 <Skeleton width={350} sx={{ margin: "auto", pt: 4 }} />
-              ) : roundPreviewRows?.length ? (
-                "Latest Rounds"
               ) : (
-                "No Rounds Recorded"
+                "Latest Rounds"
               )}
             </Typography>
             {isAuth && (

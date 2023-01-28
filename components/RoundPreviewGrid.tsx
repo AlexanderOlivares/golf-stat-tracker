@@ -10,6 +10,7 @@ import {
 import { IRoundPreview } from "../pages/[username]/profile";
 import { useRouter } from "next/router";
 import useMediaQuery from "./useMediaQuery";
+import { Typography } from "@mui/material";
 
 export interface IRoundPreviewProps {
   roundPreview: IRoundPreview[];
@@ -125,6 +126,15 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
   return (
     <Box sx={{ height: 700, width: "100%", cursor: "pointer" }}>
       <DataGrid
+        components={{
+          NoRowsOverlay: () => {
+            return (
+              <Box my={5}>
+                <Typography variant="h4">No rounds recorded</Typography>
+              </Box>
+            );
+          },
+        }}
         getRowId={row => row.round_id}
         rows={roundPreview}
         columns={columns}
