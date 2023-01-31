@@ -38,6 +38,7 @@ import KeyValueCard from "./KeyValueCard";
 import useMediaQuery from "./useMediaQuery";
 import Grid from "@mui/material/Unstable_Grid2";
 import { Skeleton } from "@mui/material";
+import EditRoundMenu from "./EditRoundMenu";
 
 export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
@@ -314,6 +315,40 @@ export default function ScoreCard(props: IScoreCardProps) {
           />
         </Grid>
       </Grid>
+      <Box
+        sx={{
+          maxWidth: "sm",
+          m: "auto",
+          mb: 2,
+        }}
+      >
+        {isAuth && (
+          <Box textAlign="center">
+            {/* <Button
+                onClick={toggleOfflineMode}
+                type="submit"
+                size="medium"
+                variant="contained"
+                color="primary"
+              >
+                {networkContext.state.offlineModeEnabled ? (
+                  <SignalCellularConnectedNoInternet1BarRoundedIcon />
+                ) : (
+                  <CellWifiRoundedIcon />
+                )}
+              </Button> */}
+            <EditRoundMenu />
+            <Box>
+              <Typography textAlign="center" variant="caption">
+                {networkContext.state.offlineModeEnabled
+                  ? "You are offline"
+                  : "Bad signal? Go offline"}
+              </Typography>
+            </Box>
+          </Box>
+        )}
+      </Box>
+      <hr style={{ maxWidth: isMobile ? "75%" : "25%" }} />
       <Box py={2}>
         <Typography variant="h3">Score</Typography>
         <Typography variant="h3">{roundContext.state.holeScores[20] || 0}</Typography>
@@ -367,7 +402,7 @@ export default function ScoreCard(props: IScoreCardProps) {
       </Box>
       <Grid
         container
-        spacing={{ xs: 1, md: 2 }}
+        spacing={{ xs: 0, md: 2 }}
         justifyContent="center"
         alignItems="center"
         direction="row"

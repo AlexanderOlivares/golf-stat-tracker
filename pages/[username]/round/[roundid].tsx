@@ -8,15 +8,13 @@ import { queryParamToString } from "../../../utils/queryParamFormatter";
 import { RoundContextProvider } from "../../../context/RoundContext";
 import { getUnverifiedCourseForRound } from "../../api/graphql/queries/unverifiedCourseQueries";
 import { useNetworkContext } from "../../../context/NetworkContext";
-import { Button, Typography } from "@mui/material";
+import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { IScoreCardProps } from "../../../interfaces/scorecardInterface";
 import { ICourseDetails } from "../../../interfaces/course";
 import { IRoundDetails } from "../../../interfaces/round";
 import LoadingSpinner from "../../../components/LoadingSpinner";
 import { toast } from "react-toastify";
-import SignalCellularConnectedNoInternet1BarRoundedIcon from "@mui/icons-material/SignalCellularConnectedNoInternet1BarRounded";
-import CellWifiRoundedIcon from "@mui/icons-material/CellWifiRounded";
 import DeleteRoundDialog from "../../../components/DeleteRoundDialog";
 import { useAuthContext } from "../../../context/AuthContext";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
@@ -113,7 +111,7 @@ export default function Round({
         <LoadingSpinner />
       ) : (
         <RoundContextProvider>
-          {isAuth && (
+          {/* {isAuth && (
             <Box m={2} textAlign="center">
               <Button
                 onClick={toggleOfflineMode}
@@ -136,7 +134,7 @@ export default function Round({
                 </Typography>
               </Box>
             </Box>
-          )}
+          )} */}
           {roundDetails && (
             <>
               <Box textAlign="center" mt={2}>
@@ -154,7 +152,7 @@ export default function Round({
               </Box>
               <Grid
                 container
-                spacing={{ xs: 1, md: 2 }}
+                spacing={{ xs: 0, md: 2 }}
                 justifyContent="center"
                 alignItems="center"
                 direction="row"
