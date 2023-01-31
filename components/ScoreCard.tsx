@@ -10,6 +10,8 @@ import TableRow from "@mui/material/TableRow";
 import Paper from "@mui/material/Paper";
 import {
   adhocStatCounter,
+  calculateSrambles,
+  formatPotentialScore,
   formatScoreCard,
   IHoleDetails,
   NON_HOLE_ROWS,
@@ -415,18 +417,28 @@ export default function ScoreCard(props: IScoreCardProps) {
         </Grid>
         <Grid xs={4} md={4}>
           <KeyValueCard
-            label={"Potential Score"}
+            label={"Scrambles"}
             value={
-              roundContext.state.holeScores[20] +
-                adhocStatCounter(roundContext.state.holeShotDetails).potentialScore || "--"
-              // add 3-putts to this and clean it up in a function
+              calculateSrambles(
+                adhocStatCounter(holeShotDetails).scrambleHoleIndexes,
+                roundContext.state.par,
+                roundContext.state.holeScores
+              ) || "--"
             }
           />
         </Grid>
-        {/* <Grid xs={4} md={4}>
-        TODO
-          <KeyValueCard label={"Scramble"} value={rating && slope ? `${rating}/${slope}` : "--"} />
-        </Grid> */}
+        <Grid xs={4} md={4}>
+          <KeyValueCard
+            label={"Potential Score"}
+            value={
+              formatPotentialScore(
+                roundContext.state.holeScores[20],
+                adhocStatCounter(holeShotDetails).potentialScore,
+                roundContext.state.holeShotDetails[20][0].threePutts
+              ) || "--"
+            }
+          />
+        </Grid>
       </Grid>
       <Box
         sx={{

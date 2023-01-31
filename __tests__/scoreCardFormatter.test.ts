@@ -8,6 +8,8 @@ import {
   teeColorPrefixMatch,
   formatScoreCard,
   adhocStatCounter,
+  formatPotentialScore,
+  calculateSrambles,
 } from "../utils/scoreCardFormatter";
 
 test("build score card rows array", () => {
@@ -1287,4 +1289,25 @@ const holeShotDetailsWithValidAdhocStats =
   test("should build an array of indexes of the holes that may have a potential scramble opportunity. Will use this array to compare against par and hole score to determin if scramble", () => {
     expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).scrambleHoleIndexes).toEqual([1, 2, 6, 8, 11, 15, 18])
     expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).scrambleHoleIndexes).not.toBe([])
+  })
+
+  test("should subtract three putts from total score and add subtractedPenalitesAndMishits (negative number) to show the potential score", () => {
+    expect(formatPotentialScore(95, -4, 6)).toEqual(85)
+    expect(formatPotentialScore(100, -7, 5)).toEqual(88)
+    expect(formatPotentialScore(100, -0, 5)).toEqual(95)
+    expect(formatPotentialScore(100, -0, 0)).toEqual(100)
+    expect(formatPotentialScore(80, -4, null)).toEqual(76)
+    expect(formatPotentialScore(80, -4, undefined)).toEqual(76)
+    expect(formatPotentialScore(null, -4, 6)).toEqual(false)
+    expect(formatPotentialScore(null, -4, null)).toEqual(false)
+    expect(formatPotentialScore(null, -4, undefined)).toEqual(false)
+  })
+
+  test("should tally up scrambles (par or better when GIR is not made)", () => {
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 4, 4, 4, 6, 5, 3, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null])).toEqual(7)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 7, 6, 4, 6, 5, 4, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null])).toEqual(4)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null])).toEqual(0)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 7, 6, 4, 6, 5, 4, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null])).not.toBe(0)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['', '', '', '', '', '', '', '', '', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 7, 6, 4, 6, 5, 4, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null])).toEqual(3)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''], [4, 7, 6, 4, 6, 5, 4, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null])).toEqual(0)
   })

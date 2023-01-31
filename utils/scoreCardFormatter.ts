@@ -295,4 +295,22 @@ export function adhocStatCounter(shotDetails: IShotDetail[][]){
     return statCounter;
 }
 
+export function formatPotentialScore(score: number | null, subtractedPenaltiesAndMishits: number, threePutts: number|null|undefined ){
+    if (!score) return false;
+    const threePuttsFound = threePutts || 0; 
+    return (score - threePuttsFound) + subtractedPenaltiesAndMishits;
+}
+
+export function calculateSrambles(scrambleIndexes: number[], parArray: string[], holeScores: (number|null)[]){
+    let scrambleCount = 0;
+    scrambleIndexes.forEach((scrambleEligableHoleIndex: number) => {
+        const par = Number(parArray[scrambleEligableHoleIndex]);
+        if (!par) return;
+        const holeScore = holeScores[scrambleEligableHoleIndex];
+        if (holeScore && holeScore <= par){
+            scrambleCount++;
+        }
+    })
+    return scrambleCount;
+}
 
