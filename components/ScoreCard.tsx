@@ -319,24 +319,11 @@ export default function ScoreCard(props: IScoreCardProps) {
         sx={{
           maxWidth: "sm",
           m: "auto",
-          mb: 2,
+          my: 2,
         }}
       >
         {isAuth && (
           <Box textAlign="center">
-            {/* <Button
-                onClick={toggleOfflineMode}
-                type="submit"
-                size="medium"
-                variant="contained"
-                color="primary"
-              >
-                {networkContext.state.offlineModeEnabled ? (
-                  <SignalCellularConnectedNoInternet1BarRoundedIcon />
-                ) : (
-                  <CellWifiRoundedIcon />
-                )}
-              </Button> */}
             <EditRoundMenu />
             <Box>
               <Typography textAlign="center" variant="caption">
