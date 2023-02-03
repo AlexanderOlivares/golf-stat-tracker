@@ -8,22 +8,17 @@ import { queryParamToString } from "../../../utils/queryParamFormatter";
 import { RoundContextProvider } from "../../../context/RoundContext";
 import { getUnverifiedCourseForRound } from "../../api/graphql/queries/unverifiedCourseQueries";
 import { useNetworkContext } from "../../../context/NetworkContext";
-import { Typography } from "@mui/material";
 import Box from "@mui/material/Box";
 import { IScoreCardProps } from "../../../interfaces/scorecardInterface";
 import { ICourseDetails } from "../../../interfaces/course";
 import { IRoundDetails } from "../../../interfaces/round";
-import LoadingSpinner from "../../../components/LoadingSpinner";
 import { toast } from "react-toastify";
 import DeleteRoundDialog from "../../../components/DeleteRoundDialog";
 import { useAuthContext } from "../../../context/AuthContext";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import apolloClient from "../../../apollo-client";
 import { setCookie } from "../../../utils/authCookieGenerator";
-import KeyValueCard from "../../../components/KeyValueCard";
 import * as Sentry from "@sentry/nextjs";
-import Grid from "@mui/material/Unstable_Grid2";
-import useMediaQuery from "../../../components/useMediaQuery";
 
 const removeDashes = (str: string) => str.replace(/-/g, "");
 
@@ -33,10 +28,7 @@ export default function Round({
 }: InferGetServerSidePropsType<typeof getServerSideProps>) {
   const router = useRouter();
   const networkContext = useNetworkContext();
-  const isMobile = useMediaQuery(600);
   const { roundid, courseId, unverifiedCourseId, username } = router.query;
-  const authContext = useAuthContext();
-  const { isAuth, tokenPayload } = authContext.state;
 
   // save reference to hidden query params so they aren't lost on refresh
   if (courseId || unverifiedCourseId) {
@@ -44,7 +36,6 @@ export default function Round({
     setCookie(roundIdAsCookieKey, JSON.stringify(router.query));
   }
 
-  const [isLoading, setIsLoading] = useState<boolean>(true);
   const [scoreCardProps, setScoreCardProps] = useState<IScoreCardProps | null>(null);
   const [courseDetails, setCourseDetails] = useState<ICourseDetails | null>(null);
   const [roundDetails, setRoundDetails] = useState<IRoundDetails | null>(null);
@@ -74,7 +65,6 @@ export default function Round({
     if (data && courseData) {
       const builtProps = buildProps(roundDetails, courseDetails);
       setScoreCardProps(builtProps);
-      setIsLoading(false);
     }
   }, [data, courseData, roundDetails, courseDetails]);
 
@@ -94,93 +84,11 @@ export default function Round({
     return roundProps;
   }
 
-  // TODO make this smarter than toggle
-  function toggleOfflineMode() {
-    networkContext.dispatch({
-      type: "update offline mode enabled",
-      payload: {
-        ...networkContext.state,
-        offlineModeEnabled: !networkContext.state.offlineModeEnabled,
-      },
-    });
-  }
-
   return (
     <>
-      {isLoading ? (
-        <LoadingSpinner />
-      ) : (
-        <RoundContextProvider>
-          {/* {isAuth && (
-            <Box m={2} textAlign="center">
-              <Button
-                onClick={toggleOfflineMode}
-                type="submit"
-                size="medium"
-                variant="contained"
-                color="primary"
-              >
-                {networkContext.state.offlineModeEnabled ? (
-                  <SignalCellularConnectedNoInternet1BarRoundedIcon />
-                ) : (
-                  <CellWifiRoundedIcon />
-                )}
-              </Button>
-              <Box pt={1}>
-                <Typography textAlign="center" variant="caption">
-                  {networkContext.state.offlineModeEnabled
-                    ? "You are offline"
-                    : "Bad signal? Go offline"}
-                </Typography>
-              </Box>
-            </Box>
-          )} */}
-          {roundDetails && (
-            <>
-              <Box textAlign="center" mt={2}>
-                <Typography variant="h5">
-                  {roundDetails.course_name
-                    ? roundDetails.course_name
-                    : roundDetails.user_added_course_name}
-                </Typography>
-                <Box>
-                  <Typography variant="subtitle2">
-                    {courseDetails?.course_city || roundDetails.user_added_city},{" "}
-                    {courseDetails?.course_state || roundDetails.user_added_state}
-                  </Typography>
-                </Box>
-              </Box>
-              <Grid
-                container
-                spacing={{ xs: 0, md: 2 }}
-                justifyContent="center"
-                alignItems="center"
-                direction="row"
-                sx={{ maxWidth: "sm", margin: "auto" }}
-                textAlign="center"
-              >
-                <Grid xs={4} md={4}>
-                  <KeyValueCard
-                    label={"Date"}
-                    value={roundDetails?.round_date ? roundDetails.round_date.split(",")[0] : "--"}
-                  />
-                </Grid>
-                <Grid xs={4} md={4}>
-                  <KeyValueCard
-                    label={isMobile ? "Cond." : "Conditions"}
-                    value={roundDetails?.weather_conditions || "--"}
-                  />
-                </Grid>
-                <Grid xs={4} md={4}>
-                  <KeyValueCard label={"Temp F"} value={roundDetails.temperature + "\u00B0"} />
-                </Grid>
-              </Grid>
-              <Box textAlign="center">{scoreCardProps && <ScoreCard {...scoreCardProps} />}</Box>
-              {isAuth && username == tokenPayload?.username && <DeleteRoundDialog />}
-            </>
-          )}
-        </RoundContextProvider>
-      )}
+      <RoundContextProvider>
+        <Box textAlign="center">{scoreCardProps && <ScoreCard {...scoreCardProps} />}</Box>
+      </RoundContextProvider>
     </>
   );
 }

@@ -39,6 +39,7 @@ import useMediaQuery from "./useMediaQuery";
 import Grid from "@mui/material/Unstable_Grid2";
 import { Skeleton } from "@mui/material";
 import EditRoundMenu from "./EditRoundMenu";
+import DeleteRoundDialog from "./DeleteRoundDialog";
 
 export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
@@ -81,6 +82,7 @@ export default function ScoreCard(props: IScoreCardProps) {
   const { hasNetworkConnection, offlineModeEnabled, mbps } = networkContext.state;
   const authContext = useAuthContext();
   const { isAuth, tokenPayload } = authContext.state;
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   const [saveRound] = useMutation(saveRoundMutation);
   const [saveUnverifiedCoursePar] = useMutation(saveUnverifiedCourseParMutation);
@@ -131,6 +133,7 @@ export default function ScoreCard(props: IScoreCardProps) {
       };
     }
     setRoundRows(roundRows);
+    setIsLoading(false);
   }, [roundContext.state.par]);
 
   useEffect(() => {
@@ -294,51 +297,114 @@ export default function ScoreCard(props: IScoreCardProps) {
 
   return (
     <>
-      <Grid
-        container
-        spacing={{ xs: 1, md: 2 }}
-        justifyContent="center"
-        alignItems="center"
-        direction="row"
-        sx={{ maxWidth: "sm", margin: "auto" }}
-      >
-        <Grid xs={4} md={4}>
-          <KeyValueCard label={"Tees"} value={formatTotalYardageHeading(props.tee_color) || "--"} />
+      <Box textAlign="center" mt={2}>
+        <Typography variant="h5">
+          {isLoading ? (
+            <>
+              <Skeleton width="sm" sx={{ maxWidth: "sm", margin: "auto" }} />
+            </>
+          ) : props?.course_name ? (
+            props.course_name
+          ) : (
+            props?.user_added_course_name
+          )}
+        </Typography>
+        <Box>
+          <Typography variant="subtitle2">
+            {isLoading ? (
+              <Skeleton width={150} sx={{ margin: "auto" }} />
+            ) : (
+              `${props?.course_city || props?.user_added_city}, 
+                ${props?.course_state || props?.user_added_state}`
+            )}
+          </Typography>
+        </Box>
+      </Box>
+      {isLoading ? (
+        <Skeleton height={320} sx={{ maxWidth: "sm", margin: "auto", mt: -3 }} />
+      ) : (
+        <Grid
+          container
+          spacing={{ xs: 1, md: 2 }}
+          justifyContent="center"
+          alignItems="center"
+          direction="row"
+          sx={{ maxWidth: "sm", margin: "auto" }}
+        >
+          <Grid xs={4} md={4}>
+            <KeyValueCard
+              label={"Date"}
+              value={props?.round_date ? props.round_date.split(",")[0] : "--"}
+            />
+          </Grid>
+          <Grid xs={4} md={4}>
+            <KeyValueCard
+              label={isMobile ? "Cond." : "Conditions"}
+              value={props?.weather_conditions || "--"}
+            />
+          </Grid>
+          <Grid xs={4} md={4}>
+            <KeyValueCard label={"Temp F"} value={props?.temperature + "\u00B0"} />
+          </Grid>
+          <Grid xs={4} md={4}>
+            <KeyValueCard
+              label={"Tees"}
+              value={formatTotalYardageHeading(props.tee_color) || "--"}
+            />
+          </Grid>
+          <Grid xs={4} md={4}>
+            <KeyValueCard
+              label={"Distance"}
+              value={displayDistanceYardage(roundRows[20]) || "--"}
+            />
+          </Grid>
+          <Grid xs={4} md={4}>
+            <KeyValueCard
+              label={isMobile ? "Rat/Slp" : "Rating/Slope"}
+              value={rating && slope ? `${rating}/${slope}` : "--"}
+            />
+          </Grid>
         </Grid>
-        <Grid xs={4} md={4}>
-          <KeyValueCard label={"Distance"} value={displayDistanceYardage(roundRows[20]) || "--"} />
-        </Grid>
-        <Grid xs={4} md={4}>
-          <KeyValueCard
-            label={isMobile ? "Rat/Slp" : "Rating/Slope"}
-            value={rating && slope ? `${rating}/${slope}` : "--"}
-          />
-        </Grid>
-      </Grid>
+      )}
       <Box
         sx={{
           maxWidth: "sm",
           m: "auto",
-          my: 2,
         }}
       >
-        {isAuth && (
-          <Box textAlign="center">
+        <Box textAlign="center">
+          {isLoading ? (
+            <Skeleton variant="rectangular" sx={{ margin: "auto", mt: -4 }}>
+              <EditRoundMenu />
+            </Skeleton>
+          ) : (
             <EditRoundMenu />
-            <Box>
-              <Typography textAlign="center" variant="caption">
-                {networkContext.state.offlineModeEnabled
-                  ? "You are offline"
-                  : "Bad signal? Go offline"}
-              </Typography>
-            </Box>
+          )}
+          <Box>
+            <Typography textAlign="center" variant="caption">
+              {isLoading ? (
+                <Skeleton width={200} sx={{ margin: "auto" }} />
+              ) : networkContext.state.offlineModeEnabled ? (
+                "You are offline"
+              ) : (
+                "Bad signal on the course? Go offline"
+              )}
+            </Typography>
           </Box>
-        )}
+        </Box>
       </Box>
       <hr style={{ maxWidth: isMobile ? "75%" : "25%" }} />
       <Box py={2}>
-        <Typography variant="h3">Score</Typography>
-        <Typography variant="h3">{roundContext.state.holeScores[20] || 0}</Typography>
+        <Typography variant="h3">
+          {isLoading ? <Skeleton width={200} sx={{ margin: "auto" }} /> : "Score"}
+        </Typography>
+        <Typography variant="h3">
+          {isLoading ? (
+            <Skeleton width={75} sx={{ margin: "auto" }} />
+          ) : (
+            roundContext.state.holeScores[20] || 0
+          )}
+        </Typography>
       </Box>
       <Box
         sx={{
@@ -347,7 +413,7 @@ export default function ScoreCard(props: IScoreCardProps) {
         }}
         pb={2}
       >
-        {roundContext.state.holeScores[20] ? (
+        {!isLoading && roundContext.state.holeScores[20] ? (
           <KeyValueCard
             label={"Breakdown"}
             value={
@@ -360,27 +426,40 @@ export default function ScoreCard(props: IScoreCardProps) {
           />
         ) : (
           <KeyValueCard
-            label={"Add Scores to see breakdown"}
+            label={isLoading ? "" : "Add scores to see pie chart breakdown"}
             value={
               <>
                 <Skeleton
-                  animation={false}
+                  animation="wave"
                   variant="text"
                   width={300}
-                  sx={{ maxWidth: "sm", margin: "auto" }}
+                  sx={{
+                    maxWidth: "sm",
+                    margin: "auto",
+                    bgcolor: isLoading ? "#e6e6e7" : "#a5d6a7",
+                  }}
                 />
                 <Skeleton
-                  animation={false}
+                  animation="wave"
                   variant="text"
                   width={300}
-                  sx={{ maxWidth: "sm", margin: "auto" }}
+                  sx={{
+                    maxWidth: "sm",
+                    margin: "auto",
+                    bgcolor: isLoading ? "#e6e6e7" : "#a5d6a7",
+                  }}
                 />
                 <Skeleton
-                  animation={false}
+                  animation="wave"
                   variant="circular"
                   width={isMobile ? 300 : 450}
                   height={isMobile ? 300 : 450}
-                  sx={{ maxWidth: "sm", margin: "auto", mt: 5 }}
+                  sx={{
+                    maxWidth: "sm",
+                    margin: "auto",
+                    mt: 5,
+                    bgcolor: isLoading ? "#e6e6e7" : "#a5d6a7",
+                  }}
                 />
               </>
             }
@@ -492,6 +571,7 @@ export default function ScoreCard(props: IScoreCardProps) {
           </Table>
         </TableContainer>
       </Box>
+      {isAuth && username == tokenPayload?.username && <DeleteRoundDialog />}
     </>
   );
 }

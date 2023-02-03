@@ -4,6 +4,7 @@ import Card from "@mui/material/Card";
 import CardContent from "@mui/material/CardContent";
 import Typography from "@mui/material/Typography";
 import { ReactElement } from "react";
+import { Skeleton } from "@mui/material";
 
 interface IKeyValueCardProps {
   label: string;
@@ -13,18 +14,16 @@ interface IKeyValueCardProps {
 export default function KeyValueCard({ label, value }: IKeyValueCardProps) {
   return (
     <>
-      {value && (
-        <Card sx={{ maxWidth: "sm", m: 1 }}>
-          <CardContent>
-            <>
-              <Typography variant="h6" color="text.secondary" gutterBottom>
-                {label}
-              </Typography>
-              <Box>{value}</Box>
-            </>
-          </CardContent>
-        </Card>
-      )}
+      <Card sx={{ maxWidth: "sm", m: 1 }}>
+        <CardContent>
+          <>
+            <Typography variant="h6" color="text.secondary" gutterBottom>
+              {label ? label : <Skeleton width={200} sx={{ margin: "auto" }} />}
+            </Typography>
+            <Box>{value}</Box>
+          </>
+        </CardContent>
+      </Card>
     </>
   );
 }

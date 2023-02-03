@@ -170,11 +170,11 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
           </Box>
           <Box sx={{ maxWidth: "sm", margin: "auto", my: 4 }}>
             {isLoading ? (
-              <Skeleton variant="rectangular" height={584} width={588} />
+              <Skeleton variant="rectangular" height={584} sx={{ maxWidth: "sm" }} />
             ) : (
               roundPreviewRows && (
                 <KeyValueCard
-                  label={"Scoring Breakdown"}
+                  label={isLoading ? "" : "Create a new round to see pie chart scoring breakdown"}
                   value={
                     roundPreviewRows.length ? (
                       <PieChart
@@ -184,25 +184,34 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
                       />
                     ) : (
                       <>
-                        <Typography variant="caption">Add a new round to see breakdown</Typography>
                         <Skeleton
-                          animation={false}
+                          animation="wave"
                           variant="text"
                           width={300}
-                          sx={{ maxWidth: "sm", margin: "auto" }}
+                          sx={{
+                            margin: "auto",
+                            bgcolor: isLoading ? "#e6e6e7" : "#a5d6a7",
+                          }}
                         />
                         <Skeleton
-                          animation={false}
+                          animation="wave"
                           variant="text"
                           width={300}
-                          sx={{ maxWidth: "sm", margin: "auto" }}
+                          sx={{
+                            margin: "auto",
+                            bgcolor: isLoading ? "#e6e6e7" : "#a5d6a7",
+                          }}
                         />
                         <Skeleton
-                          animation={false}
+                          animation="wave"
                           variant="circular"
                           width={isMobile ? 300 : 450}
                           height={isMobile ? 300 : 450}
-                          sx={{ maxWidth: "sm", margin: "auto", mt: 5 }}
+                          sx={{
+                            margin: "auto",
+                            mt: 5,
+                            bgcolor: isLoading ? "#e6e6e7" : "#a5d6a7",
+                          }}
                         />
                       </>
                     )

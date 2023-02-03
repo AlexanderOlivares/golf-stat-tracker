@@ -10,7 +10,7 @@ import {
 } from "chart.js";
 import { Pie } from "react-chartjs-2";
 import { IRoundPreview } from "../../pages/[username]/profile";
-import { Box } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 
 export interface IPieChartProps {
   data: (IRoundPreview | number)[];
@@ -53,11 +53,15 @@ export default function PieChart({ data, labels, pieSliceHexArr }: IPieChartProp
 
   return (
     <>
-      {showPieChart && (
-        <Box maxWidth="500" m={1}>
+      <Box maxWidth="500" position="relative">
+        {data ? (
           <Pie width={500} height={500} data={chartData} options={options} />
-        </Box>
-      )}
+        ) : (
+          <Box width={500} height={500}>
+            <Typography>No data to display yet</Typography>
+          </Box>
+        )}
+      </Box>
     </>
   );
 }
