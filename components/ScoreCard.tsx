@@ -523,7 +523,8 @@ export default function ScoreCard(props: IScoreCardProps) {
               calculateSrambles(
                 adhocStatCounter(holeShotDetails).scrambleHoleIndexes,
                 roundContext.state.par,
-                roundContext.state.holeScores
+                roundContext.state.holeScores,
+                roundContext.state.holeShotDetails
               ) || "--"
             }
           />

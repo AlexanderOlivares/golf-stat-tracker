@@ -13,8 +13,6 @@ import { IScoreCardProps } from "../../../interfaces/scorecardInterface";
 import { ICourseDetails } from "../../../interfaces/course";
 import { IRoundDetails } from "../../../interfaces/round";
 import { toast } from "react-toastify";
-import DeleteRoundDialog from "../../../components/DeleteRoundDialog";
-import { useAuthContext } from "../../../context/AuthContext";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
 import apolloClient from "../../../apollo-client";
 import { setCookie } from "../../../utils/authCookieGenerator";

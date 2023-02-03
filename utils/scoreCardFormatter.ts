@@ -301,14 +301,18 @@ export function formatPotentialScore(score: number | null, subtractedPenaltiesAn
     return (score - threePuttsFound) + subtractedPenaltiesAndMishits;
 }
 
-export function calculateSrambles(scrambleIndexes: number[], parArray: string[], holeScores: (number|null)[]){
+export function calculateSrambles(scrambleIndexes: number[], parArray: string[], holeScores: (number|null)[], holeShotDetails: IShotDetail[][]){
     let scrambleCount = 0;
     scrambleIndexes.forEach((scrambleEligableHoleIndex: number) => {
         const par = Number(parArray[scrambleEligableHoleIndex]);
         if (!par) return;
         const holeScore = holeScores[scrambleEligableHoleIndex];
         if (holeScore && holeScore <= par){
-            scrambleCount++;
+            const shotOnGreen = holeShotDetails[scrambleEligableHoleIndex].find(shot => shot.result == "Hit Green");
+            if (!shotOnGreen?.shotNumber) return;
+            if (par - shotOnGreen.shotNumber <= 1){
+                scrambleCount++;
+            }
         }
     })
     return scrambleCount;

@@ -1177,28 +1177,10 @@ const holeShotDetailsWithValidAdhocStats =
       },
       {
         "shotNumber": 2,
-        "distanceToPin": 191,
-        "club": null,
-        "result": "Penalty Stroke"
-      },
-      {
-        "shotNumber": 3,
-        "distanceToPin": 191,
+        "distanceToPin": 25,
         "club": "56 degree",
-        "result": "Hit Green"
-      },
-      {
-        "shotNumber": 4,
-        "distanceToPin": 31,
-        "club": "Putter",
-        "result": "Miss Short"
-      },
-      {
-        "shotNumber": 5,
-        "distanceToPin": 5,
-        "club": "Putter",
         "result": "In Hole"
-      }
+      },
     ],
     [
       {
@@ -1271,7 +1253,7 @@ const holeShotDetailsWithValidAdhocStats =
   ]
 
   test("should tally up shots labled as 'penalty strokes' in a single round ", () => {
-    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).penalties).toEqual(4)
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).penalties).toEqual(3)
     expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).penalties).not.toBe(0)
   })
   test("should tally up shots labled 'mishit' in a single round", () => {
@@ -1279,7 +1261,7 @@ const holeShotDetailsWithValidAdhocStats =
     expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).mishits).not.toBe(0)
   })
   test("should be the negative value of mishits plus penalty strokes. Meant to be less than or equal to zero so it can be subtracted from the total score", () => {
-    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).potentialScore).toEqual(-6)
+    expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).potentialScore).toEqual(-5)
     expect(adhocStatCounter(holeShotDetailsWithValidAdhocStats).potentialScore).not.toBe(0)
   })
   test("should count of times a shot labeled 'hit green' was followed up by a shot labeld 'in hole'", () => {
@@ -1304,10 +1286,12 @@ const holeShotDetailsWithValidAdhocStats =
   })
 
   test("should tally up scrambles (par or better when GIR is not made)", () => {
-    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 4, 4, 4, 6, 5, 3, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null])).toEqual(7)
-    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 7, 6, 4, 6, 5, 4, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null])).toEqual(4)
-    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null])).toEqual(0)
-    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 7, 6, 4, 6, 5, 4, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null])).not.toBe(0)
-    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['', '', '', '', '', '', '', '', '', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 7, 6, 4, 6, 5, 4, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null])).toEqual(3)
-    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 18], ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''], [4, 7, 6, 4, 6, 5, 4, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null])).toEqual(0)
+    expect(calculateSrambles([17], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 4, 4, 2, 6, 5, 3, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 2, 3, 41, 80, null, null, null, null], holeShotDetailsWithValidAdhocStats)).toEqual(0)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 17, 18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 4, 4, 4, 6, 5, 3, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 2, 3, 41, 80, null, null, null, null], holeShotDetailsWithValidAdhocStats)).toEqual(4)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 17, 18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 4, 4, 4, 6, 5, 3, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 2, 3, 41, 80, null, null, null, null], holeShotDetailsWithValidAdhocStats)).not.toBe(7)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15,17,  18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], holeShotDetailsWithValidAdhocStats)).toEqual(0)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15,17,  18], ['4', '5', '4', '3', '4', '4', '3', '5', '4', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 7, 6, 4, 6, 5, 4, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null], holeShotDetailsWithValidAdhocStats)).not.toBe(0)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 17, 18], ['', '', '', '', '', '', '', '', '', '36', '4', '4', '5', '3', '5', '3', '4', '3', '4', '35'], [4, 4, 4, 2, 6, 5, 3, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 2, 3, 41, 80, null, null, null, null], holeShotDetailsWithValidAdhocStats)).toEqual(1)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 17, 18], ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''], [4, 7, 6, 4, 6, 5, 4, 5, 4, 39, 5, 3, 7, 3, 7, 3, 5, 5, 3, 41, 80, null, null, null, null], holeShotDetailsWithValidAdhocStats)).toEqual(0)
+    expect(calculateSrambles([1, 2, 6, 8, 11, 15, 17, 18], ['', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', ''], [null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null, null], holeShotDetailsWithValidAdhocStats)).toEqual(0)
   })
