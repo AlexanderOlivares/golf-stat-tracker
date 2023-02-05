@@ -174,7 +174,11 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
             ) : (
               roundPreviewRows && (
                 <KeyValueCard
-                  label={isLoading ? "" : "Create a new round to see pie chart scoring breakdown"}
+                  label={
+                    roundPreviewRows.length
+                      ? "Scoring Breakdown"
+                      : "Create a new round to see pie chart scoring breakdown"
+                  }
                   value={
                     roundPreviewRows.length ? (
                       <PieChart
