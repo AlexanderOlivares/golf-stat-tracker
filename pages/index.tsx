@@ -6,10 +6,15 @@ import GolfCourseRoundedIcon from "@mui/icons-material/GolfCourseRounded";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import useMediaQuery from "../components/useMediaQuery";
+import ImageCard from "../components/ImageCard";
+import { landingPageContent } from "../content/LandingPage";
+import Card from "@mui/material/Card";
+
+const cards = ["Bag", "Signal"];
 
 const Home: NextPage = () => {
   const router = useRouter();
-  const mobileViewPort = useMediaQuery(600);
+  const isMobile = useMediaQuery(600);
   return (
     <div className={styles.container}>
       <Head>
@@ -19,33 +24,11 @@ const Home: NextPage = () => {
         <link rel="manifest" href="/manifest.json" />
       </Head>
 
-      <Box textAlign="center" my={4}>
+      <Box textAlign="center" my={3}>
+        <Typography variant="h5">Go low with</Typography>
         <Typography variant="h2">Golf Logs</Typography>
+        <hr style={{ maxWidth: isMobile ? "85%" : "25%" }} />
         <Box my={3}>
-          <GolfCourseRoundedIcon sx={{ fontSize: 150 }} />
-        </Box>
-        <Box
-          p={2}
-          sx={{
-            margin: "auto",
-            maxWidth: mobileViewPort ? "100%" : "50%",
-            outline: "solid",
-            borderStyle: "solid",
-            borderWidth: "thin",
-          }}
-        >
-          <Typography variant="h6">Do more than just keep score.</Typography>
-          <Box textAlign="left" mt={2}>
-            <Typography variant="body1">
-              Keep track of every single shot with Golf Logs. Record the club used, distance to pin
-              and shot result to create a snapshot of each stroke. Golf Logs will help you learn
-              your club distances, see your mishit tendancies and allow you to better understand
-              your strengths on the golf course.
-            </Typography>
-          </Box>
-        </Box>
-
-        <Box pt={3}>
           <Typography variant="h6">Create Golfer Account</Typography>
           <Box mt={1} mb={2}>
             <Button
@@ -66,6 +49,40 @@ const Home: NextPage = () => {
             </a>
           </Link>
         </Box>
+        <Card
+          sx={{
+            margin: "auto",
+            maxWidth: isMobile ? "100%" : "50%",
+            padding: 5,
+            boxShadow: 3,
+          }}
+        >
+          <Box my={3}>
+            <GolfCourseRoundedIcon sx={{ fontSize: 150 }} />
+          </Box>
+          <Typography variant="h6">Do more than keep score</Typography>
+          <Box textAlign="left" mt={2}>
+            <Typography variant="body1">
+              Keep track of every single shot with Golf Logs. Record the club used, distance to pin
+              and shot result to create a snapshot of each stroke. Golf Logs will help you learn
+              your club distances, see your mishit tendancies and allow you to better understand
+              your strengths on the golf course.
+            </Typography>
+          </Box>
+        </Card>
+        {landingPageContent.map(card => {
+          return (
+            <ImageCard
+              key={card.title}
+              title={card.title}
+              image={card.image}
+              alt={card.alt}
+              value={card.value}
+              buttonOneText={card.buttonOneText}
+              buttonTwoText={card.buttonTwoText}
+            />
+          );
+        })}
       </Box>
     </div>
   );

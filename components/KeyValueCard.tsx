@@ -14,7 +14,7 @@ interface IKeyValueCardProps {
 export default function KeyValueCard({ label, value }: IKeyValueCardProps) {
   return (
     <>
-      <Card sx={{ maxWidth: "sm", m: 1 }}>
+      <Card sx={{ maxWidth: "sm", m: 1, boxShadow: 3 }}>
         <CardContent>
           <>
             <Typography variant="h6" color="text.secondary" gutterBottom>

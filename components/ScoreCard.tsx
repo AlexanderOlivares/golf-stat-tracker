@@ -512,13 +512,13 @@ export default function ScoreCard(props: IScoreCardProps) {
         </Grid>
         <Grid xs={4} md={4}>
           <KeyValueCard
-            label={"Up and Downs"}
+            label={isMobile ? "Up & Downs" : "Up & Downs Made"}
             value={adhocStatCounter(roundContext.state.holeShotDetails).upAndDowns || "--"}
           />
         </Grid>
         <Grid xs={4} md={4}>
           <KeyValueCard
-            label={"Scrambles"}
+            label={isMobile ? "Scrambles Made" : "Scrambles Made"}
             value={
               calculateSrambles(
                 adhocStatCounter(holeShotDetails).scrambleHoleIndexes,
@@ -547,6 +547,7 @@ export default function ScoreCard(props: IScoreCardProps) {
           maxWidth: "lg",
           m: "auto",
         }}
+        pt={3}
         pb={8}
       >
         <TableContainer component={Paper}>
