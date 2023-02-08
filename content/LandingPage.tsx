@@ -3,41 +3,43 @@ export interface IImageCard {
   image: string;
   value: string;
   alt: string;
-  buttonOneText?: string;
-  buttonTwoText?: string;
 }
 
 export const landingPageContent: IImageCard[] = [
   {
-    title: "Build Your Bag",
-    image: "./",
-    alt: "",
-    value: "Select your sticks and dial-in your iron and wedge distances",
-  },
-  {
-    title: "Offline Mode",
-    image: "./",
-    alt: "",
-    value: "No signal? No problem. Track your shots even when service is bad out on the course",
-  },
-  {
     title: "Track Your Trends",
-    image: "./",
-    alt: "",
-    value: "See your improvement round-over-round with our in-depth stat trends",
+    image: "./images/trends.png",
+    alt: "Area charts of golf scores and fairways hit",
+    value: "See your round-over-round improvement with our in-depth stat trends",
   },
   {
     title: "Scoring Breakdown",
-    image: "./",
-    alt: "",
-    value:
-      "How often do you scramble for par or better? How many times do you go up and down per round? Visualize how you are scoring on the golf course and stay out of the red!",
+    image: "./images/scorepiechart.png",
+    alt: "Pie chart of golf scores over a round",
+    value: "Visualize your scoring on the golf course. Stay out of the red!",
+  },
+  {
+    title: "Distance, club, result, and score",
+    image: "./images/holedetailsmodal.png",
+    alt: "Menu to input hole score, distance, club and result",
+    value: "That's it. Golf Logs will handle the the stats. It's as easy as a tap-in putt",
   },
   {
     title: "Play To Your Potential",
-    image: "./",
-    alt: "",
-    value:
-      "Know what could've been. See your potential score without mistakes like penalty strokes, mishits and 3-putts",
+    image: "./images/scorecard.png",
+    alt: "Scorecard with golf stats",
+    value: "See your strengths. Learn your weaknesses. Find areas to improve.",
+  },
+  {
+    title: "Build Your Bag",
+    image: "./images/clubs.png",
+    alt: "Club selection menu",
+    value: "Select your sticks and dial-in your iron and wedge distances. No caddy needed",
+  },
+  {
+    title: "Offline Mode",
+    image: "./images/offline.png",
+    alt: "Offline mode menu",
+    value: "No signal? No problem. Track your shots even when there's no service on the course",
   },
 ];
