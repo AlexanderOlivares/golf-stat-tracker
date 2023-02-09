@@ -17,7 +17,7 @@ export default function KeyValueCard({ label, value }: IKeyValueCardProps) {
       <Card sx={{ maxWidth: "sm", m: 1, boxShadow: 3 }}>
         <CardContent>
           <>
-            <Typography variant="h6" color="text.secondary" gutterBottom>
+            <Typography variant="h6" color="black" gutterBottom>
               {label ? label : <Skeleton width={200} sx={{ margin: "auto" }} />}
             </Typography>
             <Box>{value}</Box>

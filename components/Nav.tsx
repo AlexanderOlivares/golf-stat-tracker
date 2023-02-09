@@ -13,13 +13,11 @@ import MenuItem from "@mui/material/MenuItem";
 import HideNavOnScroll from "./HideNavOnScroll";
 import { useRouter } from "next/router";
 import SignOut from "./SignOut";
-import { queryParamToString } from "../utils/queryParamFormatter";
 import { useAuthContext } from "../context/AuthContext";
 import { toast } from "react-toastify";
 import GolfCourseRoundedIcon from "@mui/icons-material/GolfCourseRounded";
 
 const pages = ["New Round", "Profile", "My Clubs"];
-const settings = ["login"];
 
 function Nav() {
   const authContext = useAuthContext();
@@ -80,9 +78,9 @@ function Nav() {
               sx={{
                 mr: 2,
                 display: { xs: "none", md: "flex" },
-                fontFamily: "monospace",
-                fontWeight: 700,
+                fontWeight: 800,
                 letterSpacing: ".3rem",
+                fontSize: "1.7rem",
                 color: "inherit",
                 textDecoration: "none",
               }}
@@ -91,7 +89,7 @@ function Nav() {
             </Typography>
 
             {isAuth && (
-              <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none" } }}>
+              <Box sx={{ flexGrow: 1, display: { xs: "flex", md: "none", color: "black" } }}>
                 <IconButton
                   size="large"
                   aria-label="account of current user"
@@ -117,7 +115,7 @@ function Nav() {
                   open={Boolean(anchorElNav)}
                   onClose={handleCloseNavMenu}
                   sx={{
-                    display: { xs: "block", md: "none" },
+                    display: { xs: "block", md: "none", fontWeight: 700 },
                   }}
                 >
                   {pages.map(page => (
@@ -138,10 +136,9 @@ function Nav() {
                 mr: 2,
                 display: { xs: "flex", md: "none" },
                 flexGrow: 1,
-                fontFamily: "monospace",
-                fontWeight: 700,
+                fontWeight: 900,
                 letterSpacing: ".3rem",
-                color: "inherit",
+                color: "black",
                 textDecoration: "none",
               }}
             >
@@ -153,7 +150,13 @@ function Nav() {
                   <Button
                     key={page}
                     onClick={() => goToPage(page)}
-                    sx={{ my: 2, color: "white", display: "block" }}
+                    sx={{
+                      my: 2,
+                      color: "black",
+                      display: "block",
+                      fontSize: "1em",
+                      fontWeight: 500,
+                    }}
                   >
                     {page}
                   </Button>
@@ -168,7 +171,7 @@ function Nav() {
                   ) : (
                     <IconButton
                       onClick={() => goToLoginOrRegister(pathname)}
-                      sx={{ my: 2, color: "white", display: "block" }}
+                      sx={{ my: 2, display: "block" }}
                     >
                       <Typography variant="button" display="block" gutterBottom>
                         {pathname == "/login" ? "register" : "login"}

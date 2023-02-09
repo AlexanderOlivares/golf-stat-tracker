@@ -23,7 +23,7 @@ function SignOut() {
     return router.push("/login");
   };
   return (
-    <Button size="medium" onClick={signOutUser} sx={{ my: 2, color: "white", display: "block" }}>
+    <Button size="medium" onClick={signOutUser} sx={{ my: 2, color: "black", display: "block" }}>
       logout
     </Button>
   );

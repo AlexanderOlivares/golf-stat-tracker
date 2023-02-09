@@ -234,7 +234,7 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
             </Typography>
             {isAuth && (
               <Box m={2}>
-                <Button onClick={startNewRound} size="large" variant="contained" color="primary">
+                <Button onClick={startNewRound} size="large" color="secondary" variant="contained">
                   new round
                 </Button>
               </Box>

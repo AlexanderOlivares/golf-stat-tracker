@@ -82,8 +82,6 @@ const Home: NextPage = () => {
                 image={card.image}
                 alt={card.alt}
                 value={card.value}
-                buttonOneText={card.buttonOneText}
-                buttonTwoText={card.buttonTwoText}
               />
             );
           })}

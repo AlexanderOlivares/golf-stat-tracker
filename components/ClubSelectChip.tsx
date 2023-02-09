@@ -119,7 +119,7 @@ export default function MultipleSelectChip() {
               renderValue={selected => (
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 1 }}>
                   {selected.map(value => (
-                    <Chip key={value} label={value} />
+                    <Chip color="secondary" key={value} label={value} />
                   ))}
                 </Box>
               )}

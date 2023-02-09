@@ -25,6 +25,7 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
     {
       field: "Course",
       headerName: "Course",
+      headerClassName: "super-app-theme--header",
       width: 200,
       editable: false,
       headerAlign: "left",
@@ -34,6 +35,7 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
     {
       field: "Score",
       headerName: "Score",
+      headerClassName: "super-app-theme--header",
       width: mobileViewPort ? 55 : 150,
       editable: false,
       headerAlign: "left",
@@ -43,6 +45,7 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
     {
       field: "FW Hit",
       headerName: "FW Hit",
+      headerClassName: "super-app-theme--header",
       width: mobileViewPort ? 75 : 150,
       editable: false,
       headerAlign: "left",
@@ -55,6 +58,7 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
       type: "number",
       description: "Greens In Regulation",
       headerAlign: "left",
+      headerClassName: "super-app-theme--header",
       align: "left",
       width: mobileViewPort ? 55 : 150,
       editable: false,
@@ -63,6 +67,7 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
     {
       field: "3-Putts",
       headerName: "3-Putts",
+      headerClassName: "super-app-theme--header",
       headerAlign: "left",
       align: "left",
       editable: false,
@@ -72,6 +77,7 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
     {
       field: "Total Putts",
       headerName: "Total Putts",
+      headerClassName: "super-app-theme--header",
       type: "number",
       width: mobileViewPort ? 85 : 150,
       editable: false,
@@ -82,6 +88,7 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
     {
       field: "Date",
       headerName: "Date",
+      headerClassName: "super-app-theme--header",
       type: "dateTime",
       width: 200,
       editable: false,
@@ -124,7 +131,17 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
   }
 
   return (
-    <Box sx={{ height: 700, width: "100%", cursor: "pointer" }}>
+    <Box
+      sx={{
+        height: 700,
+        width: "100%",
+        cursor: "pointer",
+        backgroundColor: "white",
+        "& .super-app-theme--header": {
+          backgroundColor: "#c4f2ff",
+        },
+      }}
+    >
       <DataGrid
         components={{
           NoRowsOverlay: () => {
