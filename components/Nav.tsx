@@ -137,6 +137,7 @@ function Nav() {
                 display: { xs: "flex", md: "none" },
                 flexGrow: 1,
                 fontWeight: 900,
+                fontSize: "1.2rem",
                 letterSpacing: ".3rem",
                 color: "black",
                 textDecoration: "none",
