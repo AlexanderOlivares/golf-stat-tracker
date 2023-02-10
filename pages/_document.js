@@ -10,6 +10,11 @@ export default function Document() {
           href="https://fonts.googleapis.com/css2?family=Nunito&display=swap"
           rel="stylesheet"
         />
+        <meta
+          name="description"
+          property="og:description"
+          content="A golf stat tracking web app that records scores and swing data to help golfers improve their game."
+        />
       </Head>
       <body>
         <Main />
