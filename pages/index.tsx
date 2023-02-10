@@ -13,6 +13,9 @@ import Card from "@mui/material/Card";
 const Home: NextPage = () => {
   const router = useRouter();
   const isMobile = useMediaQuery(600);
+  function goToRegisterPage() {
+    router.push(`/register`);
+  }
   return (
     <div className={styles.container}>
       <Head>
@@ -30,8 +33,9 @@ const Home: NextPage = () => {
             margin: "auto",
             maxWidth: "sm",
             padding: 5,
-            boxShadow: 3,
+            boxShadow: 4,
             marginTop: 2,
+            marginBottom: 2,
           }}
         >
           <Box mb={1}>
@@ -50,7 +54,12 @@ const Home: NextPage = () => {
           <Box mt={2}>
             <Typography variant="h6">Create Golfer Account</Typography>
             <CardActions>
-              <Button sx={{ margin: "auto", mt: 0 }} variant="contained" size="large">
+              <Button
+                sx={{ margin: "auto", mt: 0 }}
+                onClick={goToRegisterPage}
+                variant="contained"
+                size="large"
+              >
                 Register
               </Button>
             </CardActions>

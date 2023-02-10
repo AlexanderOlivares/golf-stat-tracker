@@ -48,15 +48,15 @@ export default function Row(props: { row: ICompleteScoreCard }) {
   return (
     <>
       <TableRow onClick={() => setOpen(!open)} sx={{ backgroundColor: stripedRowLogic() }}>
-        <TableCell component="th" scope="row">
+        <TableCell align="center" component="th" scope="row">
           {row.hole}
         </TableCell>
-        <TableCell align="right">{row.totalPar ? row.totalPar : row.par}</TableCell>
-        <TableCell align="right">{state.holeScores[holeIndex]}</TableCell>
+        <TableCell align="center">{row.totalPar ? row.totalPar : row.par}</TableCell>
+        <TableCell align="center">{state.holeScores[holeIndex]}</TableCell>
         {!roundContext.state.isUserAddedCourse && (
           <>
-            <TableCell align="right">{displayDistanceYardage(row)}</TableCell>
-            <TableCell align="right">{row.handicap}</TableCell>
+            <TableCell align="center">{displayDistanceYardage(row)}</TableCell>
+            <TableCell align="center">{row.handicap}</TableCell>
           </>
         )}
       </TableRow>

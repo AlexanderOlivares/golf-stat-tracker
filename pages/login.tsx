@@ -193,9 +193,6 @@ export default function Login() {
             </a>
           </Link>
         </Box>
-        <Box m={3}>
-          <SignOut />
-        </Box>
       </Box>
     </>
   );

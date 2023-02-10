@@ -37,6 +37,7 @@ function getStyles(name: string, clubName: readonly string[], theme: Theme) {
       clubName.indexOf(name) === -1
         ? theme.typography.fontWeightRegular
         : theme.typography.fontWeightMedium,
+    backgroundColor: clubName.indexOf(name) === -1 ? "#e2f9ff" : "#c4f2ff",
   };
 }
 
