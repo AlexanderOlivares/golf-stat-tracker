@@ -26,7 +26,7 @@ export const landingPageContent: IImageCard[] = [
   },
   {
     title: "Scoring Breakdown",
-    image: "./images/cutoffPie.png",
+    image: "./images/piechart.png",
     alt: "Pie chart of golf scores over a round",
     value: "Visualize your scoring on the golf course. Stay out of the red!",
   },
