@@ -1,10 +1,13 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useNetworkContext } from "../context/NetworkContext";
+import * as Sentry from "@sentry/nextjs";
 
 export default function ConnectionListener() {
   const networkContext = useNetworkContext();
+  const { offlineModeEnabled, hasNetworkConnection, mbps } = networkContext.state;
   const imageAddr = "https://upload.wikimedia.org/wikipedia/commons/2/2d/Snake_River_%285mb%29.jpg"; // test request image
   const downloadSize = 5452595; //size of photo in bytes
+  const [browserHasFocus, setBrowserHasFocus] = useState<boolean>(true);
 
   useEffect(() => {
     window.addEventListener("offline", e => {
@@ -28,12 +31,17 @@ export default function ConnectionListener() {
         },
       });
     });
+
+    document.addEventListener("visibilitychange", () => {
+      const browserTabHidden = document.hidden;
+      setBrowserHasFocus(!browserTabHidden);
+    });
   }, []);
 
   useEffect(() => {
     const connectionPing = setInterval(() => {
-      measureConnectionSpeed(networkContext.state.hasNetworkConnection);
-      if (networkContext.state.mbps < 10) {
+      if (hasNetworkConnection && browserHasFocus) measureConnectionSpeed(hasNetworkConnection);
+      if (mbps < 10) {
         networkContext.dispatch({
           type: "update offline mode enabled",
           payload: {
@@ -44,18 +52,17 @@ export default function ConnectionListener() {
       }
     }, 30000);
     return () => clearInterval(connectionPing);
-  }, [networkContext.state.hasNetworkConnection]);
+  }, [hasNetworkConnection, offlineModeEnabled, browserHasFocus]);
 
   useEffect(() => {
     networkContext.dispatch({
       type: "update offline mode enabled",
       payload: {
         ...networkContext.state,
-        offlineModeEnabled:
-          networkContext.state.mbps < 10 ? true : networkContext.state.offlineModeEnabled,
+        offlineModeEnabled: mbps < 10 ? true : offlineModeEnabled,
       },
     });
-  }, [networkContext.state.hasNetworkConnection]);
+  }, [hasNetworkConnection]);
 
   function measureConnectionSpeed(isOnline: boolean) {
     if (!isOnline) return;
@@ -67,7 +74,7 @@ export default function ConnectionListener() {
     };
 
     download.onerror = () => {
-      console.log("Invalid image, or error downloading");
+      Sentry.captureMessage("Invalid image, or error downloading");
     };
 
     startTime = new Date().getTime();

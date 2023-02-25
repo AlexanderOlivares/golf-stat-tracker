@@ -16,6 +16,7 @@ import * as Sentry from "@sentry/nextjs";
 import { ApolloError, useQuery } from "@apollo/client";
 import LoadingBackdrop from "../../../components/LoadingBackdrop";
 import { parseErrorMessage } from "../../../utils/errorMessage";
+import ConnectionListener from "../../../components/ConnectionListener";
 
 export default function Round() {
   const router = useRouter();
@@ -109,6 +110,7 @@ export default function Round() {
       <RoundContextProvider>
         <Box textAlign="center">{scoreCardProps && <ScoreCard {...scoreCardProps} />}</Box>
       </RoundContextProvider>
+      <ConnectionListener />
     </>
   );
 }

@@ -5,7 +5,6 @@ import apolloClient from "../apollo-client";
 import Head from "next/head";
 import { NetworkContextProvider } from "../context/NetworkContext";
 import { AuthContextProvider } from "../context/AuthContext";
-import ConnectionListener from "../components/ConnectionListener";
 import Nav from "../components/Nav";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
@@ -42,7 +41,6 @@ function MyApp({ Component, pageProps }: AppProps) {
                   pauseOnHover={false}
                   theme="light"
                 />
-                <ConnectionListener />
                 <AuthPersist />
               </CssBaseline>
             </ThemeProvider>
