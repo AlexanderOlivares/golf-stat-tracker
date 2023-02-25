@@ -112,22 +112,15 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
       course_id: courseId,
       unverified_course_id: unverifiedCourseId,
       round_id: roundid,
-      tee_color: teeColor,
-      is_user_added_course: isUserAddedCourse,
     } = row;
-    router.push(
-      {
-        pathname: `/${username}/round/${roundid}`,
-        query: {
-          roundid,
-          courseId,
-          teeColor,
-          isUserAddedCourse,
-          unverifiedCourseId,
-        },
+    router.push({
+      pathname: `/${username}/round/${roundid}`,
+      query: {
+        roundid,
+        courseId,
+        unverifiedCourseId,
       },
-      `/${username}/round/${roundid}`
-    );
+    });
   }
 
   return (

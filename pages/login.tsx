@@ -3,7 +3,6 @@ import { useRouter } from "next/router";
 import { Typography, Box, TextField, Button } from "@mui/material";
 import { emailAddressValidator, usernameAndPasswordValidator } from "../utils/formValidator";
 import { useMutation } from "@apollo/client";
-import SignOut from "../components/SignOut";
 import { loginMutation } from "./api/graphql/mutations/authMutations";
 import { useAuthContext } from "../context/AuthContext";
 import Link from "next/link";
@@ -93,10 +92,7 @@ export default function Login() {
   };
 
   useEffect(() => {
-    if (redirected) {
-      toast.error("An error occurred. Please login");
-      setIsLoading(false);
-    }
+    if (redirected) setIsLoading(false);
     removeCookie("authToken");
     authContext.dispatch({
       type: "update auth status",

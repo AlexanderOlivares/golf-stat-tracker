@@ -106,7 +106,7 @@ export default function NewRound() {
   const [userAddedCourseDetails, setuserAddedCourseDetails] = useState<IUserAddedCourse>({
     userAddedCourseName: "",
     userAddedCity: "",
-    userAddedState: "",
+    userAddedState: "Texas",
   });
 
   useEffect(() => {
@@ -244,19 +244,14 @@ export default function NewRound() {
         variables: newRoundRequestBody,
       });
 
-      router.push(
-        {
-          pathname: `/${username}/round/${roundid}`,
-          query: {
-            roundid,
-            courseId,
-            teeColor,
-            isUserAddedCourse,
-            unverifiedCourseId: newRoundRequestBody.unverifiedCourseId,
-          },
+      router.push({
+        pathname: `/${username}/round/${roundid}`,
+        query: {
+          roundid,
+          courseId,
+          unverifiedCourseId: newRoundRequestBody.unverifiedCourseId,
         },
-        `/${username}/round/${roundid}`
-      );
+      });
     } catch (error) {
       Sentry.captureException(error);
       toast.error(parseErrorMessage(error));

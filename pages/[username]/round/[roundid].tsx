@@ -4,7 +4,6 @@ import ScoreCard from "../../../components/ScoreCard";
 import { getCourseForRound } from "../../api/graphql/queries/courseQueries";
 import { useEffect, useState } from "react";
 import { getRoundByIdQuery } from "../../api/graphql/queries/roundQueries";
-import { queryParamToString } from "../../../utils/queryParamFormatter";
 import { RoundContextProvider } from "../../../context/RoundContext";
 import { getUnverifiedCourseForRound } from "../../api/graphql/queries/unverifiedCourseQueries";
 import { useNetworkContext } from "../../../context/NetworkContext";
@@ -13,26 +12,30 @@ import { IScoreCardProps } from "../../../interfaces/scorecardInterface";
 import { ICourseDetails } from "../../../interfaces/course";
 import { IRoundDetails } from "../../../interfaces/round";
 import { toast } from "react-toastify";
-import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
-import apolloClient from "../../../apollo-client";
-import { setCookie } from "../../../utils/authCookieGenerator";
 import * as Sentry from "@sentry/nextjs";
+import { ApolloError, useQuery } from "@apollo/client";
+import LoadingBackdrop from "../../../components/LoadingBackdrop";
+import { parseErrorMessage } from "../../../utils/errorMessage";
 
-const removeDashes = (str: string) => str.replace(/-/g, "");
-
-export default function Round({
-  data,
-  courseData,
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+export default function Round() {
   const router = useRouter();
   const networkContext = useNetworkContext();
-  const { roundid, courseId, unverifiedCourseId, username } = router.query;
+  const { roundid, courseId, unverifiedCourseId } = router.query;
 
-  // save reference to hidden query params so they aren't lost on refresh
-  if (courseId || unverifiedCourseId) {
-    const roundIdAsCookieKey = removeDashes(queryParamToString(roundid));
-    setCookie(roundIdAsCookieKey, JSON.stringify(router.query));
-  }
+  const { loading, error, data } = useQuery(getRoundByIdQuery, { variables: { roundid } });
+  const {
+    loading: courseLoading,
+    error: courseError,
+    data: courseData,
+  } = useQuery(getCourseForRound, { variables: { courseId }, skip: !courseId });
+  const {
+    loading: unverifiedCourseLoading,
+    error: unverfifiedCourseError,
+    data: unverifiedCourseData,
+  } = useQuery(getUnverifiedCourseForRound, {
+    variables: { unverifiedCourseId },
+    skip: !unverifiedCourseId,
+  });
 
   const [scoreCardProps, setScoreCardProps] = useState<IScoreCardProps | null>(null);
   const [courseDetails, setCourseDetails] = useState<ICourseDetails | null>(null);
@@ -53,24 +56,43 @@ export default function Round({
   }, []);
 
   useEffect(() => {
-    if (data) {
-      setRoundDetails(data.round);
-    }
-    if (courseData) {
+    if (router.isReady) {
+      if (data) setRoundDetails(data.round);
       if (courseData?.course) setCourseDetails(courseData.course[0]);
-      if (courseData?.unverifiedCourse) setCourseDetails(courseData.unverifiedCourse[0]);
+      if (unverifiedCourseData?.unverifiedCourse)
+        setCourseDetails(unverifiedCourseData.unverifiedCourse[0]);
+      if (roundDetails && courseDetails) {
+        const builtProps = buildProps(roundDetails, courseDetails);
+        setScoreCardProps(builtProps);
+      }
     }
-    if (data && courseData) {
-      const builtProps = buildProps(roundDetails, courseDetails);
-      setScoreCardProps(builtProps);
-    }
-  }, [data, courseData, roundDetails, courseDetails]);
+  }, [data, courseData, unverifiedCourseData, roundDetails, courseDetails]);
 
   useEffect(() => {
     if (networkContext.state.offlineModeEnabled) {
       toast.warn("You're in offline mode");
     }
   }, [networkContext.state.offlineModeEnabled]);
+
+  if (loading || (courseId && courseLoading) || (unverifiedCourseId && unverifiedCourseLoading)) {
+    return <LoadingBackdrop showBackdrop={loading} />;
+  }
+
+  const handleError = (queryError: ApolloError) => {
+    Sentry.captureException(queryError);
+    toast.error(parseErrorMessage(queryError));
+  };
+
+  if (error || courseError || unverfifiedCourseError) {
+    const queryError = [error, courseError, unverfifiedCourseError].find(Boolean);
+    if (queryError) handleError(queryError);
+    router.push({
+      pathname: "/login",
+      query: {
+        redirected: true,
+      },
+    });
+  }
 
   function buildProps(roundProps: any, courseProps?: any): IScoreCardProps {
     if (courseProps) {
@@ -90,63 +112,3 @@ export default function Round({
     </>
   );
 }
-
-export const getServerSideProps = async (context: GetServerSidePropsContext) => {
-  try {
-    let { roundid, courseId, unverifiedCourseId } = context.query;
-
-    // hidden query params are stored in cookie for reference on page refresh
-    const roundIdAsCookieKey = removeDashes(queryParamToString(roundid));
-    const roundQueryParamsFromCookie = context.req.cookies[roundIdAsCookieKey];
-
-    if (!courseId && roundQueryParamsFromCookie) {
-      const { courseId: courseIdQueryParam } = JSON.parse(roundQueryParamsFromCookie);
-      courseId = courseIdQueryParam;
-    }
-
-    if (!unverifiedCourseId && roundQueryParamsFromCookie) {
-      const { unverifiedCourseId: unverifiedCourseIdQueryParam } = JSON.parse(
-        roundQueryParamsFromCookie
-      );
-      unverifiedCourseId = unverifiedCourseIdQueryParam;
-    }
-
-    const { data } = await apolloClient.query({
-      query: getRoundByIdQuery,
-      variables: { roundid },
-      fetchPolicy: "network-only",
-    });
-
-    let courseData;
-
-    if (courseId) {
-      const { data } = await apolloClient.query({
-        query: getCourseForRound,
-        variables: { courseId },
-      });
-      courseData = data;
-    } else {
-      const { data } = await apolloClient.query({
-        query: getUnverifiedCourseForRound,
-        variables: { unverifiedCourseId },
-        fetchPolicy: "network-only",
-      });
-      courseData = data;
-    }
-
-    return {
-      props: {
-        data,
-        courseData,
-      },
-    };
-  } catch (error) {
-    Sentry.captureException(error);
-    return {
-      redirect: {
-        destination: "/login?redirected=true",
-        permanent: false,
-      },
-    };
-  }
-};
