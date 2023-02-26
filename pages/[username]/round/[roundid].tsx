@@ -87,12 +87,12 @@ export default function Round() {
   if (error || courseError || unverfifiedCourseError) {
     const queryError = [error, courseError, unverfifiedCourseError].find(Boolean);
     if (queryError) handleError(queryError);
-    router.push({
-      pathname: "/login",
-      query: {
-        redirected: true,
-      },
-    });
+    // router.push({
+    //   pathname: "/login",
+    //   query: {
+    //     redirected: true,
+    //   },
+    // });
   }
 
   function buildProps(roundProps: any, courseProps?: any): IScoreCardProps {
