@@ -13,7 +13,6 @@ const apolloServer = new ApolloServer({
   cache: 'bounded',
   context: async ({ req, res }) => {
     const token: JWTPayload| IErrorMessage= await validateAuthCookie(req);
-    console.log(token);
     return {
       req,
       res,

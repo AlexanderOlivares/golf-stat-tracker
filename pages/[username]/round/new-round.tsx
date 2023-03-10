@@ -18,7 +18,7 @@ import MenuItem from "@mui/material/MenuItem";
 import Slider from "@mui/material/Slider";
 import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { validUserAddedCourseFields } from "../../../utils/formValidator";
-import { queryParamToString } from "../../../utils/queryParamFormatter";
+import { nonNullQueryParams, queryParamToString } from "../../../utils/queryParamFormatter";
 import { useMutation } from "@apollo/client";
 import { createNewRound } from "../../api/graphql/mutations/roundMutations";
 import { useNetworkContext } from "../../../context/NetworkContext";
@@ -244,13 +244,14 @@ export default function NewRound() {
         variables: newRoundRequestBody,
       });
 
+      const query = nonNullQueryParams(
+        requestFieldList.courseId,
+        newRoundRequestBody.unverifiedCourseId
+      );
+
       router.push({
         pathname: `/${username}/round/${roundid}`,
-        query: {
-          roundid,
-          courseId,
-          unverifiedCourseId: newRoundRequestBody.unverifiedCourseId,
-        },
+        query,
       });
     } catch (error) {
       Sentry.captureException(error);

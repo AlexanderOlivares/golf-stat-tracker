@@ -11,6 +11,7 @@ import { IRoundPreview } from "../pages/[username]/profile";
 import { useRouter } from "next/router";
 import useMediaQuery from "./useMediaQuery";
 import { Typography } from "@mui/material";
+import { nonNullQueryParams } from "../utils/queryParamFormatter";
 
 export interface IRoundPreviewProps {
   roundPreview: IRoundPreview[];
@@ -113,13 +114,10 @@ const RoundPreviewGrid: React.FC<IRoundPreviewProps> = ({ roundPreview }: IRound
       unverified_course_id: unverifiedCourseId,
       round_id: roundid,
     } = row;
+    const query = nonNullQueryParams(courseId, unverifiedCourseId);
     router.push({
       pathname: `/${username}/round/${roundid}`,
-      query: {
-        roundid,
-        courseId,
-        unverifiedCourseId,
-      },
+      query,
     });
   }
 

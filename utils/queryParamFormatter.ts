@@ -10,3 +10,9 @@ export function queryParamToBoolean(queryParam: string | string[] | undefined): 
   if (queryParam === "true") return true;
   return Boolean(queryParam);
 }
+
+export function nonNullQueryParams(courseId: string|null, unverifiedCourseId: string|null|undefined) {
+  const query = {};
+  Object.assign(query, courseId ? { courseId } : { unverifiedCourseId });
+  return query;
+}

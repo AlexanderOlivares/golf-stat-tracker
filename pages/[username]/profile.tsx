@@ -97,7 +97,6 @@ export default function Profile({ data }: InferGetServerSidePropsType<typeof get
     if (data?.roundPreview) {
       const roundPreviewArray: IRoundPreview[] = data.roundPreview;
       setRoundPrviewRows(roundPreviewArray);
-      setIsloading(false);
     }
   }, []);
 

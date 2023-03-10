@@ -175,8 +175,7 @@ export default function ScoreCard(props: IScoreCardProps) {
       }
     } catch (error) {
       Sentry.captureException(error);
-      toast.error(parseErrorMessage(error));
-      return router.push("/login");
+      toast.error(`${parseErrorMessage(error)}. Refresh page`);
     }
   }
 
@@ -192,8 +191,7 @@ export default function ScoreCard(props: IScoreCardProps) {
       if (data) console.log("+++ saved unverified par to postgres +++");
     } catch (error) {
       Sentry.captureException(error);
-      toast.error(parseErrorMessage(error));
-      return router.push("/login");
+      toast.error(parseErrorMessage(`${error}. Refresh page`));
     }
   }
 
@@ -245,15 +243,15 @@ export default function ScoreCard(props: IScoreCardProps) {
       e.preventDefault();
       return (e.returnValue = warningText);
     };
-    const handleBrowseAway = () => {
+    const handleBrowseAway = async () => {
       const roundContextIsHydrated = roundContextHydrationCheck();
       if (!hasNetworkConnection) {
         window.alert(offlineWarningText);
       } else {
         if (window.confirm(warningText)) {
           if (hasNetworkConnection && roundContextIsHydrated) {
-            saveScoreCard();
-            if (roundContext.state.isUserAddedCourse) saveUnverifiedPar();
+            await saveScoreCard();
+            if (roundContext.state.isUserAddedCourse) await saveUnverifiedPar();
             networkContext.dispatch({
               type: "update offline mode enabled",
               payload: {
@@ -261,9 +259,7 @@ export default function ScoreCard(props: IScoreCardProps) {
                 offlineModeEnabled: false,
               },
             });
-            return;
           }
-          return;
         }
       }
       router.events.emit("routeChangeError");
@@ -271,17 +267,28 @@ export default function ScoreCard(props: IScoreCardProps) {
 
     if (usernameIsAuthorized) {
       if (offlineModeEnabled || !hasNetworkConnection) {
-        window.addEventListener("beforeunload", handleWindowClose);
-        window.addEventListener("beforeunload", handleBrowseAway);
         router.events.on("routeChangeStart", handleBrowseAway);
+        return () => {
+          router.events.off("routeChangeStart", handleBrowseAway);
+        };
       }
-      return () => {
-        window.removeEventListener("beforeunload", handleBrowseAway);
-        window.removeEventListener("beforeunload", handleWindowClose);
-        router.events.off("routeChangeStart", handleBrowseAway);
-      };
     }
   }, [offlineModeEnabled, hasNetworkConnection]);
+
+  useEffect(() => {
+    function saveWhenNotVisibile() {
+      if (document.visibilityState !== "visible") {
+        const roundContextIsHydrated = roundContextHydrationCheck();
+        console.log("round context", roundContextIsHydrated);
+        if (hasNetworkConnection && roundContextIsHydrated) {
+          saveScoreCard();
+          if (roundContext.state.isUserAddedCourse) saveUnverifiedPar();
+        }
+      }
+    }
+    document.addEventListener("visibilitychange", saveWhenNotVisibile);
+    return () => document.removeEventListener("visibilitychange", saveWhenNotVisibile);
+  }, [roundContext.state.holeScores, roundContext.state.par]);
 
   useEffect(() => {
     const { par, holeScores } = roundContext.state;
