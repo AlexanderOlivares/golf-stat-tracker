@@ -272,9 +272,9 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   }
 
   useEffect(() => {
-    if (roundContext.state.holeShotDetails[holeIndex][0].distanceToPin) saveScorecard();
     getSelectIndexFromShotNumber(roundContext.state.holeShotDetails[holeIndex], shotNumber);
     addNewHoleDetailsEntries(roundContext.state, "distanceToPin", dtp);
+    if (roundContext.state.holeShotDetails[holeIndex][0].distanceToPin) saveScorecard();
   }, [shotNumber, open]);
 
   useEffect(() => {

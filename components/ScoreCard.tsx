@@ -525,10 +525,10 @@ export default function ScoreCard(props: IScoreCardProps) {
         </Grid>
         <Grid xs={4} md={4}>
           <KeyValueCard
-            label={isMobile ? "Scrambles Made" : "Scrambles Made"}
+            label={"Scrambles Made"}
             value={
               calculateSrambles(
-                adhocStatCounter(holeShotDetails).scrambleHoleIndexes,
+                adhocStatCounter(roundContext.state.holeShotDetails).scrambleHoleIndexes,
                 roundContext.state.par,
                 roundContext.state.holeScores,
                 roundContext.state.holeShotDetails
