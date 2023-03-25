@@ -10,7 +10,6 @@ import { toast } from "react-toastify";
 import { parseErrorMessage } from "../utils/errorMessage";
 import { setCookie } from "../utils/authCookieGenerator";
 import * as Sentry from "@sentry/nextjs";
-import LoadingBackdrop from "../components/LoadingBackdrop";
 
 export interface IRegistrationCreds {
   username: string;
@@ -25,7 +24,6 @@ export default function Register() {
   const [usernameError, setUsernameError] = useState<boolean>(false);
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [registrationCreds, setRegistrationCreds] = useState<IRegistrationCreds>({
     username: "",
     email: "",
@@ -52,7 +50,6 @@ export default function Register() {
 
   const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     try {
-      setIsLoading(true);
       event.preventDefault();
 
       const isValdidEmail = validateEmail(registrationCreds);
@@ -90,7 +87,6 @@ export default function Register() {
       router.push(`/${username}/my-clubs`);
     } catch (error) {
       Sentry.captureException(error);
-      setIsLoading(false);
       toast.error(parseErrorMessage(error));
     }
   };
@@ -111,7 +107,6 @@ export default function Register() {
 
   return (
     <>
-      {isLoading && <LoadingBackdrop showBackdrop={isLoading} />}
       <Box component="form" textAlign="center" onSubmit={submitForm} noValidate autoComplete="off">
         <Box mt={3}>
           <Typography variant="h4">Register</Typography>

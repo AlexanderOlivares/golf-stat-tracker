@@ -24,7 +24,6 @@ export default function Login() {
   const { redirected } = router.query;
   const [emailError, setEmailError] = useState<boolean>(false);
   const [passwordError, setPasswordError] = useState<boolean>(false);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [loginCreds, setLoginCreds] = useState<ILoginCreds>({
     email: "",
     password: "",
@@ -49,7 +48,6 @@ export default function Login() {
 
   const submitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     try {
-      setIsLoading(true);
       event.preventDefault();
 
       const isValdidEmail = validateEmail(loginCreds);
@@ -86,13 +84,11 @@ export default function Login() {
       router.push(`/${username}/profile`);
     } catch (error) {
       Sentry.captureException(error);
-      setIsLoading(false);
       toast.error(parseErrorMessage(error));
     }
   };
 
   useEffect(() => {
-    if (redirected) setIsLoading(false);
     removeCookie("authToken");
     authContext.dispatch({
       type: "update auth status",
@@ -117,7 +113,6 @@ export default function Login() {
 
   return (
     <>
-      {isLoading && <LoadingBackdrop showBackdrop={isLoading} />}
       <Box component="form" onSubmit={submitForm} textAlign="center" noValidate autoComplete="off">
         <Box mt={3}>
           <Typography variant="h4">Login</Typography>

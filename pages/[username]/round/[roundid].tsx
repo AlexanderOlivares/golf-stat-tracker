@@ -13,7 +13,6 @@ import { ICourseDetails } from "../../../interfaces/course";
 import { IRoundDetails } from "../../../interfaces/round";
 import { toast } from "react-toastify";
 import * as Sentry from "@sentry/nextjs";
-import LoadingBackdrop from "../../../components/LoadingBackdrop";
 import ConnectionListener from "../../../components/ConnectionListener";
 import apolloClient from "../../../apollo-client";
 import { GetServerSidePropsContext, InferGetServerSidePropsType } from "next";
@@ -28,7 +27,6 @@ export default function Round({
   const [scoreCardProps, setScoreCardProps] = useState<IScoreCardProps | null>(null);
   const [courseDetails, setCourseDetails] = useState<ICourseDetails | null>(null);
   const [roundDetails, setRoundDetails] = useState<IRoundDetails | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const indexedDB = window.indexedDB;
@@ -49,12 +47,9 @@ export default function Round({
       if (data) setRoundDetails(data.round);
       if (courseData?.course) setCourseDetails(courseData.course[0]);
       if (courseData?.unverifiedCourse) setCourseDetails(courseData.unverifiedCourse[0]);
-      //   if (unverifiedCourseData?.unverifiedCourse)
-      //     setCourseDetails(unverifiedCourseData.unverifiedCourse[0]);
       if (roundDetails && courseDetails) {
         const builtProps = buildProps(roundDetails, courseDetails);
         setScoreCardProps(builtProps);
-        setIsLoading(false);
       }
     }
   }, [data, courseData, roundDetails, courseDetails]);
@@ -78,7 +73,6 @@ export default function Round({
   return (
     <>
       <RoundContextProvider>
-        {isLoading && <LoadingBackdrop showBackdrop={isLoading} />}
         <Box textAlign="center">{scoreCardProps && <ScoreCard {...scoreCardProps} />}</Box>
       </RoundContextProvider>
       <ConnectionListener />
@@ -113,8 +107,6 @@ export const getServerSideProps = async (context: GetServerSidePropsContext) => 
       });
       courseData = data;
     }
-
-    console.log(data);
 
     return {
       props: {

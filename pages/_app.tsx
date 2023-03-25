@@ -12,6 +12,7 @@ import AuthPersist from "../components/AuthPersist";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "../styles/makeStyles";
 import { CssBaseline } from "@mui/material";
+import LoadingBackdrop from "../components/LoadingBackdrop";
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -28,6 +29,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             <ThemeProvider theme={theme}>
               <CssBaseline>
                 <Nav />
+                <LoadingBackdrop showBackdrop={false} />
                 <Component {...pageProps} />
                 <ToastContainer
                   position="top-right"

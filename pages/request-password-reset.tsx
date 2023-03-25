@@ -48,10 +48,11 @@ export default function RequestPasswordReset() {
       if (error) {
         setEmailWasSent(false);
         toast.error(parseErrorMessage(error));
-        return;
+        Sentry.captureException(error);
+      } else {
+        setEmailWasSent(true);
       }
 
-      setEmailWasSent(true);
       setIsLoading(false);
     } catch (error) {
       Sentry.captureException(error);

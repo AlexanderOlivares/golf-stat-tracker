@@ -17,7 +17,6 @@ export default function MyClubs() {
 
   useEffect(() => {
     if (router.isReady && !usernameIsAuthorized) {
-      toast.error("Please login to select clubs");
       router.push("/login");
     }
   }, [isAuth]);
