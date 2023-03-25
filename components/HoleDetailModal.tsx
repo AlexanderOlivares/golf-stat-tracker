@@ -13,15 +13,11 @@ import Select, { SelectChangeEvent } from "@mui/material/Select";
 import { IShotDetail } from "../utils/roundFormatter";
 import { getHoleIndexToUpdate, ICompleteScoreCard } from "../components/ScoreCard";
 import { useRoundContext, IRoundState } from "../context/RoundContext";
-import { NON_HOLE_ROWS } from "../utils/scoreCardFormatter";
 import { shotResultOptions } from "../lib/selectOptions";
 import {
-  calculateFairwaysHit,
-  calculateGreensInReg,
-  calculateTotalPutts,
-  getNonParThreeIndices,
-  sliceSum,
   getScoreCountByName,
+  updatedHoleScoresContext,
+  updateStatTotals,
 } from "../utils/holeDetailsFormatter";
 import { useMutation } from "@apollo/client";
 import { saveRound as saveRoundMutation } from "../pages/api/graphql/mutations/roundMutations";
@@ -64,60 +60,6 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
   const handleClickOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
 
-  function getFairwaysHit(frontOrBackNine?: string) {
-    const frontNineFairwayIndices = getNonParThreeIndices(roundContext.state.par, 0, 9);
-    const backNineFairwayIndices = getNonParThreeIndices(roundContext.state.par, 10, 19);
-    const totalFairways = frontNineFairwayIndices.length + backNineFairwayIndices.length;
-    const frontFairwaysHit = calculateFairwaysHit(
-      roundContext.state.holeShotDetails,
-      frontNineFairwayIndices
-    );
-    const backFairwaysHit = calculateFairwaysHit(
-      roundContext.state.holeShotDetails,
-      backNineFairwayIndices
-    );
-    if (frontOrBackNine == "front") return `${frontFairwaysHit}/${frontNineFairwayIndices.length}`;
-    if (frontOrBackNine == "back") return `${backFairwaysHit}/${backNineFairwayIndices.length}`;
-    return `${frontFairwaysHit + backFairwaysHit}/${totalFairways}`;
-  }
-
-  function getGreensInReg(frontOrBack?: string) {
-    const { holeShotDetails, par } = roundContext.state;
-    if (frontOrBack == "front") return calculateGreensInReg(holeShotDetails, par, 0, 9);
-    if (frontOrBack == "back") return calculateGreensInReg(holeShotDetails, par, 10, 19);
-    return calculateGreensInReg(holeShotDetails, par);
-  }
-
-  function getTotalPutts(frontBackOrTotal?: string) {
-    const { holeShotDetails } = roundContext.state;
-    const sum = (arr: number[]) => arr.reduce((a, c) => a + c, 0);
-    if (frontBackOrTotal == "front") {
-      const frontNinePutts = calculateTotalPutts(holeShotDetails, 0, 9);
-      return sum(frontNinePutts);
-    }
-    if (frontBackOrTotal == "back") {
-      const backNinePutts = calculateTotalPutts(holeShotDetails, 10, 19);
-      return sum(backNinePutts);
-    }
-    const totalPutts = calculateTotalPutts(holeShotDetails);
-    return sum(totalPutts);
-  }
-
-  function getThreePutts(frontBackOrTotal?: string) {
-    const { holeShotDetails } = roundContext.state;
-    const getThreePutts = (arr: number[]) => arr.filter(putts => putts > 2).length;
-    if (frontBackOrTotal == "front") {
-      const frontNinePutts = calculateTotalPutts(holeShotDetails, 0, 9);
-      return getThreePutts(frontNinePutts);
-    }
-    if (frontBackOrTotal == "back") {
-      const backNinePutts = calculateTotalPutts(holeShotDetails, 10, 19);
-      return getThreePutts(backNinePutts);
-    }
-    const totalPutts = calculateTotalPutts(holeShotDetails);
-    return getThreePutts(totalPutts);
-  }
-
   const addNewHoleDetailsEntries = (
     prevState: IRoundState,
     keyToUpdate: keyof IShotDetail,
@@ -159,31 +101,9 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
     }
   };
 
-  // this can be extracted to other module
-  const updatedHoleScoresContext = (prevState: IRoundState) => {
-    const updatedScores = prevState.holeScores.map((existingScore: number, i: number) => {
-      if (NON_HOLE_ROWS[i] == "out") {
-        return sliceSum(prevState.holeScores, 0, 9);
-      }
-      if (NON_HOLE_ROWS[i] == "in") {
-        return sliceSum(prevState.holeScores, 10, 19);
-      }
-      if (i in NON_HOLE_ROWS) {
-        if (NON_HOLE_ROWS[i] == "total") {
-          const frontNine = sliceSum(prevState.holeScores, 0, 9);
-          const backNine = sliceSum(prevState.holeScores, 10, 19);
-          return frontNine + backNine;
-        }
-      }
-      if (i == holeIndex) return shotNumber;
-      return existingScore;
-    });
-    return updatedScores;
-  };
-
   const handleShotNumberChange = (_: Event, newValue: number | number[]) => {
     setShotNumber(newValue as number);
-    updatedHoleScoresContext(roundContext.state);
+    updatedHoleScoresContext(roundContext.state, holeIndex, newValue as number);
   };
 
   const handleUserAddedParChange = async (_: Event, newValue: number | number[]) => {
@@ -250,46 +170,10 @@ export function HoleDetailModal({ row }: { row: ICompleteScoreCard }) {
 
   async function saveScorecard() {
     try {
-      const updatedHoleScores = updatedHoleScoresContext(roundContext.state);
-      //func that returns scoreCount object to save to state/db
-      const { holeShotDetails, par, holeScores } = roundContext.state;
+      const updatedHoleScores = updatedHoleScoresContext(roundContext.state, holeIndex, shotNumber);
+      const { par, holeScores } = roundContext.state;
       const updatedScoreCountByName = getScoreCountByName(holeScores, par);
-
-      const updatedHoleShotDetails = roundContext.state.holeShotDetails.map(
-        (holeDetail: IShotDetail[], index: number) => {
-          if (index === 9) {
-            return [
-              {
-                fairwaysHit: getFairwaysHit("front"),
-                greensInReg: getGreensInReg("front"),
-                threePutts: getThreePutts("front"),
-                totalPutts: getTotalPutts("front"),
-              },
-            ];
-          }
-          if (index === 19) {
-            return [
-              {
-                fairwaysHit: getFairwaysHit("back"),
-                greensInReg: getGreensInReg("back"),
-                threePutts: getThreePutts("back"),
-                totalPutts: getTotalPutts("back"),
-              },
-            ];
-          }
-          if (index === 20) {
-            return [
-              {
-                fairwaysHit: getFairwaysHit(),
-                greensInReg: getGreensInReg(),
-                threePutts: getThreePutts(),
-                totalPutts: getTotalPutts(),
-              },
-            ];
-          }
-          return holeDetail;
-        }
-      );
+      const updatedHoleShotDetails = updateStatTotals(roundContext);
 
       const { hasNetworkConnection, offlineModeEnabled } = networkContext.state;
 

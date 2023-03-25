@@ -51,7 +51,7 @@ export type Action = {
 };
 export type Dispatch = (action: Action) => void;
 
-interface IRoundContext {
+export interface IRoundContext {
   state: IRoundState;
   dispatch: Dispatch;
 }
@@ -108,8 +108,8 @@ function roundContextReducer(state: IRoundState, action: Action): any {
 
 export function RoundContextProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(roundContextReducer, defualtState);
-  //   console.log("in round contexxt provier");
-  //   console.log(state);
+    // console.log("in round contexxt provier");
+    // console.log(state);
 
   return <RoundContext.Provider value={{ state, dispatch }}>{children}</RoundContext.Provider>;
 }
