@@ -4,8 +4,6 @@ import Button from "@mui/material/Button";
 import DialogTitle from "@mui/material/DialogTitle";
 import DialogActions from "@mui/material/DialogActions";
 import Dialog from "@mui/material/Dialog";
-import DeleteForeverOutlined from "@mui/icons-material/DeleteForeverOutlined";
-import { Typography } from "@mui/material";
 import { useMutation } from "@apollo/client";
 import { deleteRoundMutation } from "../pages/api/graphql/mutations/roundMutations";
 import { useRouter } from "next/router";
@@ -75,27 +73,20 @@ function ConfirmationDialogRaw(props: ConfirmationDialogRawProps) {
   );
 }
 
-export default function DeleteRoundDialog() {
-  const [open, setOpen] = React.useState(false);
+interface IDeleteRoundDialogProps {
+  setDeleteRoundDialog: (value: boolean) => void;
+}
 
-  const handleClickListItem = () => {
-    setOpen(true);
-  };
+export default function DeleteRoundDialog({ setDeleteRoundDialog }: IDeleteRoundDialogProps) {
+  const [open, setOpen] = React.useState(true);
 
-  const handleClose = (newValue?: string) => {
+  const handleClose = () => {
     setOpen(false);
+    setDeleteRoundDialog(false);
   };
 
   return (
     <Box textAlign="center">
-      <Box textAlign="center" mb={2}>
-        <Button onClick={handleClickListItem} size="medium" variant="contained" color="error">
-          <DeleteForeverOutlined />
-          <Typography ml={1} textAlign="center">
-            Delete Round
-          </Typography>
-        </Button>
-      </Box>
       <ConfirmationDialogRaw
         id="confirmation-menu"
         keepMounted

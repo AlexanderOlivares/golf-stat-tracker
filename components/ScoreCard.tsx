@@ -39,7 +39,6 @@ import useMediaQuery from "./useMediaQuery";
 import Grid from "@mui/material/Unstable_Grid2";
 import { Skeleton } from "@mui/material";
 import EditRoundMenu from "./EditRoundMenu";
-import DeleteRoundDialog from "./DeleteRoundDialog";
 
 export const statsOnlyHoles = Object.values(NON_HOLE_ROWS);
 
@@ -373,33 +372,35 @@ export default function ScoreCard(props: IScoreCardProps) {
           </Grid>
         </Grid>
       )}
-      <Box
-        sx={{
-          maxWidth: "sm",
-          m: "auto",
-        }}
-      >
-        <Box textAlign="center">
-          {isLoading ? (
-            <Skeleton variant="rectangular" sx={{ margin: "auto", mt: -4 }}>
+      {usernameIsAuthorized && (
+        <Box
+          sx={{
+            maxWidth: "sm",
+            m: "auto",
+          }}
+        >
+          <Box textAlign="center">
+            {isLoading ? (
+              <Skeleton variant="rectangular" sx={{ margin: "auto", mt: -4 }}>
+                <EditRoundMenu />
+              </Skeleton>
+            ) : (
               <EditRoundMenu />
-            </Skeleton>
-          ) : (
-            <EditRoundMenu />
-          )}
-          <Box>
-            <Typography textAlign="center" variant="caption">
-              {isLoading ? (
-                <Skeleton width={200} sx={{ margin: "auto" }} />
-              ) : networkContext.state.offlineModeEnabled ? (
-                "You are offline"
-              ) : (
-                "Bad signal on the course? Go offline"
-              )}
-            </Typography>
+            )}
+            <Box>
+              <Typography textAlign="center" variant="caption">
+                {isLoading ? (
+                  <Skeleton width={200} sx={{ margin: "auto" }} />
+                ) : networkContext.state.offlineModeEnabled ? (
+                  "You are offline"
+                ) : (
+                  "Bad signal on the course? Go offline"
+                )}
+              </Typography>
+            </Box>
           </Box>
         </Box>
-      </Box>
+      )}
       <hr style={{ maxWidth: isMobile ? "75%" : "25%" }} />
       <Box py={2}>
         <Typography variant="h3">
@@ -580,7 +581,6 @@ export default function ScoreCard(props: IScoreCardProps) {
           </Table>
         </TableContainer>
       </Box>
-      {isAuth && username == tokenPayload?.username && <DeleteRoundDialog />}
     </>
   );
 }
